@@ -31,6 +31,64 @@ def _build_auth_payload(user: User, refresh_token: str) -> dict:
     }
 
 
+# def register_user(
+#     db: Session,
+#     payload: RegisterRequest,
+#     user_agent: str | None = None,
+#     ip_address: str | None = None,
+# ) -> dict:
+#     existing_user = db.scalar(select(User).where(User.email == payload.email.lower()))
+#     if existing_user:
+#         raise ConflictException("An account with this email already exists.")
+
+#     role = UserRole(payload.role)
+
+#     if role == UserRole.provider and not payload.site_name:
+#         raise ValidationException("site_name is required for provider registration.")
+
+#     user = User(
+#         full_name=payload.full_name.strip(),
+#         email=payload.email.lower(),
+#         phone=payload.phone,
+#         password_hash=hash_password(payload.password),
+#         role=role,
+#         is_active=True,
+#         is_verified=False,
+#     )
+#     db.add(user)
+#     db.flush()
+
+#     if role == UserRole.provider:
+#         site = CulturalSite(
+#             user_id=user.id,
+#             site_name=payload.site_name.strip(),
+#             description=payload.description,
+#             location=payload.location,
+#             contact_email=payload.contact_email or payload.email.lower(),
+#             contact_phone=payload.contact_phone or payload.phone,
+#             verification_status=VerificationStatus.pending,
+#             is_active=True,
+#         )
+#         db.add(site)
+
+#     raw_refresh_token = create_refresh_token()
+#     refresh_token = RefreshToken(
+#         user_id=user.id,
+#         token_hash=hash_token(raw_refresh_token),
+#         user_agent=user_agent,
+#         ip_address=ip_address,
+#         expires_at=datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+#     )
+#     db.add(refresh_token)
+
+#     db.commit()
+#     db.refresh(user)
+
+#     return _build_auth_payload(user, raw_refresh_token)
+
+
+
+
 def register_user(
     db: Session,
     payload: RegisterRequest,
@@ -42,9 +100,6 @@ def register_user(
         raise ConflictException("An account with this email already exists.")
 
     role = UserRole(payload.role)
-
-    if role == UserRole.provider and not payload.site_name:
-        raise ValidationException("site_name is required for provider registration.")
 
     user = User(
         full_name=payload.full_name.strip(),
@@ -61,10 +116,10 @@ def register_user(
     if role == UserRole.provider:
         site = CulturalSite(
             user_id=user.id,
-            site_name=payload.site_name.strip(),
+            site_name=payload.site_name,
             description=payload.description,
             location=payload.location,
-            contact_email=payload.contact_email or payload.email.lower(),
+            contact_email=(payload.contact_email.lower() if payload.contact_email else None) or payload.email.lower(),
             contact_phone=payload.contact_phone or payload.phone,
             verification_status=VerificationStatus.pending,
             is_active=True,
@@ -85,6 +140,10 @@ def register_user(
     db.refresh(user)
 
     return _build_auth_payload(user, raw_refresh_token)
+
+
+
+
 
 
 def login_user(

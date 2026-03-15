@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator, field_validator
 
 
 class RegisterRequest(BaseModel):
@@ -13,20 +13,59 @@ class RegisterRequest(BaseModel):
     role: Literal["tourist", "provider"]
 
     site_name: str | None = Field(default=None, max_length=200)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=2000)
     location: str | None = Field(default=None, max_length=255)
     contact_email: EmailStr | None = None
     contact_phone: str | None = Field(default=None, max_length=30)
 
     @field_validator("full_name")
     @classmethod
-    def validate_name(cls, value: str) -> str:
-        return value.strip()
+    def validate_full_name(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 2:
+            raise ValueError("Full name must be at least 2 characters long.")
+        return value
 
-    @field_validator("site_name")
+    @field_validator("phone", "contact_phone")
     @classmethod
-    def validate_site_name(cls, value: str | None) -> str | None:
-        return value.strip() if value else value
+    def normalize_phone(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        return value or None
+
+    @field_validator("site_name", "description", "location")
+    @classmethod
+    def normalize_provider_fields(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        return value or None
+
+    @model_validator(mode="after")
+    def validate_role_specific_fields(self):
+        if self.role == "provider":
+            if not self.site_name:
+                raise ValueError("site_name is required for provider registration.")
+            if len(self.site_name) < 2:
+                raise ValueError("site_name must be at least 2 characters long.")
+
+            if not self.description:
+                raise ValueError("description is required for provider registration.")
+            if len(self.description) < 10:
+                raise ValueError("description must be at least 10 characters long.")
+
+            if not self.location:
+                raise ValueError("location is required for provider registration.")
+            if len(self.location) < 2:
+                raise ValueError("location must be at least 2 characters long.")
+
+            if not self.contact_email and not self.contact_phone:
+                raise ValueError(
+                    "At least one provider contact is required: contact_email or contact_phone."
+                )
+
+        return self
 
 
 class LoginRequest(BaseModel):
