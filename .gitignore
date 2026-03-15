@@ -1,0 +1,81 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.test.example
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+*.out
+*.err
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Build / packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+pip-wheel-metadata/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Database / local data dumps
+*.sqlite3
+*.db
+*.sql
+*.dump
+
+# Alembic / migration artifacts
+alembic/__pycache__/
+alembic/versions/__pycache__/
+
+# Redis / cache temp files
+dump.rdb
+
+# Uploaded / generated media (if stored locally in dev)
+media/
+uploads/
+static/uploads/
+
+# OS-generated files
+.DS_Store
+Desktop.ini
+
+# Docker overrides / local-only compose files
+docker-compose.override.yml
+
+# Secrets / certificates
+*.pem
+*.key
+*.crt
+secrets/
