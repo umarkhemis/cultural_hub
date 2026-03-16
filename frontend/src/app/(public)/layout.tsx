@@ -1,12 +1,6 @@
 
-
-
-
-
-
-
 import { PublicFooter } from "@/src/components/layout/public-footer";
-import { PublicNavbar } from "@/src/components/layout/public-navbar";
+import { TopNavbar } from "@/src/components/layout/top-navbar";
 
 export default function PublicLayout({
   children,
@@ -15,12 +9,25 @@ export default function PublicLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
-      <PublicNavbar />
+      <TopNavbar />
       <div className="flex-1">{children}</div>
       <PublicFooter />
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -42,10 +49,16 @@ export default function PublicLayout({
 //   children: React.ReactNode;
 // }) {
 //   return (
-//     <div className="min-h-screen bg-white text-slate-900">
+//     <div className="flex min-h-screen flex-col bg-white text-slate-900">
 //       <PublicNavbar />
-//       {children}
+//       <div className="flex-1">{children}</div>
 //       <PublicFooter />
 //     </div>
 //   );
 // }
+
+
+
+
+
+

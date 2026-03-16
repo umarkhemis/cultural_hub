@@ -2,10 +2,11 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createExperience } from "@/src/lib/api/experiences";
+import { createExperience, getProviderExperiences } from "@/src/lib/api/experiences";
 import { createPackage, getProviderPackages } from "@/src/lib/api/packages";
 import { getProviderBookings } from "@/src/lib/api/bookings";
 import { getNotifications } from "@/src/lib/api/notifications";
+// import { createExperience, getProviderExperiences } from "@/src/lib/api/experiences";
 
 export function useProviderPackages() {
   return useQuery({
@@ -44,6 +45,7 @@ export function useCreateExperienceMutation() {
     mutationFn: createExperience,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["public-feed"] });
+      await queryClient.invalidateQueries({ queryKey: ["provider-experiences"] });
     },
   });
 }
@@ -56,6 +58,16 @@ export function useCreatePackageMutation() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["provider-packages"] });
       await queryClient.invalidateQueries({ queryKey: ["packages"] });
+    },
+  });
+}
+
+export function useProviderExperiences() {
+  return useQuery({
+    queryKey: ["provider-experiences"],
+    queryFn: async () => {
+      const response = await getProviderExperiences();
+      return response.data.items;
     },
   });
 }

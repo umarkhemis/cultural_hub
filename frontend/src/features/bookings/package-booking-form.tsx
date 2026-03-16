@@ -3,6 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import axios from "axios";
 
 import { Button } from "@/src/components/ui/button";
 import { FormField } from "@/src/components/ui/form-field";
@@ -80,8 +81,15 @@ export function PackageBookingForm({
           });
 
           router.push(ROUTES.bookingCheckout);
-        } catch {
-          setError("We could not create your booking. Please try again.");
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            setError(
+            error.response?.data?.message ||
+              "We could not create your booking. Please try again."
+            );
+          } else {
+            setError("We could not create your booking. Please try again.");
+          }
         }
       },
       "Login as a tourist to book this package."

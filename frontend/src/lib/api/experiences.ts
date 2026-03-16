@@ -110,3 +110,13 @@ export async function createExperience(payload: ProviderExperiencePayload) {
   return response.data;
 }
 
+type ProviderExperiencesResponse = {
+  items: Experience[];
+};
+
+export async function getProviderExperiences() {
+  const response = await apiClient.get<ApiSuccessResponse<ProviderExperiencesResponse>>(
+    "/providers/me/experiences"
+  );
+  return response.data;
+}

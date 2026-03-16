@@ -6,6 +6,7 @@ export const ROUTES = {
   login: "/login",
   register: "/register",
   packages: "/packages",
+  sites: "/sites",
 
   touristRoot: "/tourist",
   touristBookings: "/tourist/bookings",

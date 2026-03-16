@@ -7,6 +7,7 @@ import { Textarea } from "@/src/components/ui/textarea";
 import { useCreateCommentMutation } from "./tourist-hooks";
 import { useProtectedAction } from "@/src/features/auth/useProtectedAction";
 import { useAuth } from "@/src/hooks/useAuth";
+import { useToastStore } from "@/src/store/toast-store";
 
 type CommentFormProps = {
   experienceId: string;
@@ -18,6 +19,9 @@ export function CommentForm({ experienceId }: CommentFormProps) {
   const { runProtectedAction } = useProtectedAction();
   const mutation = useCreateCommentMutation(experienceId);
 
+    const { addToast } = useToastStore();
+
+
   const handleSubmit = async () => {
     runProtectedAction(
       async () => {
@@ -28,10 +32,21 @@ export function CommentForm({ experienceId }: CommentFormProps) {
           comment_text: commentText.trim(),
         });
 
-        setCommentText("");
+        setCommentText("");      
+
+        addToast({
+          type: "success",
+          title: "Comment posted",
+          description: "Your comment has been added successfully.",
+        });
+
+
       },
+
+      
       "Login as a tourist to comment on experiences."
     );
+
   };
 
   return (
