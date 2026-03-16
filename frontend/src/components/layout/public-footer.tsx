@@ -12,7 +12,7 @@ export function PublicFooter() {
           <Link href={ROUTES.feed} className="hover:text-slate-900">
             Explore
           </Link>
-          <Link href={ROUTES.providerPackages} className="hover:text-slate-900">
+          <Link href={ROUTES.packages} className="hover:text-slate-900">
             Packages
           </Link>
           <Link href={ROUTES.login} className="hover:text-slate-900">

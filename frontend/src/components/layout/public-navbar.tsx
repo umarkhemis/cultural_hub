@@ -44,7 +44,7 @@ export function PublicNavbar() {
           <Link href={ROUTES.feed} className="text-sm text-slate-700 hover:text-slate-900">
             Explore
           </Link>
-          <Link href={ROUTES.providerPackages} className="text-sm text-slate-700 hover:text-slate-900">
+          <Link href={ROUTES.packages} className="text-sm text-slate-700 hover:text-slate-900">
             Packages
           </Link>
           {isAuthenticated && user?.role === "tourist" ? (
