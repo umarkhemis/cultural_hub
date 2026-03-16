@@ -7,6 +7,9 @@ from app.core.security import decode_token
 from app.database.dependencies import get_db
 from app.models.user import User
 from app.utils.exceptions import UnauthorizedException
+from app.core.security import decode_access_token
+
+optional_bearer_scheme = HTTPBearer(auto_error=False)
 
 bearer_scheme = HTTPBearer(auto_error=True)
 
@@ -33,6 +36,23 @@ def get_current_user(
     if not user or not user.is_active:
         raise UnauthorizedException("User not found or inactive.")
 
+    return user
+
+
+def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_bearer_scheme),
+    db: Session = Depends(get_db),
+) -> User | None:
+    if credentials is None:
+        return None
+
+    token = credentials.credentials
+    payload = decode_access_token(token)
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+
+    user = db.get(User, user_id)
     return user
 
 

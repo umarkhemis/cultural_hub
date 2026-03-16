@@ -33,6 +33,21 @@ def create_booking(db: Session, current_user: User, payload: BookingCreateReques
     )
     if not package:
         raise NotFoundException("Package not found.")
+    
+    existing_active_booking = db.scalar(
+        select(Booking).where(
+            Booking.tourist_id == current_user.id,
+            Booking.package_id == package.id,
+            Booking.booking_status.in_([
+                BookingStatus.pending,
+                BookingStatus.confirmed,
+            ]),
+        )
+    )
+    if existing_active_booking:
+        raise ValidationException(
+            "You already have an active booking for this package."
+        )
 
     participants_count = len(payload.participants)
     total_price = package.price * participants_count

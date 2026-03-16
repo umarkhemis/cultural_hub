@@ -25,6 +25,8 @@ from app.modules.experiences.service import (
 )
 from app.modules.users.optional_auth import get_optional_current_user
 from app.utils.responses import success_response
+from app.modules.experiences.service import list_provider_experiences
+from app.modules.experiences import serializer_experience
 
 router = APIRouter(prefix="/experiences", tags=["Experiences"])
 
@@ -45,6 +47,18 @@ def public_feed(
     return success_response(
         message="Experiences retrieved successfully.",
         data=result,
+    )
+
+
+@router.get("/providers/me/experiences")
+def my_experiences(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.provider)),
+):
+    experiences = list_provider_experiences(db=db, current_user=current_user)
+    return success_response(
+        message="Provider experiences retrieved successfully.",
+        data={"items": [serializer_experience(experience, current_user=None) for experience in experiences]},
     )
 
 

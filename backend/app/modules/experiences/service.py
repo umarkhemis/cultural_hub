@@ -44,6 +44,27 @@ def _get_provider_site_for_user(db: Session, user: User) -> CulturalSite:
     return site
 
 
+def list_provider_experiences(db: Session, current_user: User) -> list[Experience]:
+    if current_user.role != UserRole.provider:
+        raise ForbiddenException("Only providers can view their experiences.")
+
+    provider_site = _get_provider_site_for_user(db, current_user)
+
+    experiences = db.scalars(
+        select(Experience)
+        .options(
+            joinedload(Experience.provider),
+            joinedload(Experience.media_items),
+        )
+        .where(Experience.provider_id == provider_site.id)
+        .order_by(desc(Experience.created_at))
+    ).unique().all()
+
+    return list(experiences)
+
+
+
+
 def create_experience(db: Session, current_user: User, payload: ExperienceCreateRequest) -> Experience:
     if current_user.role != UserRole.provider:
         raise ForbiddenException("Only providers can create experiences.")
@@ -142,7 +163,9 @@ def delete_experience(db: Session, current_user: User, experience_id: uuid.UUID)
     experience.status = ExperienceStatus.archived
     db.commit()
     delete_cache_by_pattern("feed:public:*")
-    
+
+
+
 
 
 def get_public_feed(
@@ -255,35 +278,27 @@ def get_public_feed(
             }
         )
 
-
-    
-
     next_cursor = None
     if has_more and rows:
         last_experience = rows[-1][0]
         next_cursor = encode_cursor(last_experience.created_at, last_experience.id)
 
-        result = {
+    result = {
         "items": items,
         "next_cursor": next_cursor,
-        }
+    }
 
-        if should_use_cache:
-            set_cache(
+    if should_use_cache:
+        set_cache(
             cache_key,
             result,
             ttl_seconds=settings.FEED_CACHE_TTL_SECONDS,
-            )
+        )
 
     return result
-    
 
-    
 
-    # return {
-    #     "items": items,
-    #     "next_cursor": next_cursor,
-    # }
+
 
 
 def get_experience_detail(

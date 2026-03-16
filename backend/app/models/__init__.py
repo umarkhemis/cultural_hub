@@ -13,6 +13,7 @@ from app.models.booking import Booking, BookingStatus, PaymentStatus
 from app.models.booking_participant import BookingParticipant
 from app.models.payment import Payment, PaymentGateway, PaymentRecordStatus
 from app.models.notification import Notification, NotificationType
+from app.models.site_follow import SiteFollow
 
 __all__ = [
     "Base",
@@ -39,6 +40,7 @@ __all__ = [
     "PaymentRecordStatus",
     "Notification",
     "NotificationType",
+    "SiteFollow"
 ]
 
 
