@@ -68,7 +68,7 @@ export function ProviderExperienceForm() {
         />
       </FormField>
 
-      {
+      
 
         <div className="space-y-3">
           <p className="text-sm font-medium text-slate-800">Media</p>
@@ -94,7 +94,7 @@ export function ProviderExperienceForm() {
           {error}
         </div>
       ) : null}
-
+    
       <div className="flex justify-end">
         <Button onClick={handleSubmit} disabled={mutation.isPending}>
           {mutation.isPending ? "Publishing..." : "Publish Experience"}
