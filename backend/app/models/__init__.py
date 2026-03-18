@@ -15,6 +15,7 @@ from app.models.payment import Payment, PaymentGateway, PaymentRecordStatus
 from app.models.notification import Notification, NotificationType
 from app.models.site_follow import SiteFollow
 
+
 __all__ = [
     "Base",
     "User",
