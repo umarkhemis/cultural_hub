@@ -10,6 +10,7 @@ import { LoadingState } from "@/src/components/shared/loading-state";
 import { ROUTES } from "@/src/constants/routes";
 import { PackageCard } from "@/src/features/packages/package-card";
 import { useProviderPackages } from "@/src/features/provider/hooks";
+import { ProviderPackageCard } from "@/src/features/provider/provider-package-card";
 
 export default function ProviderPackagesPage() {
   const { data, isLoading, isError } = useProviderPackages();
@@ -46,7 +47,7 @@ export default function ProviderPackagesPage() {
       {!isLoading && !isError && data?.length ? (
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {data.map((item) => (
-            <PackageCard key={item.id} item={item} />
+            <ProviderPackageCard key={item.id} item={item} />
           ))}
         </div>
       ) : null}

@@ -7,7 +7,7 @@ from app.core.security import decode_token
 from app.database.dependencies import get_db
 from app.models.user import User
 from app.utils.exceptions import UnauthorizedException
-from app.core.security import decode_access_token
+# from app.core.security import decode_access
 
 optional_bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -47,7 +47,7 @@ def get_current_user_optional(
         return None
 
     token = credentials.credentials
-    payload = decode_access_token(token)
+    payload = decode_token(token)
     user_id = payload.get("sub")
     if not user_id:
         return None

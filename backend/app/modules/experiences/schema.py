@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ExperienceMediaCreate(BaseModel):
@@ -87,3 +87,15 @@ class CommentResponse(BaseModel):
 class PaginatedExperienceResponse(BaseModel):
     items: list[ExperienceResponse]
     next_cursor: str | None = None
+
+class ExperienceMediaCreate(BaseModel):
+    media_url: str | None = Field(default=None, max_length=500)
+    media_type: str
+    thumbnail_url: str | None = Field(default=None, max_length=500)
+    media_order: int = Field(default=0, ge=0)
+
+    @model_validator(mode="after")
+    def validate_media_url(self):
+        if not self.media_url:
+            raise ValueError("media_url is required after upload.")
+        return self

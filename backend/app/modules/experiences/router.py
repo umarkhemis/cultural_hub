@@ -1,4 +1,5 @@
 
+
 import uuid
 
 from fastapi import APIRouter, Depends, Query, Response, status
@@ -20,13 +21,13 @@ from app.modules.experiences.service import (
     get_public_feed,
     like_experience,
     list_comments,
+    list_provider_experiences,
     unlike_experience,
     update_experience,
 )
+from app.modules.experiences.serializers import serialize_experience
 from app.modules.users.optional_auth import get_optional_current_user
 from app.utils.responses import success_response
-from app.modules.experiences.service import list_provider_experiences
-from app.modules.experiences import serializer_experience
 
 router = APIRouter(prefix="/experiences", tags=["Experiences"])
 
@@ -50,7 +51,7 @@ def public_feed(
     )
 
 
-@router.get("/providers/me/experiences")
+@router.get("/me")
 def my_experiences(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.provider)),
@@ -58,7 +59,12 @@ def my_experiences(
     experiences = list_provider_experiences(db=db, current_user=current_user)
     return success_response(
         message="Provider experiences retrieved successfully.",
-        data={"items": [serializer_experience(experience, current_user=None) for experience in experiences]},
+        data={
+            "items": [
+                serialize_experience(experience, current_user=None)
+                for experience in experiences
+            ]
+        },
     )
 
 
@@ -70,7 +76,7 @@ def experience_detail(
 ):
     result = get_experience_detail(
         db=db,
-        experience_id=experience.id,
+        experience_id=experience_id,
         current_user=current_user,
         include_non_published_for_owner=True,
     )
@@ -91,7 +97,7 @@ def create_experience_endpoint(
         db=db,
         experience_id=experience.id,
         current_user=current_user,
-        include_non_published_for_owner=True,        
+        include_non_published_for_owner=True,
     )
     return success_response(
         message="Experience created successfully.",
@@ -112,7 +118,12 @@ def update_experience_endpoint(
         experience_id=experience_id,
         payload=payload,
     )
-    result = get_experience_detail(db=db, experience_id=experience.id, current_user=None)
+    result = get_experience_detail(
+        db=db,
+        experience_id=experience.id,
+        current_user=current_user,
+        include_non_published_for_owner=True,
+    )
     return success_response(
         message="Experience updated successfully.",
         data=result,
@@ -186,3 +197,6 @@ def list_comments_endpoint(
         message="Comments retrieved successfully.",
         data={"items": results},
     )
+
+
+

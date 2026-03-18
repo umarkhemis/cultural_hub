@@ -34,6 +34,21 @@ type ProviderExperiencePayload = {
   }>;
 };
 
+export async function updateExperience(
+  experienceId: string,
+  payload: Partial<ProviderExperiencePayload>
+) {
+  const response = await apiClient.patch<ApiSuccessResponse<Experience>>(
+    `/experiences/${experienceId}`,
+    payload
+  );
+  return response.data;
+}
+
+export async function deleteExperience(experienceId: string) {
+  await apiClient.delete(`/experiences/${experienceId}`);
+}
+
 export async function getPublicFeed(cursor?: string | null, limit = 20) {
   const response = await apiClient.get<ApiSuccessResponse<PublicFeedResponse>>(
     "/experiences/public-feed",
@@ -116,7 +131,16 @@ type ProviderExperiencesResponse = {
 
 export async function getProviderExperiences() {
   const response = await apiClient.get<ApiSuccessResponse<ProviderExperiencesResponse>>(
-    "/providers/me/experiences"
+    "/experiences/me"
   );
   return response.data;
 }
+
+
+
+
+
+
+
+
+

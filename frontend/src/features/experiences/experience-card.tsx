@@ -1,6 +1,8 @@
 
 import Link from "next/link";
 import { MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { ExperienceActions } from "./experience-actions";
 import { ExperienceMediaGallery } from "./experience-media";
@@ -12,6 +14,11 @@ type ExperienceCardProps = {
 };
 
 export function ExperienceCard({ experience }: ExperienceCardProps) {
+  const router = useRouter(); 
+  if (!experience) return null; 
+
+  const [showComments, setShowComments] = useState(false);
+
   return (
     <article className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
       <div className="p-4 sm:p-5">
@@ -49,13 +56,18 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
           <p className="text-sm leading-6 text-slate-700">{experience.caption}</p>
 
           <ExperienceActions
-                experienceId={experience.id}
-                likesCount={experience.likes_count}
-                commentsCount={experience.comments_count}
-                likedByCurrentUser={experience.liked_by_current_user}
-            />
+            experienceId={experience.id}
+            likesCount={experience.likes_count}
+            commentsCount={experience.comments_count}
+            likedByCurrentUser={experience.liked_by_current_user}
+            onCommentClick={() => router.push(`/experiences/${experience.id}#comments`)} // ✅ item → experience
+          />
         </div>
       </div>
     </article>
   );
 }
+
+
+
+

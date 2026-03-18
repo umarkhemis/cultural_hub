@@ -111,12 +111,7 @@ export default function PackageDetailPage() {
               packagePrice={data.price}
             />
 
-            {/* <div className="rounded-2xl border border-slate-200 p-4">
-              <PackageDetailActions />
-              <p className="mt-3 text-sm text-slate-500">
-                Login is required to continue with booking and payment.
-              </p>
-            </div> */}
+            
           </div>
         </article>
       </PageContainer>

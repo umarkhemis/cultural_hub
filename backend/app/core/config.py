@@ -20,6 +20,11 @@ class Settings(BaseSettings):
 
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 
+    CLOUDINARY_CLOUD_NAME: str | None = None
+    CLOUDINARY_API_KEY: str | None = None
+    CLOUDINARY_API_SECRET: str | None = None
+    CLOUDINARY_UPLOAD_FOLDER: str = "cultural_hub"
+
     RATE_LIMIT_LOGIN_PER_MINUTE: int = 5
     RATE_LIMIT_REGISTER_PER_HOUR: int = 10
 

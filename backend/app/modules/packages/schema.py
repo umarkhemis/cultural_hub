@@ -1,7 +1,7 @@
 
 from datetime import datetime
 from decimal import Decimal
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class PackageMediaCreate(BaseModel):
@@ -34,3 +34,16 @@ class PackageUpdateRequest(BaseModel):
     includes_text: str | None = None
     status: str | None = None
     media_items: list[PackageMediaCreate] | None = None
+
+
+class PackageMediaCreate(BaseModel):
+    media_url: str | None = Field(default=None, max_length=500)
+    media_type: str
+    thumbnail_url: str | None = Field(default=None, max_length=500)
+    media_order: int = Field(default=0, ge=0)
+
+    @model_validator(mode="after")
+    def validate_media_url(self):
+        if not self.media_url:
+            raise ValueError("media_url is required after upload.")
+        return self

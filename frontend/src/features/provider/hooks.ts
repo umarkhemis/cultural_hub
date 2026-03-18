@@ -2,11 +2,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createExperience, getProviderExperiences } from "@/src/lib/api/experiences";
-import { createPackage, getProviderPackages } from "@/src/lib/api/packages";
+import { createExperience, getProviderExperiences, deleteExperience, updateExperience, } from "@/src/lib/api/experiences";
+// import { createPackage, getProviderPackages } from "@/src/lib/api/packages";
 import { getProviderBookings } from "@/src/lib/api/bookings";
 import { getNotifications } from "@/src/lib/api/notifications";
-// import { createExperience, getProviderExperiences } from "@/src/lib/api/experiences";
+import { createPackage, deletePackage, getProviderPackages, updatePackage } from "@/src/lib/api/packages";
+
 
 export function useProviderPackages() {
   return useQuery({
@@ -68,6 +69,58 @@ export function useProviderExperiences() {
     queryFn: async () => {
       const response = await getProviderExperiences();
       return response.data.items;
+    },
+  });
+}
+
+
+export function useUpdateExperienceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ experienceId, payload }: { experienceId: string; payload: any }) =>
+      updateExperience(experienceId, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["provider-experiences"] });
+      await queryClient.invalidateQueries({ queryKey: ["public-feed"] });
+    },
+  });
+}
+
+export function useDeleteExperienceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteExperience,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["provider-experiences"] });
+      await queryClient.invalidateQueries({ queryKey: ["public-feed"] });
+    },
+  });
+}
+
+
+export function useUpdatePackageMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ packageId, payload }: { packageId: string; payload: any }) =>
+      updatePackage(packageId, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["provider-packages"] });
+      await queryClient.invalidateQueries({ queryKey: ["packages"] });
+    },
+  });
+}
+
+export function useDeletePackageMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deletePackage,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["provider-packages"] });
+      await queryClient.invalidateQueries({ queryKey: ["packages"] });
     },
   });
 }

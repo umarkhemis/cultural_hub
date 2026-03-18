@@ -7,6 +7,7 @@ import { ErrorState } from "@/src/components/shared/error-state";
 import { LoadingState } from "@/src/components/shared/loading-state";
 import { PackageCard } from "@/src/features/packages/package-card";
 import { usePackages } from "@/src/features/packages/hooks";
+import { ProviderPackageCard } from "@/src/features/provider/provider-package-card";
 
 export default function PackagesPage() {
   const { data, isLoading, isError } = usePackages();
@@ -41,8 +42,11 @@ export default function PackagesPage() {
             {data.items.map((item) => (
               <PackageCard key={item.id} item={item} />
             ))}
+
+
           </div>
         ) : null}
+      
       </PageContainer>
     </main>
   );

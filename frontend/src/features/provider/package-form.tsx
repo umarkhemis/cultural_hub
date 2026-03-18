@@ -10,6 +10,7 @@ import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { ROUTES } from "@/src/constants/routes";
 import { useCreatePackageMutation } from "./hooks";
+import { MediaUploadField } from "@/src/components/ui/media-upload-field";
 
 export function ProviderPackageForm() {
   const router = useRouter();
@@ -21,9 +22,9 @@ export function ProviderPackageForm() {
   const [duration, setDuration] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [includesText, setIncludesText] = useState("");
-  const [mediaUrl, setMediaUrl] = useState("");
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [error, setError] = useState("");
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
 
   const handleSubmit = async () => {
     setError("");
@@ -55,7 +56,7 @@ export function ProviderPackageForm() {
           ? [
               {
                 media_url: mediaUrl.trim(),
-                thumbnail_url: thumbnailUrl.trim() || undefined,
+                // thumbnail_url: thumbnailUrl.trim() || undefined,
                 media_order: 0,
               },
             ]
@@ -127,24 +128,23 @@ export function ProviderPackageForm() {
         />
       </FormField>
 
-      <FormField label="Cover Media URL" htmlFor="media_url">
-        <Input
-          id="media_url"
-          placeholder="https://example.com/package.jpg"
-          value={mediaUrl}
-          onChange={(e) => setMediaUrl(e.target.value)}
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-slate-800">Media</p>
+        <MediaUploadField
+          label="Image or Video"
+          accept="image/*,video/*"
+          onUploaded={({ mediaUrl, resourceType }) => {
+            setMediaUrl(mediaUrl);
+            setMediaType(resourceType);
+          }}
         />
-      </FormField>
 
-      <FormField label="Thumbnail URL" htmlFor="thumbnail_url" hint="Optional">
-        <Input
-          id="thumbnail_url"
-          placeholder="https://example.com/thumb.jpg"
-          value={thumbnailUrl}
-          onChange={(e) => setThumbnailUrl(e.target.value)}
-        />
-      </FormField>
-
+        {mediaUrl ? (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+            Uploaded successfully.
+          </div>
+        ) : null}
+      </div>
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}

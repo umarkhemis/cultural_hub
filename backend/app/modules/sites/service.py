@@ -11,7 +11,10 @@ from app.models.experience_like import ExperienceLike
 from app.models.package import Package, PackageStatus
 from app.utils.exceptions import NotFoundException
 from app.models.site_follow import SiteFollow
-from app.models.user import User
+# from app.models.user import User
+from app.models.user import User, UserRole
+from app.utils.exceptions import ForbiddenException
+from app.modules.sites.schema import SiteUpdateRequest
 
 
 def list_public_sites(db: Session, current_user: User | None = None) -> list[dict]:
@@ -242,4 +245,44 @@ def get_public_site_detail(db: Session, site_id: uuid.UUID, current_user: User |
         "packages": packages,
         "followers_count": int(followers_count),
         "following": following,
+    }
+
+
+
+def update_provider_site(db: Session, current_user: User, payload: SiteUpdateRequest) -> dict:
+    if current_user.role != UserRole.provider:
+        raise ForbiddenException("Only providers can update their cultural site.")
+
+    site = db.scalar(
+        select(CulturalSite).where(CulturalSite.user_id == current_user.id)
+    )
+    if not site:
+        raise NotFoundException("Provider site not found.")
+
+    if payload.site_name is not None:
+        site.site_name = payload.site_name.strip()
+    if payload.description is not None:
+        site.description = payload.description.strip()
+    if payload.location is not None:
+        site.location = payload.location.strip()
+    if payload.contact_email is not None:
+        site.contact_email = payload.contact_email.lower()
+    if payload.contact_phone is not None:
+        site.contact_phone = payload.contact_phone.strip() or None
+    if payload.logo_url is not None:
+        site.logo_url = payload.logo_url
+
+    db.commit()
+    db.refresh(site)
+
+    return {
+        "id": str(site.id),
+        "site_name": site.site_name,
+        "description": site.description,
+        "location": site.location,
+        "logo_url": site.logo_url,
+        "contact_email": site.contact_email,
+        "contact_phone": site.contact_phone,
+        "verification_status": site.verification_status.value,
+        "created_at": site.created_at,
     }

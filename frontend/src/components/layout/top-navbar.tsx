@@ -37,14 +37,18 @@ export function TopNavbar() {
     { label: "Profile", href: ROUTES.providerProfile },
   ];
 
-  const roleLinks =
-    user?.role === "provider"
-      ? providerLinks
-      : user?.role === "tourist"
-      ? touristLinks
-      : [];
+  const isProvider = user?.role === "provider";
 
-  const mobileLinks = [...baseLinks, ...roleLinks];
+  const roleLinks = isProvider
+    ? providerLinks
+    : user?.role === "tourist"
+    ? touristLinks
+    : [];
+
+  // Hide base links for providers — they have their own nav
+  const visibleBaseLinks = isProvider ? [] : baseLinks;
+
+  const mobileLinks = [...visibleBaseLinks, ...roleLinks];
 
   const handleLogout = () => {
     clearSession();
@@ -65,13 +69,13 @@ export function TopNavbar() {
             CT
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm font-semibold text-slate-900">Cultural Tourism</p>
-            <p className="text-xs text-slate-500">Experience Platform</p>
+            <p className="text-sm font-semibold text-slate-900">CulturalHub</p>
+            <p className="text-xs text-slate-500">Explore Culture</p>
           </div>
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">
-          {baseLinks.map((item) => (
+          {visibleBaseLinks.map((item) => (
             <Link key={item.href} href={item.href} className="text-sm text-slate-700 hover:text-slate-900">
               {item.label}
             </Link>
@@ -88,7 +92,7 @@ export function TopNavbar() {
           {isAuthenticated && user ? (
             <>
               <Link
-                href={user.role === "provider" ? ROUTES.providerRoot : ROUTES.touristProfile}
+                href={isProvider ? ROUTES.providerRoot : ROUTES.touristProfile}
                 className="hidden items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 sm:inline-flex"
               >
                 <User className="h-4 w-4" />
@@ -120,7 +124,7 @@ export function TopNavbar() {
         </div>
       </div>
 
-      {open ? (
+      {open && (
         <div className="border-t border-slate-200 bg-white lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 sm:px-6">
             {mobileLinks.map((item) => (
@@ -134,7 +138,7 @@ export function TopNavbar() {
               </Link>
             ))}
 
-            {!isAuthenticated ? (
+            {!isAuthenticated && (
               <Link
                 href={ROUTES.login}
                 className="rounded-xl px-3 py-3 text-sm text-slate-700 hover:bg-slate-100"
@@ -142,10 +146,12 @@ export function TopNavbar() {
               >
                 Login
               </Link>
-            ) : null}
+            )}
           </div>
         </div>
-      ) : null}
+      )}
     </header>
   );
 }
+
+

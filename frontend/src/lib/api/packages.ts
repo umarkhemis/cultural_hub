@@ -49,3 +49,18 @@ export async function createPackage(payload: ProviderPackagePayload) {
   );
   return response.data;
 }
+
+export async function updatePackage(
+  packageId: string,
+  payload: Partial<ProviderPackagePayload>
+) {
+  const response = await apiClient.patch<ApiSuccessResponse<TourismPackage>>(
+    `/packages/${packageId}`,
+    payload
+  );
+  return response.data;
+}
+
+export async function deletePackage(packageId: string) {
+  await apiClient.delete(`/packages/${packageId}`);
+}
