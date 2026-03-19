@@ -64,7 +64,7 @@ dump.rdb
 
 # Uploaded / generated media (if stored locally in dev)
 media/
-uploads/
+/uploads/
 static/uploads/
 
 # OS-generated files
