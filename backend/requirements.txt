@@ -35,3 +35,4 @@ typing_extensions==4.15.0
 uvicorn==0.41.0
 wrapt==2.1.2
 cloudinary==1.44.1
+python-multipart==0.0.22
