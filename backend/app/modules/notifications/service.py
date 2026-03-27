@@ -10,6 +10,7 @@ from app.utils.exceptions import ForbiddenException, NotFoundException
 from app.cache.keys import notifications_key
 from app.cache.redis import delete_cache_by_pattern, get_cache, set_cache
 from app.core.config import settings
+from app.cache.redis import redis_client
 
 
 def create_notification(
@@ -29,6 +30,8 @@ def create_notification(
         is_read=False,
     )
     db.add(notification)
+    if redis_client is None:
+        return None
     delete_cache_by_pattern(f"notifications:{user_id}:*")
     return notification
 
@@ -77,6 +80,8 @@ def mark_notification_as_read(db: Session, current_user: User, notification_id: 
 
     notification.is_read = True
     db.commit()
+    if redis_client is None:
+        return None
     delete_cache_by_pattern(f"notifications:{current_user.id}:*")
     db.refresh(notification)
     return notification

@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 14
 
-    REDIS_URL: str
+    REDIS_URL: str | None = None
 
     APP_NAME: str = "Cultural Hub API"
     APP_VERSION: str = "1.0.0"

@@ -21,6 +21,7 @@ from app.modules.experiences.schema import (
     ExperienceUpdateRequest,
 )
 from app.utils.exceptions import ForbiddenException, NotFoundException, ValidationException
+from app.cache.redis import redis_client
 
 
 def encode_cursor(created_at: datetime, experience_id: uuid.UUID) -> str:
@@ -91,6 +92,8 @@ def create_experience(db: Session, current_user: User, payload: ExperienceCreate
         db.add(media)
 
     db.commit()
+    if redis_client is None:
+        return None
     delete_cache_by_pattern("feed:public:*")
     db.refresh(experience)
     return experience
