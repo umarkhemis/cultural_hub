@@ -12,6 +12,8 @@ export type ExperienceProvider = {
   site_name: string;
   logo_url?: string | null;
   location?: string | null;
+  followers_count?: number | null;   
+  following?: boolean; 
 };
 
 export type Experience = {

@@ -92,11 +92,11 @@ jobs:
 
 #Go to your repo → **Settings → Secrets and variables → Actions → New repository secret**:
 
-TEST_DATABASE_URL        → Neon dev branch connection string
-JWT_SECRET_KEY           → your secret key
-NEXT_PUBLIC_API_BASE_URL → https://cultural-hub.onrender.com/api/v1
-RENDER_DEPLOY_HOOK       → from Render dashboard
-VERCEL_DEPLOY_HOOK       → from Vercel dashboard
+# TEST_DATABASE_URL        → Neon dev branch connection string
+# JWT_SECRET_KEY           → your secret key
+# NEXT_PUBLIC_API_BASE_URL → https://cultural-hub.onrender.com/api/v1
+# RENDER_DEPLOY_HOOK       → from Render dashboard
+# VERCEL_DEPLOY_HOOK       → from Vercel dashboard
 
 
 # **Get Render deploy hook:**
@@ -141,10 +141,10 @@ Branch name pattern: develop
 
 #Since you're using Neon, create a separate branch for CI tests so tests never touch your production data:
 
-1. Neon dashboard → **Branches → New Branch**
-2. Name it `ci-tests`, branch from `main`
-3. Copy the connection string
-4. Use it as `TEST_DATABASE_URL` in GitHub secrets
+# 1. Neon dashboard → **Branches → New Branch**
+# 2. Name it `ci-tests`, branch from `main`
+# 3. Copy the connection string
+# 4. Use it as `TEST_DATABASE_URL` in GitHub secrets
 
 ---
 

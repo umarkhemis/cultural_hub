@@ -55,6 +55,8 @@ class ProviderSummaryResponse(BaseModel):
     site_name: str
     logo_url: str | None
     location: str | None
+    followers_count: int = 0
+    following: bool = False
 
 
 class ExperienceResponse(BaseModel):

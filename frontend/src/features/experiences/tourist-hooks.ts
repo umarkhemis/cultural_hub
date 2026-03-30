@@ -1,13 +1,28 @@
 
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Experience } from "@/src/types/experience";
 import {
   createExperienceComment,
   getExperienceComments,
+  getPublicFeed,
   likeExperience,
   unlikeExperience,
 } from "@/src/lib/api/experiences";
+
+import type { ApiSuccessResponse } from "@/src/types/api";
+
+type PublicFeedPage = ApiSuccessResponse<{ items: Experience[]; next_cursor: string | null }>;
+
+export function useInfinitePublicFeed() {
+  return useInfiniteQuery<PublicFeedPage, Error, { pages: PublicFeedPage[] }, string[], string | null>({
+    queryKey: ["public-feed"],
+    queryFn: ({ pageParam }) => getPublicFeed(pageParam),
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.data.next_cursor ?? null,
+  });
+}
 
 export function useExperienceComments(experienceId: string, limit = 20) {
   return useQuery({
@@ -59,3 +74,4 @@ export function useCreateCommentMutation(experienceId: string) {
     },
   });
 }
+
