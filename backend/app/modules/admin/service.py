@@ -6,7 +6,7 @@ from app.models.booking import Booking
 from app.models.cultural_site import CulturalSite
 from app.models.experience import Experience
 from app.models.package import Package
-from app.models.report import Report
+# from app.models.report import Report
 from app.models.user import User, UserRole
 
 
@@ -19,7 +19,7 @@ def get_admin_overview(db: Session) -> dict:
     total_packages = db.scalar(select(func.count(Package.id))) or 0
     total_experiences = db.scalar(select(func.count(Experience.id))) or 0
     total_bookings = db.scalar(select(func.count(Booking.id))) or 0
-    total_reports = db.scalar(select(func.count(Report.id))) or 0
+    # total_reports = db.scalar(select(func.count(Report.id))) or 0
 
     return {
         "total_users": int(total_users),
@@ -28,7 +28,7 @@ def get_admin_overview(db: Session) -> dict:
         "total_packages": int(total_packages),
         "total_experiences": int(total_experiences),
         "total_bookings": int(total_bookings),
-        "total_reports": int(total_reports),
+        # "total_reports": int(total_reports),
     }
 
 
@@ -74,9 +74,9 @@ def list_admin_packages(db: Session) -> list[Package]:
     )
 
 
-def list_admin_reports(db: Session) -> list[Report]:
-    return list(
-        db.scalars(
-            select(Report).order_by(Report.created_at.desc())
-        ).all()
-    )
+# def list_admin_reports(db: Session) -> list[Report]:
+#     return list(
+#         db.scalars(
+#             select(Report).order_by(Report.created_at.desc())
+#         ).all()
+#     )
