@@ -73,7 +73,12 @@ class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     provider_name_snapshot: Mapped[str] = mapped_column(String(255), nullable=False)
     event_date_snapshot: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    tourist = relationship("User", back_populates="bookings")
+    # tourist = relationship("User", back_populates="bookings")
+    tourist = relationship(
+        "User",
+        back_populates="bookings",
+        foreign_keys=[tourist_id],
+    )
     package = relationship("Package", back_populates="bookings")
     participants = relationship(
         "BookingParticipant",
