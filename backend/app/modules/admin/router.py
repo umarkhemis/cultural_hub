@@ -10,7 +10,7 @@ from app.modules.admin.service import (
     list_admin_bookings,
     list_admin_experiences,
     list_admin_packages,
-    list_admin_reports,
+    # list_admin_reports,
     list_admin_sites,
     list_admin_users,
 )
@@ -85,12 +85,12 @@ def admin_packages(
     )
 
 
-@router.get("/reports")
-def admin_reports(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.admin)),
-):
-    return success_response(
-        message="Reports retrieved successfully.",
-        data={"items": list_admin_reports(db=db)},
-    )
+# @router.get("/reports")
+# def admin_reports(
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(require_roles(UserRole.admin)),
+# ):
+#     return success_response(
+#         message="Reports retrieved successfully.",
+#         data={"items": list_admin_reports(db=db)},
+#     )
