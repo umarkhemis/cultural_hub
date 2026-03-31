@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/src/components/ui/button";
 import { EmptyState } from "@/src/components/shared/empty-state";
@@ -11,6 +11,7 @@ import {
   useInitializePaymentMutation,
   useMockPaymentWebhookMutation,
 } from "@/src/features/bookings/payment-hooks";
+import { useTouristBookings } from "@/src/features/bookings/hooks";
 import { useBookingStore } from "@/src/store/booking-store";
 import { useToastStore } from "@/src/store/toast-store";
 import { formatCurrency } from "@/src/utils/formatCurrency";
@@ -18,6 +19,8 @@ import { formatDate } from "@/src/utils/formatDate";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const bookingIdFromQuery = searchParams.get("bookingId");
   const { addToast } = useToastStore();
 
   const {
@@ -30,17 +33,44 @@ export default function CheckoutPage() {
     setBookingResult,
   } = useBookingStore();
 
+  const { data: bookings = [] } = useTouristBookings();
+
   const initializePaymentMutation = useInitializePaymentMutation();
   const mockWebhookMutation = useMockPaymentWebhookMutation();
 
   const [error, setError] = useState("");
 
-  const reservationExpired = useMemo(() => {
-    if (!reservedUntil) return false;
-    return new Date(reservedUntil).getTime() < Date.now();
-  }, [reservedUntil]);
+  const activeBooking =
+    bookings.find((item) => item.id === bookingIdFromQuery) ||
+    bookings.find((item) => item.id === bookingId) ||
+    null;
 
-  if (!bookingId || !packageName || !packagePrice) {
+  useEffect(() => {
+    if (activeBooking) {
+      setBookingResult({
+        bookingId: activeBooking.id,
+        bookingReference: activeBooking.booking_reference,
+        reservedUntil: activeBooking.reserved_until,
+      });
+    }
+  }, [activeBooking, setBookingResult]);
+
+  const effectiveBookingId = activeBooking?.id || bookingId;
+  const effectiveBookingReference = activeBooking?.booking_reference || bookingReference;
+  const effectivePackageName = activeBooking?.package_title_snapshot || packageName;
+  const effectiveReservedUntil = activeBooking?.reserved_until || reservedUntil;
+  const effectiveParticipantsCount =
+    activeBooking?.participants_count || participants.length;
+  const effectiveAmount =
+    activeBooking?.total_price ||
+    ((packagePrice || 0) * (participants.length || 1));
+
+  const reservationExpired = useMemo(() => {
+    if (!effectiveReservedUntil) return false;
+    return new Date(effectiveReservedUntil).getTime() < Date.now();
+  }, [effectiveReservedUntil]);
+
+  if (!effectiveBookingId || !effectivePackageName || !effectiveAmount) {
     return (
       <EmptyState
         title="No active checkout"
@@ -49,7 +79,6 @@ export default function CheckoutPage() {
     );
   }
 
-  const amount = packagePrice * participants.length;
   const isBusy =
     initializePaymentMutation.isPending || mockWebhookMutation.isPending;
 
@@ -63,7 +92,7 @@ export default function CheckoutPage() {
 
     try {
       const paymentResponse = await initializePaymentMutation.mutateAsync({
-        booking_id: bookingId,
+        booking_id: effectiveBookingId,
         payment_gateway: "mock",
         currency: "UGX",
       });
@@ -71,9 +100,9 @@ export default function CheckoutPage() {
       const transactionReference = paymentResponse.data.transaction_reference;
 
       setBookingResult({
-        bookingId,
-        bookingReference,
-        reservedUntil,
+        bookingId: effectiveBookingId,
+        bookingReference: effectiveBookingReference,
+        reservedUntil: effectiveReservedUntil,
         paymentReference: transactionReference,
       });
 
@@ -132,30 +161,34 @@ export default function CheckoutPage() {
           <div>
             <p className="text-sm text-slate-500">Package</p>
             <h2 className="mt-1 text-xl font-semibold text-slate-900">
-              {packageName}
+              {effectivePackageName}
             </h2>
           </div>
 
-          {bookingReference ? (
+          {effectiveBookingReference ? (
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-600">Booking reference</span>
-              <span className="font-medium text-slate-900">{bookingReference}</span>
+              <span className="font-medium text-slate-900">
+                {effectiveBookingReference}
+              </span>
             </div>
           ) : null}
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-600">Participants</span>
-            <span className="font-medium text-slate-900">{participants.length}</span>
+            <span className="font-medium text-slate-900">
+              {effectiveParticipantsCount}
+            </span>
           </div>
 
           <div className="flex items-center justify-between text-sm">
             <span className="text-slate-600">Amount</span>
             <span className="font-semibold text-slate-900">
-              {formatCurrency(amount)}
+              {formatCurrency(effectiveAmount)}
             </span>
           </div>
 
-          {reservedUntil ? (
+          {effectiveReservedUntil ? (
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-600">Reservation expires</span>
               <span
@@ -163,7 +196,7 @@ export default function CheckoutPage() {
                   reservationExpired ? "text-red-600" : "text-slate-900"
                 }`}
               >
-                {formatDate(reservedUntil)}
+                {formatDate(effectiveReservedUntil)}
               </span>
             </div>
           ) : null}
@@ -179,7 +212,7 @@ export default function CheckoutPage() {
       >
         {reservationExpired
           ? "This booking reservation has expired. Please return to the package page and create a new booking."
-          : "This is currently using a mock payment flow for MVP integration. It is structured to match a real payment lifecycle and can later be connected to a live payment gateway."}
+          : "This is currently using a mock payment flow for MVP integration. It follows a realistic payment lifecycle and can later be connected to a live payment gateway."}
       </div>
 
       {error ? (

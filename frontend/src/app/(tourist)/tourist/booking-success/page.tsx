@@ -21,13 +21,12 @@ export default function BookingSuccessPage() {
       </h1>
 
       <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-        Your booking
-        {packageName ? ` for ${packageName}` : ""}
-        has been confirmed successfully.
+        Your booking{packageName ? ` for ${packageName}` : ""} has been confirmed
+        successfully and is now active.
       </p>
 
       {bookingReference ? (
-        <p className="mt-2 text-sm font-medium text-slate-900">
+        <p className="mt-3 text-sm font-medium text-slate-900">
           Booking reference: {bookingReference}
         </p>
       ) : null}
