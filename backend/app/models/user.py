@@ -32,6 +32,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
     cultural_site = relationship("CulturalSite", back_populates="user", uselist=False)
+    bookings = relationship("Booking", back_populates="tourist", cascade="all, delete-orphan", foreign_keys="Booking.tourist_id")
 
     __table_args__ = (
         Index("ix_users_role", "role"),
