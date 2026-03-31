@@ -10,8 +10,8 @@ import { LoadingState } from "@/src/components/shared/loading-state";
 import { ROUTES } from "@/src/constants/routes";
 import { PublicFeedList } from "@/src/features/experiences/public-feed-list";
 import { useProviderExperiences } from "@/src/features/provider/hooks";
-// import { ProviderExperienceCard } from "@/src/features/provider/provider-experience-card";
 import { ProviderExperienceCard } from "@/src/features/provider/provider-experience-card";
+
 
 
 export default function ProviderExperiencesPage() {
@@ -50,7 +50,8 @@ export default function ProviderExperiencesPage() {
         // <PublicFeedList items={data} />
         <div className="grid gap-6 sm:grid-cols-2">
           {data.map((item) => (
-            <ProviderExperienceCard key={item.id} item={item} />
+            <ProviderExperienceCard key={item.id} />
+            // <ProviderExperienceCard key={item.id} item={item} />
           ))}
         </div>
       ) : null}
