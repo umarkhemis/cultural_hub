@@ -14,3 +14,5 @@ export type ApiErrorResponse = {
     details?: Array<Record<string, unknown>>;
   };
 };
+
+

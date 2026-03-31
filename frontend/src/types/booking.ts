@@ -9,6 +9,7 @@ export type BookingParticipant = {
 
 export type Booking = {
   id: string;
+  booking_reference: string;
   tourist_id: string;
   package_id: string;
   booking_status: string;
@@ -16,6 +17,10 @@ export type Booking = {
   participants_count: number;
   total_price: number;
   booking_date: string;
+  reserved_until?: string | null;
+  cancelled_at?: string | null;
+  cancellation_reason?: string | null;
+  booking_notes?: string | null;
   package_title_snapshot: string;
   provider_name_snapshot: string;
   event_date_snapshot?: string | null;

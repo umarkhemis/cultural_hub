@@ -9,6 +9,16 @@ export function LoadingState({ label = "CulturalHub" }: { label?: string }) {
           <img src="/logo.jpg" alt="CulturalHub" className="h-[60px] w-[60px] rounded-2xl object-cover" />
         </div>
       </div>
+      {/* <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
+        <div className="flex flex-col items-center gap-4 animate-pulse">
+          <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-amber-400 shadow-2xl shadow-amber-400/40">
+            <span className="text-3xl font-black text-slate-900">CH</span>
+          </div>
+          <p className="text-sm font-semibold tracking-[0.3em] text-white/30 uppercase">
+            CulturalHub
+          </p>
+        </div>
+      </div> */}
 
       {/* Label */}
       <p className="text-[11px] font-semibold tracking-[3px] text-white/30 uppercase mb-5">

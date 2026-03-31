@@ -2,8 +2,9 @@
 import enum
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, Numeric, String
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -11,9 +12,10 @@ from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class BookingStatus(str, enum.Enum):
-    pending = "pending"
+    awaiting_payment = "awaiting_payment"
     confirmed = "confirmed"
     cancelled = "cancelled"
+    expired = "expired"
     completed = "completed"
 
 
@@ -35,14 +37,21 @@ class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     package_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("packages.id", ondelete="RESTRICT"),
+        ForeignKey("packages.id", ondelete="CASCADE"),
         nullable=False,
+    )
+
+    booking_reference: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False,
+        index=True,
     )
 
     booking_status: Mapped[BookingStatus] = mapped_column(
         Enum(BookingStatus, name="booking_status"),
         nullable=False,
-        default=BookingStatus.pending,
+        default=BookingStatus.awaiting_payment,
     )
     payment_status: Mapped[PaymentStatus] = mapped_column(
         Enum(PaymentStatus, name="payment_status"),
@@ -51,16 +60,28 @@ class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     participants_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    total_price: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
-    booking_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    total_price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
 
-    package_title_snapshot: Mapped[str] = mapped_column(String(200), nullable=False)
-    provider_name_snapshot: Mapped[str] = mapped_column(String(200), nullable=False)
+    booking_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    reserved_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancellation_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    booking_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    package_title_snapshot: Mapped[str] = mapped_column(String(255), nullable=False)
+    provider_name_snapshot: Mapped[str] = mapped_column(String(255), nullable=False)
     event_date_snapshot: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    package = relationship("Package")
+    tourist = relationship("User", back_populates="bookings")
+    package = relationship("Package", back_populates="bookings")
     participants = relationship(
         "BookingParticipant",
+        back_populates="booking",
+        cascade="all, delete-orphan",
+    )
+    payments = relationship(
+        "Payment",
         back_populates="booking",
         cascade="all, delete-orphan",
     )
@@ -68,9 +89,9 @@ class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __table_args__ = (
         Index("ix_bookings_tourist_id", "tourist_id"),
         Index("ix_bookings_package_id", "package_id"),
-        Index("ix_bookings_booking_date", "booking_date"),
         Index("ix_bookings_booking_status", "booking_status"),
         Index("ix_bookings_payment_status", "payment_status"),
-        Index("ix_bookings_tourist_booking_date", "tourist_id", "booking_date"),
-        Index("ix_bookings_package_booking_date", "package_id", "booking_date"),
+        Index("ix_bookings_reserved_until", "reserved_until"),
     )
+
+

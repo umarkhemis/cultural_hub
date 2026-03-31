@@ -37,6 +37,7 @@ export function TopNavbar() {
     { label: "Profile", href: ROUTES.providerProfile },
   ];
 
+
   const isProvider = user?.role === "provider";
 
   const roleLinks = isProvider
@@ -44,6 +45,9 @@ export function TopNavbar() {
     : user?.role === "tourist"
     ? touristLinks
     : [];
+
+ 
+
 
   // Hide base links for providers — they have their own nav
   const visibleBaseLinks = isProvider ? [] : baseLinks;
