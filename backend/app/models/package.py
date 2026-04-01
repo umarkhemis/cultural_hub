@@ -38,6 +38,11 @@ class Package(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     provider = relationship("CulturalSite")
+    bookings = relationship(
+        "Booking",
+        back_populates="package",
+        cascade="all, delete-orphan",
+    )
     media_items = relationship(
         "PackageMedia",
         back_populates="package",

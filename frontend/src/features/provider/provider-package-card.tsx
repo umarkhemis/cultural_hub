@@ -2,8 +2,10 @@
 "use client";
 
 import { useState } from "react";
-
-import { Button } from "@/src/components/ui/button";
+import {
+  Pencil, Trash2, X, Check, Tag, Clock,
+  DollarSign, AlignLeft, CheckSquare, Image as ImageIcon,
+} from "lucide-react";
 import { FormField } from "@/src/components/ui/form-field";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
@@ -11,10 +13,9 @@ import type { TourismPackage } from "@/src/types/package";
 import { formatCurrency } from "@/src/utils/formatCurrency";
 import { useDeletePackageMutation, useUpdatePackageMutation } from "./hooks";
 import { useToastStore } from "@/src/store/toast-store";
+import { cn } from "@/src/utils/cn";
 
-type Props = {
-  item: TourismPackage;
-};
+type Props = { item: TourismPackage };
 
 export function ProviderPackageCard({ item }: Props) {
   const [editing, setEditing] = useState(false);
@@ -23,6 +24,7 @@ export function ProviderPackageCard({ item }: Props) {
   const [price, setPrice] = useState(String(item.price));
   const [duration, setDuration] = useState(item.duration || "");
   const [includesText, setIncludesText] = useState(item.includes_text || "");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const updateMutation = useUpdatePackageMutation();
   const deleteMutation = useDeletePackageMutation();
@@ -42,136 +44,238 @@ export function ProviderPackageCard({ item }: Props) {
           includes_text: includesText || undefined,
         },
       });
-
-      addToast({
-        type: "success",
-        title: "Package updated",
-        description: "Your package changes were saved.",
-      });
+      addToast({ type: "success", title: "Package updated", description: "Your changes were saved." });
       setEditing(false);
     } catch {
-      addToast({
-        type: "error",
-        title: "Update failed",
-        description: "We could not update this package.",
-      });
+      addToast({ type: "error", title: "Update failed", description: "We could not update this package." });
     }
   };
 
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(item.id);
-      addToast({
-        type: "success",
-        title: "Package archived",
-        description: "The package was removed from public listing.",
-      });
+      addToast({ type: "success", title: "Package archived", description: "Removed from public listing." });
     } catch {
-      addToast({
-        type: "error",
-        title: "Delete failed",
-        description: "We could not remove this package.",
-      });
+      addToast({ type: "error", title: "Delete failed", description: "We could not remove this package." });
     }
   };
 
+  const inputClass = "w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 px-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-400/20";
+
   return (
-    <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
-      {firstMedia ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={firstMedia.media_url}
-          alt={item.package_name}
-          className="aspect-[16/9] w-full object-cover"
-        />
-      ) : (
-        <div className="aspect-[16/9] w-full bg-slate-100" />
-      )}
+    <div className={cn(
+      "overflow-hidden rounded-[28px] border bg-white shadow-sm transition-all duration-200",
+      editing ? "border-amber-300 shadow-amber-100" : "border-slate-200 hover:shadow-md"
+    )}>
 
-      <div className="space-y-4 p-5">
-        {!editing ? (
-          <>
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">{item.package_name}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold text-slate-900">
-                {formatCurrency(item.price)}
-              </span>
-              <span className="text-slate-500">{item.duration || "No duration"}</span>
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setEditing(true)}>
-                Edit
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={handleDelete}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? "Removing..." : "Delete"}
-              </Button>
-            </div>
-          </>
+      {/* Media */}
+      <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
+        {firstMedia ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={firstMedia.media_url}
+            alt={item.package_name}
+            className="h-full w-full object-cover"
+          />
         ) : (
-          <>
-            <FormField label="Package Name" htmlFor={`package-name-${item.id}`}>
-              <Input
-                id={`package-name-${item.id}`}
-                value={packageName}
-                onChange={(e) => setPackageName(e.target.value)}
-              />
-            </FormField>
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+            <ImageIcon className="h-8 w-8 text-slate-300" />
+          </div>
+        )}
 
-            <FormField label="Description" htmlFor={`package-desc-${item.id}`}>
-              <Textarea
-                id={`package-desc-${item.id}`}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </FormField>
+        {/* Price overlay */}
+        <div className="absolute bottom-3 left-3">
+          <span className="inline-flex items-center rounded-xl bg-slate-900/80 px-3 py-1.5 text-sm font-bold text-white backdrop-blur-sm">
+            {formatCurrency(item.price)}
+          </span>
+        </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Price" htmlFor={`package-price-${item.id}`}>
-                <Input
-                  id={`package-price-${item.id}`}
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+        {/* Edit mode indicator */}
+        {editing && (
+          <div className="absolute top-3 left-3">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3 py-1.5 text-xs font-bold text-slate-900">
+              <Pencil className="h-3 w-3" />
+              Editing
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="p-5">
+        {!editing ? (
+          /* ── View mode ── */
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 leading-snug">{item.package_name}</h3>
+              <p className="mt-1.5 text-sm leading-6 text-slate-500 line-clamp-2">{item.description}</p>
+            </div>
+
+            {/* Meta pills */}
+            <div className="flex flex-wrap gap-2">
+              {item.duration && (
+                <span className="flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                  <Clock className="h-3 w-3" />
+                  {item.duration}
+                </span>
+              )}
+              {item.includes_text && (
+                <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                  <CheckSquare className="h-3 w-3" />
+                  Includes listed
+                </span>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 border-t border-slate-100 pt-4">
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-100"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+              </button>
+
+              {!confirmDelete ? (
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition-all hover:bg-red-100"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-slate-500">Sure?</p>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleteMutation.isPending}
+                    className="flex items-center gap-1.5 rounded-2xl bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-60"
+                  >
+                    <Check className="h-3 w-3" />
+                    {deleteMutation.isPending ? "..." : "Yes"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(false)}
+                    className="flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    <X className="h-3 w-3" />
+                    No
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* ── Edit mode ── */
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm font-bold text-slate-900">Edit Package</p>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            <FormField label="Package Name" htmlFor={`name-${item.id}`}>
+              <div className="relative">
+                <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <input
+                  id={`name-${item.id}`}
+                  value={packageName}
+                  onChange={(e) => setPackageName(e.target.value)}
+                  className={cn(inputClass, "pl-10")}
                 />
+              </div>
+            </FormField>
+
+            <FormField label="Description" htmlFor={`desc-${item.id}`}>
+              <div className="relative">
+                <AlignLeft className="absolute left-3.5 top-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                <Textarea
+                  id={`desc-${item.id}`}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </FormField>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <FormField label="Price" htmlFor={`price-${item.id}`}>
+                <div className="relative">
+                  <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <input
+                    id={`price-${item.id}`}
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className={cn(inputClass, "pl-10")}
+                  />
+                </div>
               </FormField>
 
-              <FormField label="Duration" htmlFor={`package-duration-${item.id}`}>
-                <Input
-                  id={`package-duration-${item.id}`}
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                />
+              <FormField label="Duration" htmlFor={`duration-${item.id}`}>
+                <div className="relative">
+                  <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <input
+                    id={`duration-${item.id}`}
+                    value={duration}
+                    placeholder="e.g. 3 days"
+                    onChange={(e) => setDuration(e.target.value)}
+                    className={cn(inputClass, "pl-10")}
+                  />
+                </div>
               </FormField>
             </div>
 
-            <FormField label="Included Items" htmlFor={`package-includes-${item.id}`}>
-              <Textarea
-                id={`package-includes-${item.id}`}
-                value={includesText}
-                onChange={(e) => setIncludesText(e.target.value)}
-              />
+            <FormField label="Included Items" htmlFor={`includes-${item.id}`}>
+              <div className="relative">
+                <CheckSquare className="absolute left-3.5 top-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                <Textarea
+                  id={`includes-${item.id}`}
+                  value={includesText}
+                  placeholder="e.g. Transport, meals, guide..."
+                  onChange={(e) => setIncludesText(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </FormField>
 
-            <div className="flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setEditing(false)}>
+            <div className="flex items-center gap-3 border-t border-slate-100 pt-4">
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+              >
                 Cancel
-              </Button>
-              <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdate}
+                disabled={updateMutation.isPending}
+                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-slate-900 py-2.5 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-60 transition-all"
+              >
+                {updateMutation.isPending ? (
+                  <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                ) : (
+                  <Check className="h-4 w-4" />
+                )}
                 {updateMutation.isPending ? "Saving..." : "Save Changes"}
-              </Button>
+              </button>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
   );
 }
+
+

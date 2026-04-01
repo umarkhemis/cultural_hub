@@ -15,6 +15,7 @@ export function useInitializePaymentMutation() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["tourist-bookings"] });
       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
     },
   });
 }
@@ -26,8 +27,9 @@ export function useMockPaymentWebhookMutation() {
     mutationFn: processMockPaymentWebhook,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["tourist-bookings"] });
+      await queryClient.invalidateQueries({ queryKey: ["provider-bookings"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      await queryClient.invalidateQueries({ queryKey: ["packages"] });
     },
   });
 }

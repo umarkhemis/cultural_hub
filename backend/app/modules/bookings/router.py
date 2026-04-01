@@ -1,21 +1,19 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.core.permissions import require_roles
 from app.database.dependencies import get_db
 from app.models.user import User, UserRole
-from app.modules.bookings.schema import BookingCreateRequest, BookingStatusUpdateRequest
+from app.modules.bookings.schema import BookingCancelRequest, BookingCreateRequest
 from app.modules.bookings.service import (
+    cancel_booking,
     create_booking,
-    get_booking_detail_for_owner,
     list_provider_bookings,
     list_tourist_bookings,
-    update_booking_status,
 )
-from app.modules.packages.serializers import serialize_booking
 from app.utils.responses import success_response
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
@@ -28,10 +26,9 @@ def create_booking_endpoint(
     current_user: User = Depends(require_roles(UserRole.tourist)),
 ):
     booking = create_booking(db=db, current_user=current_user, payload=payload)
-    booking = get_booking_detail_for_owner(db=db, current_user=current_user, booking_id=booking.id)
     return success_response(
         message="Booking created successfully.",
-        data=serialize_booking(booking),
+        data=booking,
     )
 
 
@@ -40,10 +37,10 @@ def my_bookings(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.tourist)),
 ):
-    bookings = list_tourist_bookings(db=db, current_user=current_user)
+    items = list_tourist_bookings(db=db, current_user=current_user)
     return success_response(
-        message="Tourist bookings retrieved successfully.",
-        data={"items": [serialize_booking(booking) for booking in bookings]},
+        message="Bookings retrieved successfully.",
+        data={"items": items},
     )
 
 
@@ -52,41 +49,28 @@ def provider_bookings(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.provider)),
 ):
-    bookings = list_provider_bookings(db=db, current_user=current_user)
+    items = list_provider_bookings(db=db, current_user=current_user)
     return success_response(
         message="Provider bookings retrieved successfully.",
-        data={"items": [serialize_booking(booking) for booking in bookings]},
+        data={"items": items},
     )
 
 
-@router.get("/{booking_id}")
-def booking_detail(
+@router.post("/{booking_id}/cancel")
+def cancel_booking_endpoint(
     booking_id: uuid.UUID,
+    payload: BookingCancelRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.tourist, UserRole.provider, UserRole.admin)),
+    current_user: User = Depends(require_roles(UserRole.tourist, UserRole.admin)),
 ):
-    booking = get_booking_detail_for_owner(db=db, current_user=current_user, booking_id=booking_id)
-    return success_response(
-        message="Booking retrieved successfully.",
-        data=serialize_booking(booking),
-    )
-
-
-@router.patch("/{booking_id}/status")
-def update_booking_status_endpoint(
-    booking_id: uuid.UUID,
-    payload: BookingStatusUpdateRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.provider)),
-):
-    booking = update_booking_status(
+    booking = cancel_booking(
         db=db,
         current_user=current_user,
         booking_id=booking_id,
-        payload=payload,
+        reason=payload.reason,
     )
-    booking = get_booking_detail_for_owner(db=db, current_user=current_user, booking_id=booking.id)
     return success_response(
-        message="Booking status updated successfully.",
-        data=serialize_booking(booking),
+        message="Booking cancelled successfully.",
+        data=booking,
     )
+

@@ -8,7 +8,7 @@ import { ROUTES } from "@/src/constants/routes";
 import { useBookingStore } from "@/src/store/booking-store";
 
 export default function BookingSuccessPage() {
-  const { packageName, clearBookingFlow } = useBookingStore();
+  const { packageName, bookingReference, clearBookingFlow } = useBookingStore();
 
   return (
     <div className="mx-auto max-w-2xl rounded-[32px] border border-slate-200 bg-white p-8 text-center shadow-sm">
@@ -21,9 +21,15 @@ export default function BookingSuccessPage() {
       </h1>
 
       <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-        Your booking{packageName ? ` for ${packageName}` : ""} has been created and
-        payment was completed successfully.
+        Your booking{packageName ? ` for ${packageName}` : ""} has been confirmed
+        successfully and is now active.
       </p>
+
+      {bookingReference ? (
+        <p className="mt-3 text-sm font-medium text-slate-900">
+          Booking reference: {bookingReference}
+        </p>
+      ) : null}
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Link href={ROUTES.touristBookings} onClick={clearBookingFlow}>

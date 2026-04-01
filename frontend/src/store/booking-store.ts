@@ -16,6 +16,8 @@ type PendingBookingState = {
   packagePrice: number | null;
   participants: BookingParticipantInput[];
   bookingId: string | null;
+  bookingReference: string | null;
+  reservedUntil: string | null;
   paymentReference: string | null;
 
   setDraftBooking: (payload: {
@@ -27,6 +29,8 @@ type PendingBookingState = {
 
   setBookingResult: (payload: {
     bookingId: string;
+    bookingReference?: string | null;
+    reservedUntil?: string | null;
     paymentReference?: string | null;
   }) => void;
 
@@ -39,6 +43,8 @@ export const useBookingStore = create<PendingBookingState>((set) => ({
   packagePrice: null,
   participants: [],
   bookingId: null,
+  bookingReference: null,
+  reservedUntil: null,
   paymentReference: null,
 
   setDraftBooking: ({ packageId, packageName, packagePrice, participants }) =>
@@ -49,9 +55,16 @@ export const useBookingStore = create<PendingBookingState>((set) => ({
       participants,
     }),
 
-  setBookingResult: ({ bookingId, paymentReference }) =>
+  setBookingResult: ({
+    bookingId,
+    bookingReference,
+    reservedUntil,
+    paymentReference,
+  }) =>
     set({
       bookingId,
+      bookingReference: bookingReference ?? null,
+      reservedUntil: reservedUntil ?? null,
       paymentReference: paymentReference ?? null,
     }),
 
@@ -62,6 +75,8 @@ export const useBookingStore = create<PendingBookingState>((set) => ({
       packagePrice: null,
       participants: [],
       bookingId: null,
+      bookingReference: null,
+      reservedUntil: null,
       paymentReference: null,
     }),
 }));

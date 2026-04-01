@@ -1,194 +1,232 @@
 
-import json
-import secrets
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.booking import Booking, BookingStatus, PaymentStatus
-from app.models.cultural_site import CulturalSite
-from app.models.notification import NotificationType
-from app.models.package import Package
-from app.models.payment import Payment, PaymentGateway, PaymentRecordStatus
+from app.models.payment import Payment, PaymentGateway
 from app.models.user import User, UserRole
-from app.modules.notifications.service import create_notification
-from app.modules.payments.schema import MockWebhookRequest, PaymentInitializeRequest
 from app.utils.exceptions import ForbiddenException, NotFoundException, ValidationException
 
 
-def _generate_reference() -> str:
-    return f"TXN-{secrets.token_hex(12).upper()}"
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
-def initialize_payment(db: Session, current_user: User, payload: PaymentInitializeRequest) -> Payment:
-    if current_user.role != UserRole.tourist:
-        raise ForbiddenException("Only tourists can initialize payments.")
+def _expire_booking_if_needed(db: Session, booking: Booking) -> Booking:
+    now = _now()
 
-    try:
-        booking_uuid = uuid.UUID(payload.booking_id)
-    except ValueError as exc:
-        raise ValidationException("Invalid booking_id.") from exc
+    if (
+        booking.booking_status == BookingStatus.awaiting_payment
+        and booking.payment_status in [PaymentStatus.unpaid, PaymentStatus.pending, PaymentStatus.failed]
+        and booking.reserved_until is not None
+        and booking.reserved_until < now
+    ):
+        booking.booking_status = BookingStatus.expired
+        db.add(booking)
+        db.commit()
+        db.refresh(booking)
 
+    return booking
+
+
+def _get_booking_for_payment(db: Session, booking_id: uuid.UUID) -> Booking:
     booking = db.scalar(
         select(Booking)
-        .options(joinedload(Booking.package).joinedload(Package.provider))
-        .where(Booking.id == booking_uuid)
+        .options(joinedload(Booking.payments))
+        .where(Booking.id == booking_id)
     )
     if not booking:
         raise NotFoundException("Booking not found.")
 
+    return booking
+
+
+def _validate_booking_payable(booking: Booking) -> None:
+    if booking.booking_status == BookingStatus.cancelled:
+        raise ValidationException("This booking has already been cancelled.")
+
+    if booking.booking_status == BookingStatus.expired:
+        raise ValidationException("This booking has expired.")
+
+    if booking.booking_status == BookingStatus.completed:
+        raise ValidationException("This booking has already been completed.")
+
+    if booking.booking_status == BookingStatus.confirmed and booking.payment_status == PaymentStatus.paid:
+        raise ValidationException("This booking has already been paid for.")
+
+    if booking.reserved_until and booking.reserved_until < _now():
+        raise ValidationException("This booking reservation has expired.")
+
+
+def initialize_payment(
+    db: Session,
+    current_user: User,
+    booking_id: uuid.UUID,
+    payment_gateway: PaymentGateway,
+    currency: str = "UGX",
+) -> Payment:
+    booking = _get_booking_for_payment(db=db, booking_id=booking_id)
+    booking = _expire_booking_if_needed(db=db, booking=booking)
+
+    if current_user.role != UserRole.tourist:
+        raise ForbiddenException("Only tourists can initialize payments.")
+
     if booking.tourist_id != current_user.id:
-        raise ForbiddenException("You can only pay for your own booking.")
+        raise ForbiddenException("You do not have permission to pay for this booking.")
 
-    if booking.payment_status == PaymentStatus.paid:
-        raise ValidationException("This booking is already paid.")
+    _validate_booking_payable(booking)
 
-    existing_active_payment = db.scalar(
+    existing_paid_payment = db.scalar(
         select(Payment).where(
             Payment.booking_id == booking.id,
-            Payment.payment_status.in_([
-                PaymentRecordStatus.initialized,
-                PaymentRecordStatus.pending,
-                PaymentRecordStatus.completed,
-            ]),
+            Payment.payment_status == PaymentStatus.paid,
         )
     )
-    if existing_active_payment and existing_active_payment.payment_status == PaymentRecordStatus.completed:
-        raise ValidationException("A completed payment already exists for this booking.")
+    if existing_paid_payment:
+        raise ValidationException("This booking has already been paid for.")
 
-    try:
-        gateway = PaymentGateway(payload.payment_gateway)
-    except ValueError as exc:
-        raise ValidationException("Unsupported payment gateway.") from exc
+    existing_pending_payment = db.scalar(
+        select(Payment).where(
+            Payment.booking_id == booking.id,
+            Payment.payment_status == PaymentStatus.pending,
+        )
+    )
+    if existing_pending_payment:
+        booking.payment_status = PaymentStatus.pending
+        db.add(booking)
+        db.commit()
+        db.refresh(existing_pending_payment)
+        return existing_pending_payment
+
+    transaction_reference = f"TXN-{uuid.uuid4().hex[:16].upper()}"
 
     payment = Payment(
         booking_id=booking.id,
         amount=booking.total_price,
-        currency=payload.currency.upper(),
-        payment_gateway=gateway,
-        payment_status=PaymentRecordStatus.initialized,
-        transaction_reference=_generate_reference(),
-        gateway_response=json.dumps(
-            {
-                "message": "Payment initialized successfully.",
-                "checkout_url": f"https://mock-gateway.local/checkout/{booking.id}",
-            }
-        ),
+        currency=currency,
+        payment_gateway=payment_gateway,
+        payment_status=PaymentStatus.pending,
+        transaction_reference=transaction_reference,
+        gateway_response=None,
+        paid_at=None,
     )
     db.add(payment)
 
     booking.payment_status = PaymentStatus.pending
-
-    provider_user_id = db.scalar(
-        select(CulturalSite.user_id).where(CulturalSite.id == booking.package.provider_id)
-    )
-    if provider_user_id:
-        create_notification(
-            db=db,
-            user_id=provider_user_id,
-            notification_type=NotificationType.new_booking_for_provider,
-            title="New booking received",
-            message=f"You received a new booking for {booking.package_title_snapshot}.",
-            related_entity_id=str(booking.id),
-        )
-
-    create_notification(
-        db=db,
-        user_id=current_user.id,
-        notification_type=NotificationType.booking_created,
-        title="Booking created",
-        message=f"Your booking for {booking.package_title_snapshot} has been created and is awaiting payment.",
-        related_entity_id=str(booking.id),
-    )
+    booking.booking_status = BookingStatus.awaiting_payment
+    db.add(booking)
 
     db.commit()
     db.refresh(payment)
     return payment
 
 
-def get_payment_detail_for_owner(db: Session, current_user: User, payment_id: uuid.UUID) -> Payment:
+def get_payment_detail(db: Session, payment_id: uuid.UUID, current_user: User | None = None) -> Payment:
     payment = db.scalar(
         select(Payment)
-        .options(joinedload(Payment.booking).joinedload(Booking.package))
+        .options(joinedload(Payment.booking))
         .where(Payment.id == payment_id)
     )
     if not payment:
         raise NotFoundException("Payment not found.")
 
-    booking = payment.booking
+    if current_user:
+        booking = payment.booking
 
-    if current_user.role == UserRole.tourist and booking.tourist_id == current_user.id:
-        return payment
+        if current_user.role == UserRole.tourist and booking.tourist_id != current_user.id:
+            raise ForbiddenException("You do not have permission to view this payment.")
 
-    if current_user.role == UserRole.provider:
-        site = db.scalar(select(CulturalSite).where(CulturalSite.user_id == current_user.id))
-        if site and booking.package.provider_id == site.id:
-            return payment
-
-    if current_user.role == UserRole.admin:
-        return payment
-
-    raise ForbiddenException("You do not have permission to view this payment.")
+    return payment
 
 
-def process_mock_webhook(db: Session, payload: MockWebhookRequest) -> Payment:
+def mark_payment_success(
+    db: Session,
+    transaction_reference: str,
+    gateway_response: str | None = None,
+) -> Payment:
     payment = db.scalar(
         select(Payment)
-        .options(joinedload(Payment.booking).joinedload(Booking.package).joinedload(Package.provider))
-        .where(Payment.transaction_reference == payload.transaction_reference)
+        .options(joinedload(Payment.booking))
+        .where(Payment.transaction_reference == transaction_reference)
     )
     if not payment:
         raise NotFoundException("Payment not found.")
 
     booking = payment.booking
-    provider_site = booking.package.provider
+    booking = _expire_booking_if_needed(db=db, booking=booking)
 
-    if payload.payment_status not in {"completed", "failed"}:
-        raise ValidationException("payment_status must be 'completed' or 'failed'.")
+    if booking.booking_status == BookingStatus.cancelled:
+        raise ValidationException("Cannot confirm payment for a cancelled booking.")
 
-    if payload.payment_status == "completed":
-        payment.payment_status = PaymentRecordStatus.completed
-        payment.gateway_response = payload.gateway_response
-        booking.payment_status = PaymentStatus.paid
-        booking.booking_status = BookingStatus.confirmed
+    if booking.booking_status == BookingStatus.expired:
+        raise ValidationException("Cannot confirm payment for an expired booking.")
 
-        create_notification(
-            db=db,
-            user_id=booking.tourist_id,
-            notification_type=NotificationType.payment_completed,
-            title="Payment successful",
-            message=f"Your payment for {booking.package_title_snapshot} was successful.",
-            related_entity_id=str(booking.id),
-        )
+    payment.payment_status = PaymentStatus.paid
+    payment.gateway_response = gateway_response
+    payment.paid_at = _now()
 
-        provider_user_id = db.scalar(
-            select(CulturalSite.user_id).where(CulturalSite.id == provider_site.id)
-        )
-        if provider_user_id:
-            create_notification(
-                db=db,
-                user_id=provider_user_id,
-                notification_type=NotificationType.booking_confirmed,
-                title="Booking confirmed",
-                message=f"A booking for {booking.package_title_snapshot} has been paid and confirmed.",
-                related_entity_id=str(booking.id),
-            )
+    booking.payment_status = PaymentStatus.paid
+    booking.booking_status = BookingStatus.confirmed
 
-    else:
-        payment.payment_status = PaymentRecordStatus.failed
-        payment.gateway_response = payload.gateway_response
-        booking.payment_status = PaymentStatus.failed
-
-        create_notification(
-            db=db,
-            user_id=booking.tourist_id,
-            notification_type=NotificationType.payment_failed,
-            title="Payment failed",
-            message=f"Your payment for {booking.package_title_snapshot} failed. Please try again.",
-            related_entity_id=str(booking.id),
-        )
-
+    db.add(payment)
+    db.add(booking)
     db.commit()
     db.refresh(payment)
     return payment
+
+
+def mark_payment_failed(
+    db: Session,
+    transaction_reference: str,
+    gateway_response: str | None = None,
+) -> Payment:
+    payment = db.scalar(
+        select(Payment)
+        .options(joinedload(Payment.booking))
+        .where(Payment.transaction_reference == transaction_reference)
+    )
+    if not payment:
+        raise NotFoundException("Payment not found.")
+
+    booking = payment.booking
+    booking = _expire_booking_if_needed(db=db, booking=booking)
+
+    payment.payment_status = PaymentStatus.failed
+    payment.gateway_response = gateway_response
+
+    if booking.booking_status == BookingStatus.awaiting_payment:
+        booking.payment_status = PaymentStatus.failed
+
+    db.add(payment)
+    db.add(booking)
+    db.commit()
+    db.refresh(payment)
+    return payment
+
+
+def process_mock_payment_webhook(
+    db: Session,
+    transaction_reference: str,
+    payment_status: str,
+    gateway_response: str | None = None,
+) -> Payment:
+    normalized_status = payment_status.strip().lower()
+
+    if normalized_status == "completed":
+        return mark_payment_success(
+            db=db,
+            transaction_reference=transaction_reference,
+            gateway_response=gateway_response or "Mock gateway payment approved",
+        )
+
+    if normalized_status == "failed":
+        return mark_payment_failed(
+            db=db,
+            transaction_reference=transaction_reference,
+            gateway_response=gateway_response or "Mock gateway payment failed",
+        )
+
+    raise ValidationException("Unsupported mock payment status.")

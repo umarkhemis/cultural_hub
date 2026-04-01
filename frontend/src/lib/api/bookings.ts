@@ -38,3 +38,10 @@ export async function createBooking(payload: CreateBookingPayload) {
   );
   return response.data;
 }
+
+export async function cancelBooking(bookingId: string, reason?: string) {
+  const response = await apiClient.post(`/bookings/${bookingId}/cancel`, {
+    reason,
+  });
+  return response.data;
+}

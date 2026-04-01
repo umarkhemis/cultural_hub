@@ -11,7 +11,7 @@ from app.models.package import Package, PackageStatus
 from app.models.package_media import PackageMedia
 from app.models.booking import Booking, BookingStatus, PaymentStatus
 from app.models.booking_participant import BookingParticipant
-from app.models.payment import Payment, PaymentGateway, PaymentRecordStatus
+from app.models.payment import Payment, PaymentGateway 
 from app.models.notification import Notification, NotificationType
 from app.models.site_follow import SiteFollow
 
