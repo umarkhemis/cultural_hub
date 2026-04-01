@@ -1,9 +1,10 @@
+// src\components\layout\top-navbar.tsx
 
 "use client";
 
 import Link from "next/link";
 import { Menu, X, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ROUTES } from "@/src/constants/routes";
@@ -16,6 +17,17 @@ export function TopNavbar() {
   const { isAuthenticated, user, clearSession } = useAuth();
   const { addToast } = useToastStore();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // detect scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const baseLinks = [
     { label: "Explore", href: ROUTES.feed },
@@ -45,9 +57,7 @@ export function TopNavbar() {
     ? touristLinks
     : [];
 
-  // Hide base links for providers — they have their own nav
   const visibleBaseLinks = isProvider ? [] : baseLinks;
-
   const mobileLinks = [...visibleBaseLinks, ...roleLinks];
 
   const handleLogout = () => {
@@ -62,76 +72,111 @@ export function TopNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href={ROUTES.welcome} className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-900 text-sm font-semibold text-white">
-            CT
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-sm font-semibold text-slate-900">CulturalHub</p>
-            <p className="text-xs text-slate-500">Explore Culture</p>
-          </div>
-        </Link>
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+      
+      {/* Dynamic navbar style */}
+      <div
+        className={`transition-all duration-300 ${
+          scrolled
+            ? "backdrop-blur-lg bg-black/70 border-b border-white/10 shadow-md"
+            : "backdrop-blur-md bg-black/20 border-b border-white/10"
+        }`}
+      >
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          
+          {/* Logo */}
+          <Link href={ROUTES.welcome} className="flex items-center gap-2 text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-sm font-semibold text-slate-900">
+              CT
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-sm font-semibold text-white">CulturalHub</p>
+              <p className="text-xs text-white/70">Explore Culture</p>
+            </div>
+          </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
-          {visibleBaseLinks.map((item) => (
-            <Link key={item.href} href={item.href} className="text-sm text-slate-700 hover:text-slate-900">
-              {item.label}
-            </Link>
-          ))}
-
-          {roleLinks.map((item) => (
-            <Link key={item.href} href={item.href} className="text-sm text-slate-700 hover:text-slate-900">
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          {isAuthenticated && user ? (
-            <>
+          {/* Desktop Nav */}
+          <nav className="hidden items-center gap-6 lg:flex">
+            {visibleBaseLinks.map((item) => (
               <Link
-                href={isProvider ? ROUTES.providerRoot : ROUTES.touristProfile}
-                className="hidden items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 sm:inline-flex"
+                key={item.href}
+                href={item.href}
+                className="text-sm text-white/80 hover:text-white transition"
               >
-                <User className="h-4 w-4" />
-                {user.full_name.split(" ")[0]}
+                {item.label}
               </Link>
-              <Button variant="ghost" onClick={handleLogout}>
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Link href={ROUTES.login} className="hidden sm:block">
-                <Button variant="ghost">Login</Button>
-              </Link>
-              <Link href={ROUTES.register}>
-                <Button>Get Started</Button>
-              </Link>
-            </>
-          )}
+            ))}
 
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 lg:hidden"
-            aria-label="Open menu"
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+            {roleLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm text-white/80 hover:text-white transition"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-2">
+            {isAuthenticated && user ? (
+              <>
+                <Link
+                  href={isProvider ? ROUTES.providerRoot : ROUTES.touristProfile}
+                  className="hidden items-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-sm text-white hover:bg-white/10 sm:inline-flex backdrop-blur-sm"
+                >
+                  <User className="h-4 w-4" />
+                  {user.full_name.split(" ")[0]}
+                </Link>
+
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="text-white hover:bg-white/10"
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href={ROUTES.login} className="hidden sm:block">
+                  <Button variant="ghost" className="text-white hover:bg-white/10">
+                    Login
+                  </Button>
+                </Link>
+
+                <Link href={ROUTES.register}>
+                  <Button className="bg-white text-slate-900 hover:bg-white/90 font-semibold">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
+
+            {/* Mobile Menu Button */}
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 text-white lg:hidden"
+              aria-label="Open menu"
+              onClick={() => setOpen((v) => !v)}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+
         </div>
       </div>
 
+      {/* Mobile Menu */}
       {open && (
-        <div className="border-t border-slate-200 bg-white lg:hidden">
+        <div className="border-t border-white/10 bg-black/80 backdrop-blur-lg lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 sm:px-6">
             {mobileLinks.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-xl px-3 py-3 text-sm text-slate-700 hover:bg-slate-100"
+                className="rounded-xl px-3 py-3 text-sm text-white/80 hover:bg-white/10 hover:text-white transition"
                 onClick={() => setOpen(false)}
               >
                 {item.label}
@@ -141,7 +186,7 @@ export function TopNavbar() {
             {!isAuthenticated && (
               <Link
                 href={ROUTES.login}
-                className="rounded-xl px-3 py-3 text-sm text-slate-700 hover:bg-slate-100"
+                className="rounded-xl px-3 py-3 text-sm text-white/80 hover:bg-white/10 hover:text-white"
                 onClick={() => setOpen(false)}
               >
                 Login
@@ -153,5 +198,3 @@ export function TopNavbar() {
     </header>
   );
 }
-
-

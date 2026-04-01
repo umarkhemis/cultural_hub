@@ -1,4 +1,4 @@
-
+//mock-cultural-slides.ts
 export type CulturalSlide = {
   id: string;
   image: string;
@@ -9,29 +9,29 @@ export type CulturalSlide = {
 export const mockCulturalSlides: CulturalSlide[] = [
   {
     id: "slide-1",
-    image: "/mock/culture_image.jpg",
-    title: "Celebrate the rhythm of Kigezi culture",
+    image: "/mock/kab_7.jpg",
+    title: "Kikiga Dance Traditions of Kigezi",
     subtitle:
-      "Discover vibrant movement, community storytelling, and living heritage through authentic cultural experiences.",
+      "Experience the energy, rhythm, and storytelling of traditional dance rooted in Uganda’s Kigezi heritage",
   },
   {
     id: "slide-2",
-    image: "/mock/kiga_image.jpg",
+    image: "/mock/kab_6.jpg",
     title: "Experience culture beyond sightseeing",
     subtitle:
       "Explore traditions, performances, and destination stories that connect visitors to the heart of local communities.",
   },
   {
     id: "slide-3",
-    image: "/mock/kiga_culture.jpg",
-    title: "Discover heritage through real people and places",
+    image: "/mock/kab_5.jpg",
+    title: "Taste culture through authentic local cuisine",
     subtitle:
-      "From dances and drumming to cultural gatherings, every experience tells a story worth sharing.",
+      "Connect with local providers and discover traditional food and drinks prepared with heritage, care, and authentic methods",
   },
   {
     id: "slide-4",
-    image: "/mock/bakiga_image.jpg",
-    title: "Bring cultural tourism to life digitally",
+    image: "/mock/kigezi_mountain.jpg",
+    title: "Discover the cultural sites in Kigezi",
     subtitle:
       "Browse, connect, and book meaningful experiences shared by cultural service providers.",
   },

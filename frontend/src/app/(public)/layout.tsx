@@ -1,4 +1,4 @@
-
+// src\app\(public)\layout.tsx
 import { PublicFooter } from "@/src/components/layout/public-footer";
 import { TopNavbar } from "@/src/components/layout/top-navbar";
 
