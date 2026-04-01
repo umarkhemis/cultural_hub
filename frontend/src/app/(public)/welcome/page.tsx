@@ -1,19 +1,25 @@
-// src/app/(public)/welcome/page.tsx
+// src\app\(public)\welcome\page.tsx
 
 "use client";
 
 import Link from "next/link";
 import {
-  Compass,
-  Mountain,
-  Sparkles,
-  Users,
   ArrowRight,
-  Globe,
-  Star,
-  Play
+  Star
 } from "lucide-react";
+
+import {
+  MapPin,
+  VideoCamera,
+  Backpack,
+  UsersThree,
+  GlobeHemisphereWest,
+  Storefront,
+  Mountains
+} from "phosphor-react";
+
 import { useEffect, useRef, useState } from "react";
+import type { ElementType } from "react";
 
 import { Button } from "@/src/components/ui/button";
 import { AnimatedCounter } from "@/src/components/ui/animated-counter";
@@ -21,6 +27,7 @@ import { PageContainer } from "@/src/components/layout/page-container";
 import { FullWidthSection } from "@/src/components/layout/full-width-section";
 import { ROUTES } from "@/src/constants/routes";
 import { CulturalHeroSlider } from "@/src/features/home/cultural-hero-slider";
+import { useTypewriter } from "@/src/hooks/use-typewriter";
 
 /* ===================== DATA ===================== */
 
@@ -31,44 +38,90 @@ const stats = [
   { value: 4.9, label: "Community Rating", icon: Star, decimal: true },
 ];
 
-const features = [
-  {
-    icon: Compass,
-    label: "Explore",
-    title: "Discover Real Culture",
-    description:
-      "Browse authentic cultural experiences, stories, and destinations shared by local communities.",
-    accent: "bg-amber-50 text-amber-600 border-amber-100",
-    iconBg: "bg-amber-100",
-  },
-  {
-    icon: Users,
-    label: "Connect",
-    title: "Meet Local Providers",
-    description:
-      "Engage directly with cultural hosts, creators, and communities behind each experience.",
-    accent: "bg-sky-50 text-sky-600 border-sky-100",
-    iconBg: "bg-sky-100",
-  },
-  {
-    icon: Mountain,
-    label: "Book",
-    title: "Plan Your Visit",
-    description:
-      "Book curated tourism packages and explore cultural sites with confidence.",
-    accent: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    iconBg: "bg-emerald-100",
-  },
-  {
-    icon: Sparkles,
-    label: "Share",
-    title: "Tell Your Story",
-    description:
-      "Providers can showcase culture through videos, experiences, and storytelling.",
-    accent: "bg-violet-50 text-violet-600 border-violet-100",
-    iconBg: "bg-violet-100",
-  },
+const travelerLines = [
+  "Discover cultural sites and hidden gems",
+  "Watch real cultural experiences",
+  "Book curated tourism packages",
+  "Engage with communities",
 ];
+
+const providerLines = [
+  "Showcase your cultural experiences",
+  "Create tourism packages",
+  "Connect with travelers",
+  "Reach a wider audience",
+];
+
+const travelerIcons = [MapPin, VideoCamera, Backpack, UsersThree];
+const providerIcons = [Storefront, Backpack, UsersThree, GlobeHemisphereWest];
+
+/* ===================== COMPONENTS ===================== */
+
+function TypewriterCard({
+  title,
+  lines,
+  Icons,
+  iconColor = "text-slate-500",
+  startDelay = 0,
+  button,
+  cardClass = "",
+}: {
+  title: string;
+  lines: string[];
+  Icons: ElementType[];
+  iconColor?: string;
+  startDelay?: number;
+  button: React.ReactNode;
+  cardClass?: string;
+}) {
+  const { displayed, activeIndex, done } = useTypewriter(lines, 28, 180, startDelay);
+
+  return (
+    <div className={`rounded-3xl border p-8 shadow-sm hover:shadow-md transition flex flex-col items-center text-center ${cardClass}`}>
+
+      <h3 className="text-xl font-semibold mb-6">{title}</h3>
+
+      <div className="space-y-5">
+        {lines.map((_, i) => {
+          const Icon = Icons[i] ?? Icons[0];
+          const hasStarted = i < activeIndex || done || i === activeIndex;
+          const isTyping = activeIndex === i && !done;
+
+          return (
+            <div
+              key={i}
+              className={`flex items-center justify-center gap-4 transition-opacity duration-300 ${
+                hasStarted ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <Icon
+                size={22}
+                weight="duotone"
+                className={`${iconColor} shrink-0 mt-0.5`}
+              />
+              <p className="min-h-[1.5em] text-center">
+                {displayed[i]}
+                {isTyping && (
+                  <span className="inline-block w-0.5 h-4 ml-0.5 align-middle bg-current animate-pulse rounded-sm" />
+                )}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Button fades in after all lines finish typing */}
+      <div
+        className={`mt-6 transition-opacity duration-500 ${
+          done ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {button}
+      </div>
+
+    </div>
+  );
+}
 
 /* ===================== PAGE ===================== */
 
@@ -79,195 +132,136 @@ export default function WelcomePage() {
       {/* HERO */}
       <CulturalHeroSlider />
 
-      {/* ===================== STATS ===================== */}
+      {/* STATS */}
       <FullWidthSection className="border-y border-slate-100 bg-slate-50">
         <PageContainer>
           <StatsSection />
         </PageContainer>
       </FullWidthSection>
 
- {/* ===================== EXPERIENCE VIDEO ===================== */}
-<FullWidthSection className="py-20 lg:py-28 bg-black text-white">
-  <PageContainer>
-    <div className="grid gap-10 lg:grid-cols-2 items-center">
-
-      {/* TEXT */}
-      <div>
-        <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl leading-tight">
-          Experience culture before you travel
-        </h2>
-
-        <p className="mt-5 text-white/70 text-base sm:text-lg max-w-lg">
-          Watch real experiences from cultural sites and communities.
-          Discover traditions, stories, and moments that go beyond tourism.
-        </p>
-
-        <div className="mt-6">
-          <Link href={ROUTES.feed}>
-            <Button className="bg-amber-500 text-slate-900 hover:bg-amber-400 shadow-lg shadow-amber-500/20">
-              Explore More Experiences
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-
       {/* VIDEO */}
-      <div className="relative w-full overflow-hidden rounded-2xl shadow-lg">
-        <div className="aspect-video w-full">
-          <iframe
-            className="h-full w-full"
-            src="https://www.youtube.com/embed/MeePfYXA28A"
-            title="Kabale Cultural Experience"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      </div>
-
-    </div>
-  </PageContainer>
-</FullWidthSection>
-
-{/* ===================== ROLE-BASED EXPERIENCE ===================== */}
-<FullWidthSection className="py-20 bg-white">
-  <PageContainer>
-
-    {/* SECTION HEADER */}
-    <div className="mx-auto max-w-2xl text-center mb-16">
-      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600">
-        <Globe className="h-4 w-4 text-amber-500" />
-        Built for everyone in cultural tourism
-      </div>
-
-      <h2 className="text-3xl font-bold sm:text-4xl text-slate-900">
-        A platform for both{" "}
-        <span className="text-amber-500">explorers</span> and{" "}
-        <span className="text-amber-500">storytellers</span>
-      </h2>
-
-      <p className="mt-4 text-slate-500">
-        Whether you're discovering culture or sharing it, CulturalHub gives you the tools to connect, explore, and grow.
-      </p>
-    </div>
-
-    {/* TWO COLUMNS */}
-    <div className="grid gap-8 lg:grid-cols-2">
-
-      {/* ================= TOURISTS ================= */}
-      <div className="rounded-3xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition">
-
-        <h3 className="text-xl font-semibold text-slate-900 mb-4">
-          👤 For Tourists
-        </h3>
-
-        <ul className="space-y-4 text-slate-600 text-sm">
-          <li className="flex gap-3">
-            <Compass className="h-5 w-5 text-amber-500" />
-            Discover authentic cultural experiences and hidden gems
-          </li>
-
-          <li className="flex gap-3">
-            <Play className="h-5 w-5 text-amber-500" />
-            Watch real videos from cultural sites and communities
-          </li>
-
-          <li className="flex gap-3">
-            <Mountain className="h-5 w-5 text-amber-500" />
-            Book curated tourism packages with trusted providers
-          </li>
-
-          <li className="flex gap-3">
-            <Users className="h-5 w-5 text-amber-500" />
-            Engage through comments, sharing, and interactions
-          </li>
-        </ul>
-
-        <div className="mt-6">
-          <Link href={ROUTES.feed}>
-            <Button className="bg-amber-500 text-slate-900 hover:bg-amber-400">
-              Start Exploring
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-      </div>
-
-      {/* ================= PROVIDERS ================= */}
-      <div className="rounded-3xl border border-slate-200 p-8 shadow-sm hover:shadow-md transition bg-slate-50">
-
-        <h3 className="text-xl font-semibold text-slate-900 mb-4">
-          For Cultural Providers
-        </h3>
-
-        <ul className="space-y-4 text-slate-600 text-sm">
-          <li className="flex gap-3">
-            <Sparkles className="h-5 w-5 text-amber-500" />
-            Showcase your culture through videos and storytelling
-          </li>
-
-          <li className="flex gap-3">
-            <Mountain className="h-5 w-5 text-amber-500" />
-            Create and manage tourism packages بسهولة
-          </li>
-
-          <li className="flex gap-3">
-            <Users className="h-5 w-5 text-amber-500" />
-            Connect directly with tourists and grow your audience
-          </li>
-
-          <li className="flex gap-3">
-            <Globe className="h-5 w-5 text-amber-500" />
-            Reach a wider audience beyond your physical location
-          </li>
-        </ul>
-
-        <div className="mt-6">
-          <Link href={ROUTES.register}>
-            <Button className="bg-slate-900 text-white hover:bg-slate-800">
-              Become a Provider
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-      </div>
-
-    </div>
-
-  </PageContainer>
-</FullWidthSection>
-
-      {/* ===================== CTA ===================== */}
-      <FullWidthSection className="border-t border-slate-100 bg-slate-900 py-14">
+      <FullWidthSection className="py-20 lg:py-28 bg-black text-white">
         <PageContainer>
-          <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:justify-between sm:text-left">
+          <div className="grid gap-10 lg:grid-cols-2 items-center">
 
-            <div className="max-w-xl">
-              <h3 className="text-xl font-bold text-white sm:text-2xl">
-                Are you a cultural experience provider?
+            <div>
+              <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
+                Experience culture before you travel
+              </h2>
+
+              <p className="mt-5 text-white/70 max-w-lg">
+                Watch real experiences from cultural sites and communities.
+              </p>
+
+              <div className="mt-6">
+                <Link href={ROUTES.feed}>
+                  <Button className="bg-amber-500 text-slate-900 hover:bg-amber-400">
+                    Explore Experiences
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden">
+              <div className="aspect-video">
+                <iframe
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/MeePfYXA28A"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+
+          </div>
+        </PageContainer>
+      </FullWidthSection>
+
+      {/* ROLE SECTION */}
+      <FullWidthSection className="py-24 bg-white">
+        <PageContainer>
+
+          {/* HEADER */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-base font-medium animate-float">
+              <Mountains size={16} weight="duotone" />
+              Visit Kigezi
+            </div>
+
+            <h2 className="mt-4 text-3xl sm:text-4xl font-bold text-slate-900">
+              Discover culture through people and stories
+            </h2>
+
+            <p className="mt-3 text-slate-500 max-w-xl mx-auto">
+              Explore authentic experiences and connect with local communities.
+            </p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-2">
+
+            {/* TRAVELERS */}
+            <TypewriterCard
+              title="For Travelers"
+              lines={travelerLines}
+              Icons={travelerIcons}
+              iconColor="text-amber-500"
+              startDelay={300}
+              cardClass=""
+              button={
+                <Link href={ROUTES.feed}>
+                  <Button className="bg-amber-500 text-slate-900">
+                    Start Exploring
+                  </Button>
+                </Link>
+              }
+            />
+
+            {/* PROVIDERS */}
+            <TypewriterCard
+              title="For Cultural Providers"
+              lines={providerLines}
+              Icons={providerIcons}
+              iconColor="text-slate-500"
+              startDelay={500}
+              cardClass="bg-slate-50"
+              button={
+                <Link href={ROUTES.register}>
+                  <Button className="bg-slate-900 text-white">
+                    Become a Provider
+                  </Button>
+                </Link>
+              }
+            />
+
+          </div>
+
+        </PageContainer>
+      </FullWidthSection>
+
+      {/* =================== CTA ================ */}
+      <FullWidthSection className="bg-slate-900 py-14 text-white">
+        <PageContainer>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+
+            <div>
+              <h3 className="text-xl font-bold">
+                Are you a cultural provider?
               </h3>
-
-              <p className="mt-2 text-sm text-slate-400 leading-6">
-                Share your culture, attract visitors, and grow your presence through our platform.
+              <p className="text-slate-400">
+                Share your culture and grow your audience.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row shrink-0">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link href={ROUTES.register}>
-                <Button className="gap-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold">
-                  Become a Provider
-                  <ArrowRight className="h-4 w-4" />
+                <Button className="bg-amber-500 text-slate-900 hover:bg-amber-400 transition px-6 py-3 text-base font-semibold shadow-md">
+                  Join Now
                 </Button>
               </Link>
 
               <Link href={ROUTES.feed}>
-                <Button
-                  variant="secondary"
-                  className="border border-white/15 bg-white/10 text-white hover:bg-white/20"
-                >
-                  Browse First
+                <Button variant="secondary" className="opacity-80 hover:opacity-100">
+                  Explore
                 </Button>
               </Link>
             </div>
@@ -280,7 +274,7 @@ export default function WelcomePage() {
   );
 }
 
-/* ===================== STATS COMPONENT ===================== */
+/* ===================== STATS ===================== */
 
 function StatsSection() {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -288,9 +282,7 @@ function StatsSection() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setVisible(true);
-      },
+      ([entry]) => entry.isIntersecting && setVisible(true),
       { threshold: 0.4 }
     );
 
@@ -299,36 +291,19 @@ function StatsSection() {
   }, []);
 
   return (
-    <div
-      ref={ref}
-      className="grid grid-cols-2 divide-x divide-slate-100 sm:grid-cols-4"
-    >
+    <div ref={ref} className="grid grid-cols-2 sm:grid-cols-4">
       {stats.map((stat) => (
-        <div
-          key={stat.label}
-          className="flex flex-col items-center justify-center gap-1 py-6 px-4 text-center"
-        >
-          <div className="flex items-center gap-1">
-            <span className="text-3xl font-bold tracking-tight text-slate-900">
-              {visible ? (
-                <AnimatedCounter
-                  value={stat.value}
-                  duration={1.5}
-                  decimals={stat.decimal ? 1 : 0}
-                />
-              ) : (
-                0
-              )}
-            </span>
-
-            {stat.icon && (
-              <stat.icon className="h-4 w-4 fill-amber-400 text-amber-400" />
-            )}
+        <div key={stat.label} className="text-center py-6">
+          <div className="text-2xl font-bold">
+            {visible ? (
+              <AnimatedCounter
+                value={stat.value}
+                duration={1500}
+                decimals={stat.decimal ? 1 : 0}
+              />
+            ) : 0}
           </div>
-
-          <span className="text-xs text-slate-500 font-medium">
-            {stat.label}
-          </span>
+          <p className="text-xs text-slate-500">{stat.label}</p>
         </div>
       ))}
     </div>
