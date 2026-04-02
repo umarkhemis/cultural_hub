@@ -29,23 +29,61 @@ body {
   display: none;
 }
 
+/* ================= SHIMMER ================= */
 @keyframes shimmer {
   from { transform: translateX(-100%); }
   to   { transform: translateX(100%); }
 }
 
+/* ================= FLOAT ================= */
 @keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-4px); }
+  100% { transform: translateY(0px); }
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+/* ================= ORBIT ================= */
+/* Uses CSS variable --radius for each ring */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(var(--radius)) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(var(--radius)) rotate(-360deg);
+  }
+}
+
+.animate-orbit {
+  animation: orbit linear infinite;
+  transform-origin: center;
+}
+
+/* ================= BREATHE ================= */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* ================= GLOW ================= */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.5; }
+}
+
+.glow-pulse {
+  animation: pulseGlow 4s ease-in-out infinite;
 }

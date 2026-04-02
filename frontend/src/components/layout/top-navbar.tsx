@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, X, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { ROUTES } from "@/src/constants/routes";
 import { Button } from "@/src/components/ui/button";
@@ -88,12 +89,21 @@ export function TopNavbar() {
           
           {/* Logo */}
           <Link href={ROUTES.welcome} className="flex items-center gap-2 text-white">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-sm font-semibold text-slate-900">
-              CT
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-semibold text-white">CulturalHub</p>
-              <p className="text-xs text-white/70">Explore Culture</p>
+            <Image
+              src="/Cultural hub (2).png"
+              alt="CulturalHub Logo"
+              width={50}
+              height={500}
+              className="object-contain"
+            />
+
+            <div className="hidden sm:flex flex-col leading-tight">
+              <span className="text-sm font-bold text-orange-400">
+                Cultural Hub
+              </span>
+              <span className="text-xs text-blue-400">
+                Culture Connect
+              </span>
             </div>
           </Link>
 

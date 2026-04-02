@@ -1,12 +1,9 @@
-// src\app\(public)\welcome\page.tsx
+// src/app/(public)/welcome/page.tsx
 
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  Star
-} from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 
 import {
   MapPin,
@@ -15,7 +12,7 @@ import {
   UsersThree,
   GlobeHemisphereWest,
   Storefront,
-  Mountains
+  Mountains,
 } from "phosphor-react";
 
 import { useEffect, useRef, useState } from "react";
@@ -55,7 +52,7 @@ const providerLines = [
 const travelerIcons = [MapPin, VideoCamera, Backpack, UsersThree];
 const providerIcons = [Storefront, Backpack, UsersThree, GlobeHemisphereWest];
 
-/* ===================== COMPONENTS ===================== */
+/* ===================== TYPEWRITER CARD ===================== */
 
 function TypewriterCard({
   title,
@@ -74,51 +71,67 @@ function TypewriterCard({
   button: React.ReactNode;
   cardClass?: string;
 }) {
-  const { displayed, activeIndex, done } = useTypewriter(lines, 28, 180, startDelay);
+  const { displayed, activeIndex, done } = useTypewriter(
+    lines,
+    28,
+    180,
+    startDelay
+  );
 
   return (
-    <div className={`rounded-3xl border p-8 shadow-sm hover:shadow-md transition flex flex-col items-center text-center ${cardClass}`}>
+    <div
+      className={`relative overflow-hidden rounded-3xl 
+      p-4 sm:p-5 lg:p-6
+      min-h-[260px] sm:min-h-[300px] lg:min-h-[320px]
+      shadow-sm transition-all duration-500 flex flex-col gap-4
+      hover:shadow-xl hover:-translate-y-1 group border border-slate-100 ${cardClass}`}
+    >
+      <div className="relative z-10 text-center">
+        <h3 className="text-lg font-semibold mb-4 group-hover:text-slate-900">
+          {title}
+        </h3>
 
-      <h3 className="text-xl font-semibold mb-6">{title}</h3>
+        <div className="space-y-3">
+          {lines.map((_, i) => {
+            const Icon = Icons?.[i] ?? Icons?.[0];
 
-      <div className="space-y-5">
-        {lines.map((_, i) => {
-          const Icon = Icons[i] ?? Icons[0];
-          const hasStarted = i < activeIndex || done || i === activeIndex;
-          const isTyping = activeIndex === i && !done;
+            const hasStarted = i < activeIndex || done || i === activeIndex;
+            const isTyping = activeIndex === i && !done;
 
-          return (
-            <div
-              key={i}
-              className={`flex items-center justify-center gap-4 transition-opacity duration-300 ${
-                hasStarted ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <Icon
-                size={22}
-                weight="duotone"
-                className={`${iconColor} shrink-0 mt-0.5`}
-              />
-              <p className="min-h-[1.5em] text-center">
-                {displayed[i]}
-                {isTyping && (
-                  <span className="inline-block w-0.5 h-4 ml-0.5 align-middle bg-current animate-pulse rounded-sm" />
+            return (
+              <div
+                key={i}
+                className={`flex items-center justify-center gap-3 transition-opacity duration-300 ${
+                  hasStarted ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                {Icon && (
+                  <Icon
+                    size={20}
+                    weight="duotone"
+                    className={`${iconColor} transition-transform duration-300 group-hover:scale-110`}
+                  />
                 )}
-              </p>
-            </div>
-          );
-        })}
-      </div>
 
-      {/* Button fades in after all lines finish typing */}
-      <div
-        className={`mt-6 transition-opacity duration-500 ${
-          done ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {button}
-      </div>
+                <p className="min-h-[1.3em] text-center text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
+                  {displayed[i]}
+                  {isTyping && (
+                    <span className="inline-block w-0.5 h-4 ml-0.5 bg-current animate-pulse" />
+                  )}
+                </p>
+              </div>
+            );
+          })}
+        </div>
 
+        <div
+          className={`mt-5 transition-all duration-500 ${
+            done ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+          }`}
+        >
+          {button}
+        </div>
+      </div>
     </div>
   );
 }
@@ -127,63 +140,21 @@ function TypewriterCard({
 
 export default function WelcomePage() {
   return (
-    <main className="bg-white">
+    <main className="bg-gradient-to-b from-white via-slate-50 to-white">
 
-      {/* HERO */}
       <CulturalHeroSlider />
 
-      {/* STATS */}
       <FullWidthSection className="border-y border-slate-100 bg-slate-50">
         <PageContainer>
           <StatsSection />
         </PageContainer>
       </FullWidthSection>
 
-      {/* VIDEO */}
-      <FullWidthSection className="py-20 lg:py-28 bg-black text-white">
-        <PageContainer>
-          <div className="grid gap-10 lg:grid-cols-2 items-center">
-
-            <div>
-              <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
-                Experience culture before you travel
-              </h2>
-
-              <p className="mt-5 text-white/70 max-w-lg">
-                Watch real experiences from cultural sites and communities.
-              </p>
-
-              <div className="mt-6">
-                <Link href={ROUTES.feed}>
-                  <Button className="bg-amber-500 text-slate-900 hover:bg-amber-400">
-                    Explore Experiences
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-2xl overflow-hidden">
-              <div className="aspect-video">
-                <iframe
-                  className="w-full h-full"
-                  src="https://www.youtube.com/embed/MeePfYXA28A"
-                  allowFullScreen
-                />
-              </div>
-            </div>
-
-          </div>
-        </PageContainer>
-      </FullWidthSection>
-
-      {/* ROLE SECTION */}
-      <FullWidthSection className="py-24 bg-white">
+      <FullWidthSection className="py-20 bg-slate-50">
         <PageContainer>
 
-          {/* HEADER */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-base font-medium animate-float">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium">
               <Mountains size={16} weight="duotone" />
               Visit Kigezi
             </div>
@@ -197,48 +168,131 @@ export default function WelcomePage() {
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2">
+          <div className="grid gap-10 lg:grid-cols-3 items-center">
 
-            {/* TRAVELERS */}
-            <TypewriterCard
-              title="For Travelers"
-              lines={travelerLines}
-              Icons={travelerIcons}
-              iconColor="text-amber-500"
-              startDelay={300}
-              cardClass=""
-              button={
-                <Link href={ROUTES.feed}>
-                  <Button className="bg-amber-500 text-slate-900">
-                    Start Exploring
-                  </Button>
-                </Link>
-              }
-            />
+            {/* ORBIT FIXED */}
+            <div className="flex justify-center lg:justify-end items-center lg:pr-6">
+              <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
 
-            {/* PROVIDERS */}
-            <TypewriterCard
-              title="For Cultural Providers"
-              lines={providerLines}
-              Icons={providerIcons}
-              iconColor="text-slate-500"
-              startDelay={500}
-              cardClass="bg-slate-50"
-              button={
-                <Link href={ROUTES.register}>
-                  <Button className="bg-slate-900 text-white">
-                    Become a Provider
-                  </Button>
-                </Link>
-              }
-            />
+                {/* glow */}
+                <div className="absolute w-32 h-32 rounded-full bg-amber-200 blur-3xl opacity-30" />
 
+                {/* center */}
+                <div className="absolute text-center z-10 px-4">
+                  <p className="text-sm sm:text-base font-semibold text-slate-800">
+                    Visit Kigezi
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Cultural Sites
+                  </p>
+                </div>
+
+                {/* OUTER RING */}
+                {travelerIcons.map((Icon, i) => {
+                  const angle = (i / travelerIcons.length) * 360;
+
+                  return (
+                    <div
+                      key={`outer-${i}`}
+                      className="absolute animate-orbit"
+                      style={{
+                        transform: `rotate(${angle}deg) translateX(120px)`,
+                        ["--radius" as any]: "120px",
+                        animationDuration: "14s",
+                      }}
+                    >
+                      <div className="animate-breathe text-blue-500">
+                        <Icon size={20} />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* MIDDLE RING */}
+                {providerIcons.map((Icon, i) => {
+                  const angle = (i / providerIcons.length) * 360;
+
+                  return (
+                    <div
+                      key={`mid-${i}`}
+                      className="absolute animate-orbit"
+                      style={{
+                        transform: `rotate(${angle}deg) translateX(85px)`,
+                        ["--radius" as any]: "85px",
+                        animationDuration: "10s",
+                      }}
+                    >
+                      <div className="animate-breathe text-slate-600">
+                        <Icon size={18} />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* INNER RING */}
+                {[MapPin, UsersThree, Backpack].map((Icon, i) => {
+                  const angle = (i / 3) * 360;
+
+                  return (
+                    <div
+                      key={`inner-${i}`}
+                      className="absolute animate-orbit"
+                      style={{
+                        transform: `rotate(${angle}deg) translateX(55px)`,
+                        ["--radius" as any]: "55px",
+                        animationDuration: "8s",
+                      }}
+                    >
+                      <div className="animate-breathe text-amber-500">
+                        <Icon size={16} />
+                      </div>
+                    </div>
+                  );
+                })}
+
+              </div>
+            </div>
+
+            {/* RIGHT CARDS */}
+            <div className="lg:col-span-2 grid gap-6">
+
+              <TypewriterCard
+                title="For Travelers"
+                lines={travelerLines}
+                Icons={travelerIcons}
+                iconColor="text-amber-500"
+                startDelay={300}
+                button={
+                  <Link href={ROUTES.feed}>
+                    <Button className="bg-amber-500 text-slate-900">
+                      Start Exploring
+                    </Button>
+                  </Link>
+                }
+              />
+
+              <TypewriterCard
+                title="For Cultural Providers"
+                lines={providerLines}
+                Icons={providerIcons}
+                iconColor="text-slate-500"
+                startDelay={500}
+                cardClass="bg-white"
+                button={
+                  <Link href={ROUTES.register}>
+                    <Button className="bg-slate-900 text-white">
+                      Become a Provider
+                    </Button>
+                  </Link>
+                }
+              />
+
+            </div>
           </div>
 
         </PageContainer>
       </FullWidthSection>
 
-      {/* =================== CTA ================ */}
       <FullWidthSection className="bg-slate-900 py-14 text-white">
         <PageContainer>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
@@ -254,7 +308,7 @@ export default function WelcomePage() {
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link href={ROUTES.register}>
-                <Button className="bg-amber-500 text-slate-900 hover:bg-amber-400 transition px-6 py-3 text-base font-semibold shadow-md">
+                <Button className="bg-amber-500 text-slate-900 hover:bg-amber-400 px-6 py-3 font-semibold shadow-md">
                   Join Now
                 </Button>
               </Link>
@@ -301,7 +355,9 @@ function StatsSection() {
                 duration={1500}
                 decimals={stat.decimal ? 1 : 0}
               />
-            ) : 0}
+            ) : (
+              0
+            )}
           </div>
           <p className="text-xs text-slate-500">{stat.label}</p>
         </div>
