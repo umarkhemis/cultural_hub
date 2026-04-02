@@ -40,7 +40,7 @@ export function LoginForm() {
   };
 
   const inputClass =
-    "w-full rounded-2xl border border-white/25 bg-white/15 py-3 pl-10 pr-4 text-sm text-white placeholder-slate-400 outline-none transition-all focus:border-amber-400/60 focus:bg-white/20 focus:ring-2 focus:ring-amber-400/20";
+    "w-full rounded-xl sm:rounded-2xl border border-white/25 bg-white/15 py-3 pl-10 pr-4 text-sm text-white placeholder-slate-400 outline-none transition-all focus:border-amber-400/60 focus:bg-white/20 focus:ring-2 focus:ring-amber-400/20";
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
@@ -52,146 +52,149 @@ export function LoginForm() {
           alt="Cultural landscape"
           className="h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
-        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-slate-950 to-transparent" />
+        <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-[2px]" />
+        <div className="absolute bottom-0 left-0 right-0 h-48 sm:h-64 bg-gradient-to-t from-slate-950 to-transparent" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12 sm:px-6">
+      <div className="relative z-10 flex min-h-screen flex-col px-4 py-0 sm:px-6">
 
         {/* Top bar */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 py-5">
-          <Link href={ROUTES.welcome} className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-400 shadow-lg shadow-amber-400/30 transition-transform group-hover:scale-105">
-              <Globe className="h-5 w-5 text-slate-900" />
+        <div className="flex items-center justify-between py-4 sm:py-5">
+          <Link href={ROUTES.welcome} className="flex items-center gap-2 sm:gap-2.5 group">
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl sm:rounded-2xl bg-amber-400 shadow-lg shadow-amber-400/30 transition-transform group-hover:scale-105">
+              <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-slate-900" />
             </div>
-            <span className="text-base font-bold text-white group-hover:text-amber-400 transition-colors">
+            <span className="text-sm sm:text-base font-bold text-white group-hover:text-amber-400 transition-colors">
               CulturalHub
             </span>
           </Link>
 
           <Link
             href={ROUTES.register}
-            className="text-sm text-slate-300 hover:text-white transition-colors"
+            className="text-xs sm:text-sm text-slate-300 hover:text-white transition-colors"
           >
             No account?{" "}
             <span className="font-semibold text-amber-400">Create one free</span>
           </Link>
         </div>
 
-        {/* Form container */}
-        <div className="w-full max-w-sm">
+        {/* Form container — grows to fill, centers vertically */}
+        <div className="flex flex-1 items-center justify-center py-6">
+          <div className="w-full max-w-sm">
 
-          {/* Heading */}
-          <div className="mb-8">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-xs font-semibold text-amber-400">Welcome back</span>
+            {/* Heading */}
+            <div className="mb-6 sm:mb-8">
+              <div className="mb-3 sm:mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-xs font-semibold text-amber-400">Welcome back</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+                Sign in to CulturalHub
+              </h1>
+              <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300">
+                Continue your cultural journey
+              </p>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Sign in to CulturalHub
-            </h1>
-            <p className="mt-2 text-sm text-slate-300">
-              Continue your cultural journey
+
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+
+              <FormField label="Email Address" htmlFor="email" error={errors.email?.message}>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    className={inputClass}
+                    {...register("email")}
+                  />
+                </div>
+              </FormField>
+
+              <FormField label="Password" htmlFor="password" error={errors.password?.message}>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    className={`${inputClass} pr-11`}
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-white transition-colors p-1 -mr-1"
+                    tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </FormField>
+
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-medium text-slate-300 hover:text-amber-400 transition-colors py-1"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+
+              {loginMutation.isError && (
+                <div className="rounded-xl sm:rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs sm:text-sm text-red-400">
+                  {getApiErrorMessage(loginMutation.error, "Login failed. Please try again.")}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loginMutation.isPending}
+                className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-amber-400 px-6 py-3.5 text-sm font-bold text-slate-900 shadow-lg shadow-amber-400/20 transition-all hover:bg-amber-300 hover:shadow-amber-300/30 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {loginMutation.isPending ? (
+                  <>
+                    <span className="h-4 w-4 rounded-full border-2 border-slate-900/30 border-t-slate-900 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign in
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="my-5 sm:my-6 flex items-center gap-3">
+              <div className="flex-1 h-px bg-white/15" />
+              <span className="text-xs text-slate-300">or</span>
+              <div className="flex-1 h-px bg-white/15" />
+            </div>
+
+            <p className="text-center text-sm text-slate-300">
+              Don&apos;t have an account?{" "}
+              <Link href={ROUTES.register} className="font-semibold text-white hover:text-amber-400 transition-colors">
+                Create one free
+              </Link>
+            </p>
+
+            <p className="mt-6 sm:mt-8 text-center text-xs text-slate-400 leading-5">
+              By continuing you agree to our{" "}
+              <Link href="/terms" className="text-slate-300 hover:text-white underline underline-offset-2 transition-colors">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-slate-300 hover:text-white underline underline-offset-2 transition-colors">
+                Privacy Policy
+              </Link>
             </p>
           </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
-            <FormField label="Email Address" htmlFor="email" error={errors.email?.message}>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  className={inputClass}
-                  {...register("email")}
-                />
-              </div>
-            </FormField>
-
-            <FormField label="Password" htmlFor="password" error={errors.password?.message}>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  className={`${inputClass} pr-11`}
-                  {...register("password")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-white transition-colors"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </FormField>
-
-            <div className="flex justify-end -mt-1">
-              <Link
-                href="/forgot-password"
-                className="text-xs font-medium text-slate-300 hover:text-amber-400 transition-colors"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-
-            {loginMutation.isError && (
-              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {getApiErrorMessage(loginMutation.error, "Login failed. Please try again.")}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loginMutation.isPending}
-              className="group mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-400 px-6 py-3.5 text-sm font-bold text-slate-900 shadow-lg shadow-amber-400/20 transition-all hover:bg-amber-300 hover:shadow-amber-300/30 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loginMutation.isPending ? (
-                <>
-                  <span className="h-4 w-4 rounded-full border-2 border-slate-900/30 border-t-slate-900 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  Sign in
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-white/15" />
-            <span className="text-xs text-slate-300">or</span>
-            <div className="flex-1 h-px bg-white/15" />
-          </div>
-
-          <p className="text-center text-sm text-slate-300">
-            Don&apos;t have an account?{" "}
-            <Link href={ROUTES.register} className="font-semibold text-white hover:text-amber-400 transition-colors">
-              Create one free
-            </Link>
-          </p>
-
-          <p className="mt-8 text-center text-xs text-slate-400 leading-5">
-            By continuing you agree to our{" "}
-            <Link href="/terms" className="text-slate-300 hover:text-white underline underline-offset-2 transition-colors">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-slate-300 hover:text-white underline underline-offset-2 transition-colors">
-              Privacy Policy
-            </Link>
-          </p>
         </div>
       </div>
     </div>
