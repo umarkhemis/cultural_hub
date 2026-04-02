@@ -14,7 +14,7 @@ interface Props {
   isLast: boolean;
 }
 
-export function ProviderExperienceRow({ item, selected, onToggleSelect, isLast }: Props) {
+export default function ProviderExperienceRow({ item, selected, onToggleSelect, isLast }: Props) {
   const deleteMutation = useDeleteExperienceMutation();
   const { addToast } = useToastStore();
   const [confirmDelete, setConfirmDelete] = useState(false);

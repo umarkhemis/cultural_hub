@@ -15,6 +15,8 @@ import { getApiErrorMessage } from "./get-error-message";
 import { getRedirectPathByRole } from "./redirect-by-role";
 import { loginSchema, type LoginFormValues } from "./schema";
 import { useAuth } from "@/src/hooks/useAuth";
+import { setAuthTokens } from "@/src/lib/api/client";
+
 
 export function LoginForm() {
   const router = useRouter();
@@ -36,6 +38,10 @@ export function LoginForm() {
       const response = await loginMutation.mutateAsync(values);
       setSession(response.data.user, response.data.tokens);
       router.push(getRedirectPathByRole(response.data.user.role));
+      // setAuthTokens({
+      //   accessToken: response.data.access_token,
+      //   refreshToken: response.data.refresh_token,
+      // });
     } catch {}
   };
 

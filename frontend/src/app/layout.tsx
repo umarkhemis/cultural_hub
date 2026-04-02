@@ -6,7 +6,7 @@ import { AuthRequiredModal } from "@/src/components/shared/auth-required-modal";
 import { ToastContainer } from "@/src/components/shared/toast-container";
 
 export const metadata: Metadata = {
-  title: "Cultural Hub",
+  title: "CulturalHub",
   description: "Discover and book cultural tourism experiences.",
 };
 

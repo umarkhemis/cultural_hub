@@ -31,12 +31,14 @@ import { ROUTES } from "@/src/constants/routes";
 import { useQuery } from "@tanstack/react-query";
 import { searchAll } from "@/src/lib/api/search";
 import type { SearchSiteResult, SearchExperienceResult } from "@/src/lib/api/search";
+import { usePublicFeed } from "./hooks";
 
 
 // ── Caption with expand/collapse (TikTok-style) ──
 function ExpandableCaption({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
   const isLong = text.length > 80;
+  const { data, isLoading, isError } = usePublicFeed();
 
   return (
     <div className="text-sm leading-6 text-white/90">
@@ -302,12 +304,24 @@ function FeedNavbar({
             className="pointer-events-auto flex items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400 shadow-lg shadow-amber-400/30">
+            {/* <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400 shadow-lg shadow-amber-400/30">
               <span className="text-xs font-black text-slate-900">CH</span>
+            </div> */}
+            <img
+              src="/mock/logo_cultural_hub-bg.png"
+              alt="CulturalHub"
+              className="h-11 w-11 object-contain shrink-0"
+              style={{ imageRendering: "crisp-edges" }}
+            />
+            {/* Text block — both lines tight together, matching logo colors */}
+            <div className="flex flex-col justify-center leading-none gap-0.5">
+              <span
+                className="text-sm font-bold tracking-wide"
+                style={{ color: "#f97316" }}   /* orange — matches left side of logo mark */
+              >
+                CulturalHub
+              </span>
             </div>
-            <span className="hidden text-sm font-bold text-white sm:block">
-              CulturalHub
-            </span>
           </Link>
 
           <div className="pointer-events-auto hidden items-center gap-1 rounded-2xl border border-white/10 bg-black/30 px-2 py-1.5 backdrop-blur-md sm:flex">
@@ -951,12 +965,23 @@ export function ExperienceFeed() {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
         <div className="flex flex-col items-center gap-4 animate-pulse">
-          <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-amber-400 shadow-2xl shadow-amber-400/40">
-            <span className="text-3xl font-black text-slate-900">CH</span>
-          </div>
-          <p className="text-sm font-semibold tracking-[0.3em] text-white/30 uppercase">
-            CulturalHub
-          </p>
+          
+          <img
+            src="/mock/logo_cultural_hub-bg.png"
+            alt="CulturalHub"
+            className="h-25 w-25 object-contain shrink-0 mt-0.4"
+            style={{ imageRendering: "crisp-edges" }}
+          />         
+            <div className="flex flex-col mb-0.9">
+              <span
+                className="text-sm font-bold  "
+                style={{ color: "#f97316" }}  
+              >
+                CulturalHub
+              </span>
+              
+            </div>
+          
         </div>
       </div>
     );

@@ -1,3 +1,4 @@
+
 // src\components\layout\top-navbar.tsx
 
 "use client";
@@ -19,12 +20,10 @@ export function TopNavbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // detect scroll
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -49,7 +48,6 @@ export function TopNavbar() {
     { label: "Profile", href: ROUTES.providerProfile },
   ];
 
-
   const isProvider = user?.role === "provider";
 
   const roleLinks = isProvider
@@ -58,7 +56,6 @@ export function TopNavbar() {
     ? touristLinks
     : [];
 
-  // Hide base links for providers — they have their own nav
   const visibleBaseLinks = isProvider ? [] : baseLinks;
   const mobileLinks = [...visibleBaseLinks, ...roleLinks];
 
@@ -75,8 +72,7 @@ export function TopNavbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
-      
-      {/* Dynamic navbar style */}
+
       <div
         className={`transition-all duration-300 ${
           scrolled
@@ -85,15 +81,29 @@ export function TopNavbar() {
         }`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          
-          {/* Logo */}
-          <Link href={ROUTES.welcome} className="flex items-center gap-2 text-white">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-sm font-semibold text-slate-900">
-              CT
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-semibold text-white">CulturalHub</p>
-              <p className="text-xs text-white/70">Explore Culture</p>
+
+          {/* ── Logo ── */}
+          <Link href={ROUTES.welcome} className="flex items-center gap-2">
+            <img
+              src="/mock/logo_cultural_hub-bg.png"
+              alt="CulturalHub"
+              className="h-11 w-11 object-contain shrink-0"
+              style={{ imageRendering: "crisp-edges" }}
+            />
+            
+            <div className="flex flex-col justify-center leading-none gap-0.5">
+              <span
+                className="text-sm font-bold tracking-wide"
+                style={{ color: "#f97316" }}  
+              >
+                CulturalHub
+              </span>
+              <span
+                className="text-[10px] font-semibold tracking-widest uppercase"
+                style={{ color: "#14b8a6" }}   
+              >
+                Explore Culture
+              </span>
             </div>
           </Link>
 
@@ -108,7 +118,6 @@ export function TopNavbar() {
                 {item.label}
               </Link>
             ))}
-
             {roleLinks.map((item) => (
               <Link
                 key={item.href}
@@ -200,3 +209,5 @@ export function TopNavbar() {
     </header>
   );
 }
+
+

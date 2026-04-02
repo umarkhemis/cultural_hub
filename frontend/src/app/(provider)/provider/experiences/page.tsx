@@ -14,7 +14,7 @@ import { ErrorState } from "@/src/components/shared/error-state";
 import { ROUTES } from "@/src/constants/routes";
 import { useProviderExperiences } from "@/src/features/provider/hooks";
 import { ProviderExperienceCard } from "@/src/features/provider/provider-experience-card";
-import { ProviderExperienceRow } from "@/src/features/provider/provider-experience-row";
+import ProviderExperienceRow from "@/src/features/provider/provider-experience-row";
 import { useDeleteExperienceMutation } from "@/src/features/provider/hooks";
 import { useToastStore } from "@/src/store/toast-store";
 import { Experience } from "@/src/types/experience";
