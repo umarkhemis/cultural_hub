@@ -1,5 +1,4 @@
 
-
 import { ReactNode } from "react";
 import { cn } from "@/src/utils/cn";
 
@@ -22,7 +21,7 @@ export function FormField({
     <div className="space-y-2">
       <label
         htmlFor={htmlFor}
-        className="block text-sm font-medium text-slate-800"
+        className="block text-sm font-medium text-white"
       >
         {label}
       </label>
@@ -30,12 +29,83 @@ export function FormField({
       {children}
 
       {hint && !error ? (
-        <p className="text-xs text-slate-500">{hint}</p>
+        <p className="text-xs text-slate-700">{hint}</p>
       ) : null}
 
       {error ? (
-        <p className={cn("text-xs font-medium text-red-600")}>{error}</p>
+        <p className={cn("text-xs font-medium text-red-400")}>{error}</p>
       ) : null}
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { ReactNode } from "react";
+// import { cn } from "@/src/utils/cn";
+
+// type FormFieldProps = {
+//   label: string;
+//   htmlFor: string;
+//   error?: string;
+//   hint?: string;
+//   children: ReactNode;
+// };
+
+// export function FormField({
+//   label,
+//   htmlFor,
+//   error,
+//   hint,
+//   children,
+// }: FormFieldProps) {
+//   return (
+//     <div className="space-y-2">
+//       <label
+//         htmlFor={htmlFor}
+//         className="block text-sm font-medium text-slate-800"
+//       >
+//         {label}
+//       </label>
+
+//       {children}
+
+//       {hint && !error ? (
+//         <p className="text-xs text-slate-500">{hint}</p>
+//       ) : null}
+
+//       {error ? (
+//         <p className={cn("text-xs font-medium text-red-600")}>{error}</p>
+//       ) : null}
+//     </div>
+//   );
+// }

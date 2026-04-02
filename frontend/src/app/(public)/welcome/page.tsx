@@ -1,9 +1,8 @@
 // src/app/(public)/welcome/page.tsx
-
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Star } from "lucide-react";
+import { Star } from "lucide-react";
 
 import {
   MapPin,
@@ -91,42 +90,41 @@ function TypewriterCard({
           {title}
         </h3>
 
-        <div className="space-y-3">
-          {lines.map((_, i) => {
-            const Icon = Icons?.[i] ?? Icons?.[0];
+        {/* Improved aligned layout */}
+        <div className="flex flex-col items-center flex-1">
+          <div className="inline-flex flex-col gap-4">
+            {lines.map((_, i) => {
+              const Icon = Icons[i] ?? Icons[0];
+              const hasStarted = i < activeIndex || done || i === activeIndex;
+              const isTyping = activeIndex === i && !done;
 
-            const hasStarted = i < activeIndex || done || i === activeIndex;
-            const isTyping = activeIndex === i && !done;
+              return (
+                <div
+                  key={i}
+                  className={`flex items-center gap-3 transition-opacity duration-300 ${
+                    hasStarted ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                    <Icon size={16} weight="duotone" className={iconColor} />
+                  </div>
 
-            return (
-              <div
-                key={i}
-                className={`flex items-center justify-center gap-3 transition-opacity duration-300 ${
-                  hasStarted ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                {Icon && (
-                  <Icon
-                    size={20}
-                    weight="duotone"
-                    className={`${iconColor} transition-transform duration-300 group-hover:scale-110`}
-                  />
-                )}
-
-                <p className="min-h-[1.3em] text-center text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-                  {displayed[i]}
-                  {isTyping && (
-                    <span className="inline-block w-0.5 h-4 ml-0.5 bg-current animate-pulse" />
-                  )}
-                </p>
-              </div>
-            );
-          })}
+                  <p className="min-w-[220px] min-h-[1.5em] text-sm text-slate-700 text-left leading-relaxed">
+                    {displayed[i]}
+                    {isTyping && (
+                      <span className="inline-block w-0.5 h-4 ml-0.5 align-middle bg-current animate-pulse rounded-sm" />
+                    )}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
+        {/* Button */}
         <div
-          className={`mt-5 transition-all duration-500 ${
-            done ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+          className={`mt-8 transition-opacity duration-500 ${
+            done ? "opacity-100" : "opacity-0"
           }`}
         >
           {button}
@@ -141,7 +139,6 @@ function TypewriterCard({
 export default function WelcomePage() {
   return (
     <main className="bg-gradient-to-b from-white via-slate-50 to-white">
-
       <CulturalHeroSlider />
 
       <FullWidthSection className="border-y border-slate-100 bg-slate-50">
@@ -152,7 +149,6 @@ export default function WelcomePage() {
 
       <FullWidthSection className="py-20 bg-slate-50">
         <PageContainer>
-
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium">
               <Mountains size={16} weight="duotone" />
@@ -169,7 +165,7 @@ export default function WelcomePage() {
           </div>
 
           <div className="grid gap-10 lg:grid-cols-3 items-center">
-
+            {/* ORBIT */}
             {/* ORBIT FIXED */}
             <div className="flex justify-center lg:justify-end items-center lg:pr-6">
               <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
@@ -249,13 +245,11 @@ export default function WelcomePage() {
                     </div>
                   );
                 })}
-
               </div>
             </div>
 
-            {/* RIGHT CARDS */}
+            {/* CARDS */}
             <div className="lg:col-span-2 grid gap-6">
-
               <TypewriterCard
                 title="For Travelers"
                 lines={travelerLines}
@@ -286,44 +280,10 @@ export default function WelcomePage() {
                   </Link>
                 }
               />
-
             </div>
-          </div>
-
-        </PageContainer>
-      </FullWidthSection>
-
-      <FullWidthSection className="bg-slate-900 py-14 text-white">
-        <PageContainer>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-
-            <div>
-              <h3 className="text-xl font-bold">
-                Are you a cultural provider?
-              </h3>
-              <p className="text-slate-400">
-                Share your culture and grow your audience.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Link href={ROUTES.register}>
-                <Button className="bg-amber-500 text-slate-900 hover:bg-amber-400 px-6 py-3 font-semibold shadow-md">
-                  Join Now
-                </Button>
-              </Link>
-
-              <Link href={ROUTES.feed}>
-                <Button variant="secondary" className="opacity-80 hover:opacity-100">
-                  Explore
-                </Button>
-              </Link>
-            </div>
-
           </div>
         </PageContainer>
       </FullWidthSection>
-
     </main>
   );
 }
