@@ -1,3 +1,4 @@
+
 // src\app\(public)\welcome\page.tsx
 
 "use client";
@@ -81,38 +82,39 @@ function TypewriterCard({
 
       <h3 className="text-xl font-semibold mb-6">{title}</h3>
 
-      <div className="space-y-5">
-        {lines.map((_, i) => {
-          const Icon = Icons[i] ?? Icons[0];
-          const hasStarted = i < activeIndex || done || i === activeIndex;
-          const isTyping = activeIndex === i && !done;
+      {/* Outer div centers the block; inner div sizes to widest line so all rows align */}
+      <div className="flex flex-col items-center flex-1">
+        <div className="inline-flex flex-col gap-4">
+          {lines.map((_, i) => {
+            const Icon = Icons[i] ?? Icons[0];
+            const hasStarted = i < activeIndex || done || i === activeIndex;
+            const isTyping = activeIndex === i && !done;
 
-          return (
-            <div
-              key={i}
-              className={`flex items-center justify-center gap-4 transition-opacity duration-300 ${
-                hasStarted ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <Icon
-                size={22}
-                weight="duotone"
-                className={`${iconColor} shrink-0 mt-0.5`}
-              />
-              <p className="min-h-[1.5em] text-center">
-                {displayed[i]}
-                {isTyping && (
-                  <span className="inline-block w-0.5 h-4 ml-0.5 align-middle bg-current animate-pulse rounded-sm" />
-                )}
-              </p>
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={i}
+                className={`flex items-center gap-3 transition-opacity duration-300 ${
+                  hasStarted ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                  <Icon size={16} weight="duotone" className={`${iconColor} shrink-0`} />
+                </div>
+                <p className="min-w-[220px] min-h-[1.5em] text-sm text-slate-700 text-left leading-relaxed">
+                  {displayed[i]}
+                  {isTyping && (
+                    <span className="inline-block w-0.5 h-4 ml-0.5 align-middle bg-current animate-pulse rounded-sm" />
+                  )}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Button fades in after all lines finish typing */}
       <div
-        className={`mt-6 transition-opacity duration-500 ${
+        className={`mt-8 transition-opacity duration-500 ${
           done ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -309,3 +311,4 @@ function StatsSection() {
     </div>
   );
 }
+

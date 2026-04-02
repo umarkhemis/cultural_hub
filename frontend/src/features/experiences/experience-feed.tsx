@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -26,7 +27,8 @@ import { useProtectedAction } from "@/src/features/auth/useProtectedAction";
 import { LoadingState } from "@/src/components/shared/loading-state";
 import { CommentForm } from "./comment-form";
 import { CommentList } from "./comment-list";
-import { ROUTES } from "@/src/constants/routes";import { useQuery } from "@tanstack/react-query";
+import { ROUTES } from "@/src/constants/routes";
+import { useQuery } from "@tanstack/react-query";
 import { searchAll } from "@/src/lib/api/search";
 import type { SearchSiteResult, SearchExperienceResult } from "@/src/lib/api/search";
 
@@ -69,9 +71,6 @@ function ExpandableCaption({ text }: { text: string }) {
 }
 
 // ── Search overlay ────────────────────────────
-// Replace the SearchOverlay function in experience-feed.tsx with this
-
-
 function SearchOverlay({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -81,7 +80,6 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
     inputRef.current?.focus();
   }, []);
 
-  // Debounce — wait 350ms after user stops typing
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query.trim()), 350);
     return () => clearTimeout(t);
@@ -137,7 +135,6 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
       {/* Results */}
       <div className="flex-1 overflow-y-auto">
 
-        {/* Empty state — no query */}
         {!isSearching && (
           <div className="px-4 py-6 space-y-6">
             <div>
@@ -164,7 +161,6 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
-        {/* Loading skeleton */}
         {isSearching && isFetching && !data && (
           <div className="px-4 py-6 space-y-3">
             {[...Array(4)].map((_, i) => (
@@ -179,7 +175,6 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
-        {/* No results */}
         {isSearching && !isFetching && !hasResults && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Search className="h-10 w-10 text-white/10" />
@@ -190,11 +185,8 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
-        {/* Results */}
         {isSearching && hasResults && (
           <div className="px-4 py-4 space-y-6">
-
-            {/* Sites */}
             {sites.length > 0 && (
               <div>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
@@ -244,7 +236,6 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
-            {/* Experiences */}
             {experiences.length > 0 && (
               <div>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">
@@ -303,11 +294,9 @@ function FeedNavbar({
 
   return (
     <>
-      {/* Top floating navbar */}
       <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none">
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
 
-          {/* Left — logo */}
           <Link
             href={ROUTES.welcome}
             className="pointer-events-auto flex items-center gap-2"
@@ -321,7 +310,6 @@ function FeedNavbar({
             </span>
           </Link>
 
-          {/* Center — nav links (desktop) */}
           <div className="pointer-events-auto hidden items-center gap-1 rounded-2xl border border-white/10 bg-black/30 px-2 py-1.5 backdrop-blur-md sm:flex">
             {navLinks.map((link) => (
               <Link
@@ -336,7 +324,6 @@ function FeedNavbar({
             ))}
           </div>
 
-          {/* Right — search + menu */}
           <div className="pointer-events-auto flex items-center gap-2">
             <button
               type="button"
@@ -346,7 +333,6 @@ function FeedNavbar({
               <Search className="h-4 w-4" />
             </button>
 
-            {/* Mobile menu */}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
@@ -367,7 +353,6 @@ function FeedNavbar({
           </div>
         </div>
 
-        {/* Mobile dropdown */}
         {menuOpen && (
           <div
             className="pointer-events-auto mx-4 mt-1 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-md p-2"
@@ -449,28 +434,30 @@ function ExperienceFeedItem({
   const isVideo = firstMedia?.media_type === "video";
   const mediaSrc = firstMedia?.media_url;
 
-  // Auto-play/pause based on isActive — this is the core fix
+  // ── Core fix: drive play/pause purely from isActive ──
+  // This handles both arrow-button navigation AND free scroll/swipe.
+  // When isActive flips to false (any cause), we immediately pause + reset.
+  // When isActive flips to true, we play after a short settle delay.
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !isVideo) return;
 
     if (isActive) {
-      // Small delay to let the snap scroll settle
       const t = setTimeout(() => {
         video.play()
           .then(() => setIsPlaying(true))
           .catch(() => setIsPlaying(false));
-      }, 100);
+      }, 80);
       return () => clearTimeout(t);
     } else {
-      // Immediately pause and reset when scrolled away
+      // Immediate stop — no delay, no matter how the scroll happened
       video.pause();
       video.currentTime = 0;
       setIsPlaying(false);
     }
   }, [isActive, isVideo]);
 
-  // Sync global mute state to the video element
+  // Sync mute state
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -573,7 +560,7 @@ function ExperienceFeedItem({
   return (
     <div className="relative h-screen w-full snap-start snap-always overflow-hidden bg-black">
 
-      {/* Media — clicking toggles play/pause */}
+      {/* Media */}
       {isVideo && mediaSrc ? (
         <video
           ref={videoRef}
@@ -617,7 +604,7 @@ function ExperienceFeedItem({
         </div>
       )}
 
-      {/* Provider info bar — sits below the navbar */}
+      {/* Provider info bar */}
       <div className="absolute top-14 left-0 right-0 z-20 flex items-center justify-between px-4 gap-3">
         <Link
           href={`/sites/${experience.provider.id}`}
@@ -657,7 +644,6 @@ function ExperienceFeedItem({
         </Link>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Mute/unmute — now global, lifted to parent */}
           {isVideo && (
             <button
               type="button"
@@ -764,8 +750,9 @@ function ExperienceFeedItem({
         )}
       </div>
 
-      {/* Bottom — date + expandable caption */}
-      <div className="absolute bottom-0 left-0 right-16 z-20 px-4 pb-6">
+      {/* ── Bottom info: date + caption, aligned with "View" button ── */}
+      {/* bottom-32 matches the top of the right sidebar so they sit on the same line */}
+      <div className="absolute bottom-32 left-0 right-16 z-20 px-4">
         <p className="mb-1.5 text-xs text-white/40">{formatDate(experience.created_at)}</p>
         <ExpandableCaption text={experience.caption} />
         {experience.media_items?.length > 1 && (
@@ -853,7 +840,6 @@ export function ExperienceFeed() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
-  // Global mute state — shared across all items
   const [globalMuted, setGlobalMuted] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const isProgrammaticScroll = useRef(false);
@@ -870,19 +856,28 @@ export function ExperienceFeed() {
     .flatMap((page) => page.data.items ?? [])
     .filter(Boolean) ?? [];
 
-  // Splash — wait for data + 1.8s minimum
+  // Splash
   useEffect(() => {
     if (isLoading) return;
     const timer = setTimeout(() => setShowSplash(false), 1800);
     return () => clearTimeout(timer);
   }, [isLoading]);
 
-  // Auto-unmute after first scroll — better UX
+  // Auto-unmute after first scroll
   useEffect(() => {
     if (activeIndex > 0 && globalMuted) {
       setGlobalMuted(false);
     }
   }, [activeIndex]);
+
+  // Pause ALL videos when search opens
+  useEffect(() => {
+    if (showSearch) {
+      document.querySelectorAll("video").forEach((v) => {
+        v.pause();
+      });
+    }
+  }, [showSearch]);
 
   const scrollToIndex = useCallback((index: number) => {
     const container = containerRef.current;
@@ -910,6 +905,9 @@ export function ExperienceFeed() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [goNext, goPrev]);
 
+  // ── Core fix: use a high threshold (0.8) so activeIndex only updates
+  // when a slide is almost fully in view. This ensures the outgoing slide's
+  // isActive flips to false quickly, triggering its pause effect immediately.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -924,7 +922,7 @@ export function ExperienceFeed() {
           }
         });
       },
-      { root: container, threshold: 0.6 }
+      { root: container, threshold: 0.8 } // raised from 0.6 → 0.8
     );
 
     const observeChildren = () => {
@@ -968,15 +966,12 @@ export function ExperienceFeed() {
 
   return (
     <div className="relative h-screen overflow-hidden">
-      {/* Floating navbar - sits above the feed */}
       <FeedNavbar onSearchOpen={() => setShowSearch(true)} />
 
-      {/* Search overlay */}
       {showSearch && (
         <SearchOverlay onClose={() => setShowSearch(false)} />
       )}
 
-      {/* Feed scroll container */}
       <div
         ref={containerRef}
         className="h-screen overflow-y-scroll snap-y snap-mandatory"
@@ -986,7 +981,7 @@ export function ExperienceFeed() {
           <ExperienceFeedItem
             key={experience.id}
             experience={experience}
-            isActive={index === activeIndex && !showSplash}
+            isActive={index === activeIndex && !showSplash && !showSearch}
             onNext={goNext}
             onPrev={goPrev}
             isFirst={index === 0}
@@ -1003,5 +998,6 @@ export function ExperienceFeed() {
     </div>
   );
 }
+
 
 

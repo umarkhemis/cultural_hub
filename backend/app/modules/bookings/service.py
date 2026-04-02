@@ -135,7 +135,7 @@ def list_provider_bookings(db: Session, current_user: User) -> list[Booking]:
         select(Booking)
         .join(Package, Booking.package_id == Package.id)
         .options(joinedload(Booking.participants))
-        .where(Package.provider_id == current_user.site.id)
+        .where(Package.provider_id == current_user.cultural_site.id)
         .order_by(Booking.created_at.desc())
     ).unique().all()
 
@@ -147,7 +147,7 @@ def list_provider_bookings(db: Session, current_user: User) -> list[Booking]:
             select(Booking)
             .join(Package, Booking.package_id == Package.id)
             .options(joinedload(Booking.participants))
-            .where(Package.provider_id == current_user.site.id)
+            .where(Package.provider_id == current_user.cultural_site.id)
             .order_by(Booking.created_at.desc())
         ).unique().all()
     )
