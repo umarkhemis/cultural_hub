@@ -1,5 +1,4 @@
 
-// src\components\layout\top-navbar.tsx
 
 "use client";
 
@@ -7,6 +6,7 @@ import Link from "next/link";
 import { Menu, X, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { ROUTES } from "@/src/constants/routes";
 import { Button } from "@/src/components/ui/button";
@@ -82,6 +82,7 @@ export function TopNavbar() {
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
+
           {/* ── Logo ── */}
           <Link href={ROUTES.welcome} className="flex items-center gap-2">
             <img
@@ -103,6 +104,7 @@ export function TopNavbar() {
                 style={{ color: "#14b8a6" }}   
               >
                 Explore Culture
+      
               </span>
             </div>
           </Link>
