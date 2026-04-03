@@ -1,4 +1,4 @@
-
+// frontend\src\features\experiences\experience-feed.tsx
 
 "use client";
 
@@ -457,6 +457,14 @@ function ExperienceFeedItem({
     if (!video || !isVideo) return;
 
     if (isActive) {
+      // Pause ALL other videos first
+      document.querySelectorAll("video").forEach((v) => {
+        if (v !== video) {
+          v.pause();
+          v.currentTime = 0;
+          }
+      });
+
       const t = setTimeout(() => {
         video.play()
           .then(() => setIsPlaying(true))
@@ -766,7 +774,8 @@ function ExperienceFeedItem({
 
       {/* ── Bottom info: date + caption, aligned with "View" button ── */}
       {/* bottom-32 matches the top of the right sidebar so they sit on the same line */}
-      <div className="absolute bottom-32 left-0 right-16 z-20 px-4">
+      {/* text issues */}
+      <div className="absolute bottom-28 left-4 right-4 z-20 pr-16">
         <p className="mb-1.5 text-xs text-white/40">{formatDate(experience.created_at)}</p>
         <ExpandableCaption text={experience.caption} />
         {experience.media_items?.length > 1 && (
@@ -936,9 +945,10 @@ export function ExperienceFeed() {
           }
         });
       },
-      { root: container, threshold: 0.8 } // raised from 0.6 → 0.8
+      { root: container, threshold: 0.6 } // raised from 0.6 → 0.8
     );
 
+  
     const observeChildren = () => {
       Array.from(container.children).forEach((child) => observer.observe(child));
     };
@@ -952,6 +962,25 @@ export function ExperienceFeed() {
       mutation.disconnect();
     };
   }, []);
+
+  //scroll fix
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      if (isProgrammaticScroll.current) return;
+
+      const index = Math.round(container.scrollTop / container.clientHeight);
+
+      setActiveIndex((prev) => (prev !== index ? index : prev));
+    };
+
+    container.addEventListener("scroll", handleScroll);
+
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
+  
 
   // Pre-fetch next page
   useEffect(() => {
@@ -990,35 +1019,39 @@ export function ExperienceFeed() {
   if (!experiences.length) return null;
 
   return (
-    <div className="relative h-screen overflow-hidden">
-      <FeedNavbar onSearchOpen={() => setShowSearch(true)} />
+    // positioned the feed, Feed container
+    <div className="flex justify-center bg-black">
+      <div className="relative h-screen w-full max-w-[420px] overflow-hidden">
+        <FeedNavbar onSearchOpen={() => setShowSearch(true)} />
 
-      {showSearch && (
-        <SearchOverlay onClose={() => setShowSearch(false)} />
-      )}
-
-      <div
-        ref={containerRef}
-        className="h-screen overflow-y-scroll snap-y snap-mandatory"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        {experiences.map((experience, index) => (
-          <ExperienceFeedItem
-            key={experience.id}
-            experience={experience}
-            isActive={index === activeIndex && !showSplash && !showSearch}
-            onNext={goNext}
-            onPrev={goPrev}
-            isFirst={index === 0}
-            isLast={index === experiences.length - 1 && !hasNextPage}
-            globalMuted={globalMuted}
-            onMuteToggle={() => setGlobalMuted((v) => !v)}
-          />
-        ))}
-
-        {hasNextPage && (
-          <FetchMoreSentinel onVisible={fetchNextPage} />
+        {showSearch && (
+          <SearchOverlay onClose={() => setShowSearch(false)} />
         )}
+
+        <div
+          ref={containerRef}
+          // Smooth scrolling feel
+          className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth no-scrollbar"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {experiences.map((experience, index) => (
+            <ExperienceFeedItem
+              key={experience.id}
+              experience={experience}
+              isActive={index === activeIndex && !showSplash && !showSearch}
+              onNext={goNext}
+              onPrev={goPrev}
+              isFirst={index === 0}
+              isLast={index === experiences.length - 1 && !hasNextPage}
+              globalMuted={globalMuted}
+              onMuteToggle={() => setGlobalMuted((v) => !v)}
+            />
+          ))}
+
+          {hasNextPage && (
+            <FetchMoreSentinel onVisible={fetchNextPage} />
+          )}
+        </div>
       </div>
     </div>
   );
