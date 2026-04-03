@@ -15,6 +15,7 @@ import { getApiErrorMessage } from "./get-error-message";
 import { getRedirectPathByRole } from "./redirect-by-role";
 import { loginSchema, type LoginFormValues } from "./schema";
 import { useAuth } from "@/src/hooks/useAuth";
+import { BrandLogo } from "@/src/components/common/brand-logo";
 import { setAuthTokens } from "@/src/lib/api/client";
 
 
@@ -67,14 +68,7 @@ export function LoginForm() {
 
         {/* Top bar */}
         <div className="flex items-center justify-between py-4 sm:py-5">
-          <Link href={ROUTES.welcome} className="flex items-center gap-2 sm:gap-2.5 group">
-            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl sm:rounded-2xl bg-amber-400 shadow-lg shadow-amber-400/30 transition-transform group-hover:scale-105">
-              <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-slate-900" />
-            </div>
-            <span className="text-sm sm:text-base font-bold text-white group-hover:text-amber-400 transition-colors">
-              CulturalHub
-            </span>
-          </Link>
+          <BrandLogo size="sm" showTagline={false} />
 
           <Link
             href={ROUTES.register}

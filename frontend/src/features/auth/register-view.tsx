@@ -1,14 +1,14 @@
-
+// frontend\src\features\auth\register-view.tsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { Globe } from "lucide-react";
 
 import { ROUTES } from "@/src/constants/routes";
 import { RoleSelector } from "./role-selector";
 import { TouristRegisterForm } from "./tourist-register-form";
 import { ProviderRegisterForm } from "./provider-register-form";
+import { BrandLogo } from "@/src/components/common/brand-logo";
 
 type AuthRole = "tourist" | "provider";
 
@@ -36,19 +36,15 @@ export function RegisterView() {
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-between px-4 py-0 sm:px-6">
 
         {/* Top bar */}
-        <div className="flex w-full items-center justify-between px-0 py-4 sm:py-5">
-          <Link href={ROUTES.welcome} className="flex items-center gap-2 sm:gap-2.5">
-            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl sm:rounded-2xl bg-amber-400 shadow-lg shadow-amber-400/30">
-              <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-slate-900" />
-            </div>
-            <span className="text-sm sm:text-base font-bold text-white">CulturalHub</span>
-          </Link>
+        <div className="flex w-full items-center justify-between py-4 sm:py-5">
+          <BrandLogo size="sm" showTagline={false} />
+
           <Link
             href={ROUTES.login}
             className="text-xs sm:text-sm text-slate-300 hover:text-white transition-colors"
           >
             Have an account?{" "}
-            <span className="font-semibold text-amber-400">Sign in</span>
+            <span className="font-semibold text-green-400">Sign in</span>
           </Link>
         </div>
 

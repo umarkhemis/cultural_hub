@@ -1,8 +1,7 @@
-// src/app/(public)/welcome/page.tsx
 "use client";
 
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import {
   MapPin,
@@ -10,318 +9,218 @@ import {
   Backpack,
   UsersThree,
   GlobeHemisphereWest,
-  Storefront,
   Mountains,
 } from "phosphor-react";
 
-import { useEffect, useRef, useState } from "react";
-import type { ElementType } from "react";
-
 import { Button } from "@/src/components/ui/button";
-import { AnimatedCounter } from "@/src/components/ui/animated-counter";
 import { PageContainer } from "@/src/components/layout/page-container";
 import { FullWidthSection } from "@/src/components/layout/full-width-section";
 import { ROUTES } from "@/src/constants/routes";
 import { CulturalHeroSlider } from "@/src/features/home/cultural-hero-slider";
-import { useTypewriter } from "@/src/hooks/use-typewriter";
 
-/* ===================== DATA ===================== */
+/* ===================== COUNTER HOOK ===================== */
 
-const stats = [
-  { value: 15, label: "Cultural Sites" },
-  { value: 40, label: "Active Providers" },
-  { value: 120, label: "Experiences Shared" },
-  { value: 4.9, label: "Community Rating", icon: Star, decimal: true },
-];
+function useCountUp(target: number, duration = 1500) {
+  const [value, setValue] = useState(0);
 
-const travelerLines = [
-  "Discover cultural sites and hidden gems",
-  "Watch real cultural experiences",
-  "Book curated tourism packages",
-  "Engage with communities",
-];
+  useEffect(() => {
+    let start = 0;
+    const increment = target / (duration / 16);
 
-const providerLines = [
-  "Showcase your cultural experiences",
-  "Create tourism packages",
-  "Connect with travelers",
-  "Reach a wider audience",
-];
+    const timer = setInterval(() => {
+      start += increment;
 
-const travelerIcons = [MapPin, VideoCamera, Backpack, UsersThree];
-const providerIcons = [Storefront, Backpack, UsersThree, GlobeHemisphereWest];
+      if (start >= target) {
+        setValue(target);
+        clearInterval(timer);
+      } else {
+        setValue(start);
+      }
+    }, 16);
 
-/* ===================== TYPEWRITER CARD ===================== */
+    return () => clearInterval(timer);
+  }, [target, duration]);
 
-function TypewriterCard({
-  title,
-  lines,
-  Icons,
-  iconColor = "text-slate-500",
-  startDelay = 0,
-  button,
-  cardClass = "",
-}: {
-  title: string;
-  lines: string[];
-  Icons: ElementType[];
-  iconColor?: string;
-  startDelay?: number;
-  button: React.ReactNode;
-  cardClass?: string;
-}) {
-  const { displayed, activeIndex, done } = useTypewriter(
-    lines,
-    28,
-    180,
-    startDelay
-  );
-
-  return (
-    <div
-      className={`relative overflow-hidden rounded-3xl 
-      p-4 sm:p-5 lg:p-6
-      min-h-[260px] sm:min-h-[300px] lg:min-h-[320px]
-      shadow-sm transition-all duration-500 flex flex-col gap-4
-      hover:shadow-xl hover:-translate-y-1 group border border-slate-100 ${cardClass}`}
-    >
-      <div className="relative z-10 text-center">
-        <h3 className="text-lg font-semibold mb-4 group-hover:text-slate-900">
-          {title}
-        </h3>
-
-        {/* Improved aligned layout */}
-        <div className="flex flex-col items-center flex-1">
-          <div className="inline-flex flex-col gap-4">
-            {lines.map((_, i) => {
-              const Icon = Icons[i] ?? Icons[0];
-              const hasStarted = i < activeIndex || done || i === activeIndex;
-              const isTyping = activeIndex === i && !done;
-
-              return (
-                <div
-                  key={i}
-                  className={`flex items-center gap-3 transition-opacity duration-300 ${
-                    hasStarted ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                    <Icon size={16} weight="duotone" className={iconColor} />
-                  </div>
-
-                  <p className="min-w-[220px] min-h-[1.5em] text-sm text-slate-700 text-left leading-relaxed">
-                    {displayed[i]}
-                    {isTyping && (
-                      <span className="inline-block w-0.5 h-4 ml-0.5 align-middle bg-current animate-pulse rounded-sm" />
-                    )}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Button */}
-        <div
-          className={`mt-8 transition-opacity duration-500 ${
-            done ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {button}
-        </div>
-      </div>
-    </div>
-  );
+  return value;
 }
 
 /* ===================== PAGE ===================== */
 
 export default function WelcomePage() {
+  const stats = [
+    { value: 15, label: "Cultural Sites", suffix: "+" },
+    { value: 40, label: "Local Providers", suffix: "+" },
+    { value: 120, label: "Experiences", suffix: "+" },
+    { value: 4.9, label: "Community Rating", decimal: true },
+  ];
+
   return (
-    <main className="bg-gradient-to-b from-white via-slate-50 to-white">
+    <main className="bg-white">
+      {/* HERO */}
       <CulturalHeroSlider />
 
-      <FullWidthSection className="border-y border-slate-100 bg-slate-50">
+      {/* INTRO */}
+      <FullWidthSection className="py-16 sm:py-24 bg-white">
         <PageContainer>
-          <StatsSection />
-        </PageContainer>
-      </FullWidthSection>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+                Discover culture through real experiences, not just stories
+              </h1>
 
-      <FullWidthSection className="py-20 bg-slate-50">
-        <PageContainer>
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium">
-              <Mountains size={16} weight="duotone" />
-              Visit Kigezi
-            </div>
+              <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed">
+                Explore cultural destinations, watch real experiences, and connect with
+                local providers. Everything is designed to help you understand a place
+                before you visit it — or even from wherever you are.
+              </p>
 
-            <h2 className="mt-4 text-3xl sm:text-4xl font-bold text-slate-900">
-              Discover culture through people and stories
-            </h2>
+              <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Link href={ROUTES.feed}>
+                  <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white">
+                    Explore Experiences
+                  </Button>
+                </Link>
 
-            <p className="mt-3 text-slate-500 max-w-xl mx-auto">
-              Explore authentic experiences and connect with local communities.
-            </p>
-          </div>
-
-          <div className="grid gap-10 lg:grid-cols-3 items-center">
-            {/* ORBIT */}
-            {/* ORBIT FIXED */}
-            <div className="flex justify-center lg:justify-end items-center lg:pr-6">
-              <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
-
-                {/* glow */}
-                <div className="absolute w-32 h-32 rounded-full bg-amber-200 blur-3xl opacity-30" />
-
-                {/* center */}
-                <div className="absolute text-center z-10 px-4">
-                  <p className="text-sm sm:text-base font-semibold text-slate-800">
-                    Visit Kigezi
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Cultural Sites
-                  </p>
-                </div>
-
-                {/* OUTER RING */}
-                {travelerIcons.map((Icon, i) => {
-                  const angle = (i / travelerIcons.length) * 360;
-
-                  return (
-                    <div
-                      key={`outer-${i}`}
-                      className="absolute animate-orbit"
-                      style={{
-                        transform: `rotate(${angle}deg) translateX(120px)`,
-                        ["--radius" as any]: "120px",
-                        animationDuration: "14s",
-                      }}
-                    >
-                      <div className="animate-breathe text-blue-500">
-                        <Icon size={20} />
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* MIDDLE RING */}
-                {providerIcons.map((Icon, i) => {
-                  const angle = (i / providerIcons.length) * 360;
-
-                  return (
-                    <div
-                      key={`mid-${i}`}
-                      className="absolute animate-orbit"
-                      style={{
-                        transform: `rotate(${angle}deg) translateX(85px)`,
-                        ["--radius" as any]: "85px",
-                        animationDuration: "10s",
-                      }}
-                    >
-                      <div className="animate-breathe text-slate-600">
-                        <Icon size={18} />
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* INNER RING */}
-                {[MapPin, UsersThree, Backpack].map((Icon, i) => {
-                  const angle = (i / 3) * 360;
-
-                  return (
-                    <div
-                      key={`inner-${i}`}
-                      className="absolute animate-orbit"
-                      style={{
-                        transform: `rotate(${angle}deg) translateX(55px)`,
-                        ["--radius" as any]: "55px",
-                        animationDuration: "8s",
-                      }}
-                    >
-                      <div className="animate-breathe text-amber-500">
-                        <Icon size={16} />
-                      </div>
-                    </div>
-                  );
-                })}
+                <Link href={ROUTES.register}>
+                  <Button className="w-full sm:w-auto bg-white text-green-600 border border-green-200 hover:bg-green-50 shadow-sm">
+                    Become a Provider
+                  </Button>
+                </Link>
               </div>
             </div>
 
-            {/* CARDS */}
-            <div className="lg:col-span-2 grid gap-6">
-              <TypewriterCard
-                title="For Travelers"
-                lines={travelerLines}
-                Icons={travelerIcons}
-                iconColor="text-amber-500"
-                startDelay={300}
-                button={
-                  <Link href={ROUTES.feed}>
-                    <Button className="bg-amber-500 text-slate-900">
-                      Start Exploring
-                    </Button>
-                  </Link>
-                }
-              />
+            <div className="flex justify-center">
+              <Mountains size={140} className="sm:size-[180px] text-green-500 opacity-80" />
+            </div>
+          </div>
+        </PageContainer>
+      </FullWidthSection>
 
-              <TypewriterCard
-                title="For Cultural Providers"
-                lines={providerLines}
-                Icons={providerIcons}
-                iconColor="text-slate-500"
-                startDelay={500}
-                cardClass="bg-white"
-                button={
-                  <Link href={ROUTES.register}>
-                    <Button className="bg-slate-900 text-white">
-                      Become a Provider
-                    </Button>
-                  </Link>
-                }
+      {/* STATS + MESSAGE */}
+      <FullWidthSection className="py-16 sm:py-24 bg-slate-50 border-y border-slate-100">
+        <PageContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* TEXT */}
+            <div className="space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                Listen, explore, and connect with culture in a new way
+              </h2>
+
+              <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
+                From live experiences to recorded cultural moments, the platform brings
+                together travelers and local communities in one place. You can browse,
+                watch, and decide what to experience before you even arrive.
+              </p>
+
+              <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
+                Whether you're planning a trip or just curious, everything here is built
+                to help you discover authentic experiences and meaningful connections.
+              </p>
+            </div>
+
+            {/* STATS */}
+            <div className="grid grid-cols-2 gap-6">
+              {stats.map((stat) => {
+                const count = useCountUp(stat.value);
+
+                return (
+                  <div
+                    key={stat.label}
+                    className="p-5 sm:p-6 rounded-2xl bg-white shadow-sm border border-slate-100"
+                  >
+                    <div className="text-3xl sm:text-4xl font-bold text-orange-500">
+                      {stat.decimal
+                        ? count.toFixed(1)
+                        : Math.floor(count)}
+                      {stat.suffix || ""}
+                    </div>
+
+                    <div className="mt-2 text-sm sm:text-base font-semibold text-slate-800">
+                      {stat.label}
+                    </div>
+
+                    <p className="mt-2 text-xs sm:text-sm text-slate-500 leading-relaxed">
+                      {stat.label === "Cultural Sites" &&
+                        "Places available to explore physically or digitally."}
+                      {stat.label === "Local Providers" &&
+                        "People sharing authentic cultural knowledge and services."}
+                      {stat.label === "Experiences" &&
+                        "Recorded and live cultural moments you can watch anytime."}
+                      {stat.label === "Community Rating" &&
+                        "Feedback reflecting trust and quality of experiences."}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </PageContainer>
+      </FullWidthSection>
+
+      {/* VIDEO SECTION */}
+      <FullWidthSection className="py-16 sm:py-24 bg-white">
+        <PageContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            {/* TEXT */}
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                See what cultural experiences look like
+              </h2>
+
+              <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed">
+                This video represents the kind of content you’ll find on the platform
+                Cultural events, traditions, and real-life moments captured by providers
+                
+              </p>
+
+              <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
+                It’s not just about watching — it’s about discovering, connecting, and
+                preparing for real-world experiences
+              </p>
+            </div>
+
+            {/* VIDEO */}
+            <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-lg border border-slate-100">
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/hjqu8P7XvGQ"
+                title="Cultural Experience"
+                allowFullScreen
               />
+            </div>
+          </div>
+        </PageContainer>
+      </FullWidthSection>
+
+      {/* FINAL CTA */}
+      <FullWidthSection className="py-16 sm:py-24 bg-slate-50">
+        <PageContainer>
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
+              Ready to explore culture in a more meaningful way?
+            </h2>
+
+            <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed">
+              Whether you're discovering experiences or sharing them, this platform
+              connects people through culture, stories, and real moments
+            </p>
+
+            <div className="mt-7 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+              <Link href={ROUTES.feed}>
+                <Button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white">
+                  Start Exploring
+                </Button>
+              </Link>
+
+              <Link href={ROUTES.register}>
+                <Button className="w-full sm:w-auto bg-white text-green-600 border border-green-200 hover:bg-green-50 shadow-sm">
+                  Join as Provider
+                </Button>
+              </Link>
             </div>
           </div>
         </PageContainer>
       </FullWidthSection>
     </main>
-  );
-}
-
-/* ===================== STATS ===================== */
-
-function StatsSection() {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => entry.isIntersecting && setVisible(true),
-      { threshold: 0.4 }
-    );
-
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} className="grid grid-cols-2 sm:grid-cols-4">
-      {stats.map((stat) => (
-        <div key={stat.label} className="text-center py-6">
-          <div className="text-2xl font-bold">
-            {visible ? (
-              <AnimatedCounter
-                value={stat.value}
-                duration={1500}
-                decimals={stat.decimal ? 1 : 0}
-              />
-            ) : (
-              0
-            )}
-          </div>
-          <p className="text-xs text-slate-500">{stat.label}</p>
-        </div>
-      ))}
-    </div>
   );
 }

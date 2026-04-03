@@ -1,4 +1,4 @@
-
+// frontend\src\features\auth\tourist-register-form.tsx
 "use client";
 
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import {
   Eye, EyeOff, Mail, Lock, User,
-  ArrowRight, Globe, Compass, ArrowLeft,
+  ArrowRight, Compass, ArrowLeft,
 } from "lucide-react";
 
 import { FormField } from "@/src/components/ui/form-field";
@@ -17,6 +17,8 @@ import { useTouristRegisterMutation } from "./hooks";
 import { getApiErrorMessage } from "./get-error-message";
 import { touristRegisterSchema, type TouristRegisterFormValues } from "./schema";
 import { ROUTES } from "@/src/constants/routes";
+import { BrandLogo } from "@/src/components/common/brand-logo";
+
 
 type Props = { onBack?: () => void };
 
@@ -79,12 +81,8 @@ export function TouristRegisterForm({ onBack }: Props) {
                 <span>Back</span>
               </button>
             )}
-            <Link href={ROUTES.welcome} className="flex items-center gap-1.5 sm:gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 shadow-md shadow-amber-400/30 sm:h-8 sm:w-8 sm:rounded-xl">
-                <Globe className="h-3.5 w-3.5 text-slate-900 sm:h-4 sm:w-4" />
-              </div>
-              <span className="text-sm font-bold text-white">CulturalHub</span>
-            </Link>
+            {/* logo */}
+            <BrandLogo size="sm" showTagline={false} />
           </div>
           <Link href={ROUTES.login} className="text-xs text-slate-300 hover:text-white transition-colors sm:text-sm">
             Have an account? <span className="font-semibold text-amber-400">Sign in</span>

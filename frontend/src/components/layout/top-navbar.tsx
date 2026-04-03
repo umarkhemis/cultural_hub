@@ -1,4 +1,4 @@
-
+// frontend\src\components\layout\top-navbar.tsx
 
 "use client";
 
@@ -12,6 +12,7 @@ import { ROUTES } from "@/src/constants/routes";
 import { Button } from "@/src/components/ui/button";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useToastStore } from "@/src/store/toast-store";
+import { BrandLogo } from "@/src/components/common/brand-logo";
 
 export function TopNavbar() {
   const router = useRouter();
@@ -84,30 +85,7 @@ export function TopNavbar() {
 
 
           {/* ── Logo ── */}
-          <Link href={ROUTES.welcome} className="flex items-center gap-2">
-            <img
-              src="/mock/logo_cultural_hub-bg.png"
-              alt="CulturalHub"
-              className="h-11 w-11 object-contain shrink-0"
-              style={{ imageRendering: "crisp-edges" }}
-            />
-            
-            <div className="flex flex-col justify-center leading-none gap-0.5">
-              <span
-                className="text-sm font-bold tracking-wide"
-                style={{ color: "#f97316" }}  
-              >
-                CulturalHub
-              </span>
-              <span
-                className="text-[10px] font-semibold tracking-widest uppercase"
-                style={{ color: "#14b8a6" }}   
-              >
-                Explore Culture
-      
-              </span>
-            </div>
-          </Link>
+          <BrandLogo size="md" />
 
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-6 lg:flex">

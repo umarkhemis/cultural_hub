@@ -17,6 +17,8 @@ import { ROUTES } from "@/src/constants/routes";
 import { getApiErrorMessage } from "./get-error-message";
 import { useProviderRegisterMutation } from "./hooks";
 import { providerRegisterSchema, type ProviderRegisterFormValues } from "./schema";
+import { BrandLogo } from "@/src/components/common/brand-logo";
+
 
 type Props = { onBack?: () => void };
 
@@ -98,12 +100,8 @@ export function ProviderRegisterForm({ onBack }: Props) {
                 <span>Back</span>
               </button>
             )}
-            <Link href={ROUTES.welcome} className="flex items-center gap-1.5 sm:gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 shadow-md shadow-amber-400/30 sm:h-9 sm:w-9 sm:rounded-2xl">
-                <Globe className="h-3.5 w-3.5 text-slate-900 sm:h-5 sm:w-5" />
-              </div>
-              <span className="text-sm font-bold text-white sm:text-base">CulturalHub</span>
-            </Link>
+            {/* logo */}
+            <BrandLogo size="sm" showTagline={false} />
           </div>
           <Link href={ROUTES.login} className="text-xs text-slate-300 hover:text-white transition-colors sm:text-sm">
             <span className="hidden sm:inline">Already have an account? </span>
