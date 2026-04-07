@@ -30,11 +30,12 @@ export default function AdminBookingsPage() {
             subtitle={`Provider: ${booking.provider_name_snapshot}`}
             meta={booking.booking_status}
           >
-            <div className="grid gap-2 text-sm text-slate-500 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-2 text-sm text-slate-500 sm:grid-cols-2 lg:grid-cols-5">
               <span>Payment: {booking.payment_status}</span>
               <span>Participants: {booking.participants_count}</span>
-              <span>Total: {formatCurrency(booking.total_price)}</span>
-              <span>Created: {formatDate(booking.booking_date)}</span>
+              <span>Total paid: {formatCurrency(booking.total_price)}</span>
+              <span>Platform fee: {formatCurrency(booking.platform_fee)}</span>
+              <span>Provider payout: {formatCurrency(booking.provider_payout_amount)}</span>
             </div>
           </AdminListCard>
         ))}

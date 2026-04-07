@@ -3,11 +3,19 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+
+    
+    PLATFORM_BOOKING_FEE_PERCENT: float = 0.15
+    BOOKING_RESERVATION_MINUTES: int = 15
+    DEFAULT_CURRENCY: str = "UGX"
+
     DATABASE_URL: str
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 120
     REFRESH_TOKEN_EXPIRE_DAYS: int = 14
+
+
 
     REDIS_URL: str | None = None
 
@@ -42,6 +50,8 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",") if origin.strip()]
+    
+
 
 
 settings = Settings()
@@ -49,44 +59,4 @@ settings = Settings()
 
 
 
-
-
-
-
-
-
-
-
-# from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-# class Settings(BaseSettings):
-#     DATABASE_URL: str
-#     JWT_SECRET_KEY: str
-#     JWT_ALGORITHM: str = "HS256"
-#     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-#     REFRESH_TOKEN_EXPIRE_DAYS: int = 14
-#     REDIS_URL: str
-
-#     APP_NAME: str = "Cultural Hub API"
-#     APP_VERSION: str = "1.0.0"
-#     API_V1_PREFIX: str = "/api/v1"
-#     APP_ENV: str = "development"
-#     DEBUG: bool = True
-
-#     BACKEND_CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
-
-#     LOG_LEVEL: str = "INFO"
-
-#     RATE_LIMIT_LOGIN_PER_MINUTE: int = 5
-#     RATE_LIMIT_REGISTER_PER_HOUR: int = 10
-
-#     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-
-#     @property
-#     def cors_origins_list(self) -> list[str]:
-#         return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",") if origin.strip()]
-
-
-# settings = Settings()
 

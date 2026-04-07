@@ -155,7 +155,7 @@ export default function CheckoutPage() {
           Complete payment before the reservation expires.
         </p>
       </div>
-
+    
       <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
         <div className="space-y-4">
           <div>
@@ -182,7 +182,7 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">Amount</span>
+            <span className="text-slate-600">Total amount</span>
             <span className="font-semibold text-slate-900">
               {formatCurrency(effectiveAmount)}
             </span>
@@ -202,6 +202,8 @@ export default function CheckoutPage() {
           ) : null}
         </div>
       </div>
+
+
 
       <div
         className={`rounded-[28px] border p-5 text-sm ${

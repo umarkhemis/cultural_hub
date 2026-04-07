@@ -12,16 +12,21 @@ import { formatDate } from "@/src/utils/formatDate";
 import { BookingStatusBadge, PaymentStatusBadge } from "./booking-badges";
 
 
+
 type BookingCardProps = {
   booking: Booking;
   onCancel?: (bookingId: string) => void;
   isCancelling?: boolean;
+  showProviderPayout?: boolean;
 };
+
+
 
 export function BookingCard({
   booking,
   onCancel,
   isCancelling = false,
+  showProviderPayout = false,
 }: BookingCardProps) {
   const { setBookingResult } = useBookingStore();
 
@@ -93,6 +98,17 @@ export function BookingCard({
           <p className="text-lg font-semibold text-slate-900">
             {formatCurrency(booking.total_price)}
           </p>
+
+          {showProviderPayout ? (
+            <p className="text-sm text-slate-600">
+              Provider payout:{" "}
+              <span className="font-medium text-slate-900">
+                {formatCurrency(booking.provider_payout_amount)}
+              </span>
+            </p>
+          ) : null}
+
+
           <p className="text-sm text-slate-600">
             Participants: <span className="font-medium">{booking.participants_count}</span>
           </p>
