@@ -71,7 +71,7 @@ export default function WelcomePage() {
               <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed">
                 Explore cultural destinations, watch real experiences, and connect with
                 local providers. Everything is designed to help you understand a place
-                before you visit it — or even from wherever you are.
+                before you visit it - or even from wherever you are.
               </p>
 
               <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -174,7 +174,7 @@ export default function WelcomePage() {
               </p>
 
               <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
-                It’s not just about watching — it’s about discovering, connecting, and
+                It’s not just about watching - it’s about discovering, connecting, and
                 preparing for real-world experiences
               </p>
             </div>
