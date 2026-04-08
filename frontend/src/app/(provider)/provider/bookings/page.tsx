@@ -36,7 +36,7 @@ export default function ProviderBookingsPage() {
       {!isLoading && !isError && data?.length ? (
         <div className="grid gap-5">
           {data.map((booking) => (
-            <BookingCard key={booking.id} booking={booking} />
+            <BookingCard key={booking.id} booking={booking} showProviderPayout />
           ))}
         </div>
       ) : null}

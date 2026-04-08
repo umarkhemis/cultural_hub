@@ -40,7 +40,6 @@ def _get_booking_for_payment(db: Session, booking_id: uuid.UUID) -> Booking:
     )
     if not booking:
         raise NotFoundException("Booking not found.")
-
     return booking
 
 
@@ -121,24 +120,6 @@ def initialize_payment(
 
     db.commit()
     db.refresh(payment)
-    return payment
-
-
-def get_payment_detail(db: Session, payment_id: uuid.UUID, current_user: User | None = None) -> Payment:
-    payment = db.scalar(
-        select(Payment)
-        .options(joinedload(Payment.booking))
-        .where(Payment.id == payment_id)
-    )
-    if not payment:
-        raise NotFoundException("Payment not found.")
-
-    if current_user:
-        booking = payment.booking
-
-        if current_user.role == UserRole.tourist and booking.tourist_id != current_user.id:
-            raise ForbiddenException("You do not have permission to view this payment.")
-
     return payment
 
 
@@ -230,3 +211,4 @@ def process_mock_payment_webhook(
         )
 
     raise ValidationException("Unsupported mock payment status.")
+

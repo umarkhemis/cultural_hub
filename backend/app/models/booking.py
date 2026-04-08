@@ -54,13 +54,19 @@ class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=BookingStatus.awaiting_payment,
     )
     payment_status: Mapped[PaymentStatus] = mapped_column(
-        Enum(PaymentStatus, name="payment_status"),
+        Enum(PaymentStatus, name="booking_payment_status"),
         nullable=False,
         default=PaymentStatus.unpaid,
     )
 
     participants_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+    base_price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    platform_fee: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     total_price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    provider_payout_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+
+    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="UGX")
 
     booking_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     reserved_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -73,7 +79,6 @@ class Booking(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     provider_name_snapshot: Mapped[str] = mapped_column(String(255), nullable=False)
     event_date_snapshot: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    # tourist = relationship("User", back_populates="bookings")
     tourist = relationship(
         "User",
         back_populates="bookings",

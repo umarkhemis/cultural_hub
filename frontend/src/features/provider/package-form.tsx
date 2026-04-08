@@ -158,6 +158,11 @@ export function ProviderPackageForm() {
               className={inputBase}
             />
           </div>
+
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            A 15% platform commission will be deducted from your listed package price
+            after each successful booking.
+          </div>
         </div>
 
         {/* ── Event Date ── */}

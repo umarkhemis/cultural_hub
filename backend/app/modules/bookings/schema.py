@@ -37,7 +37,11 @@ class BookingResponse(BaseModel):
     booking_status: str
     payment_status: str
     participants_count: int
+    base_price: Decimal
+    platform_fee: Decimal
     total_price: Decimal
+    provider_payout_amount: Decimal
+    currency: str
     booking_date: datetime
     reserved_until: datetime | None
     cancelled_at: datetime | None
@@ -54,8 +58,5 @@ class BookingResponse(BaseModel):
 
 class BookingCancelRequest(BaseModel):
     reason: str | None = Field(default=None, max_length=500)
-
-
-
 
 
