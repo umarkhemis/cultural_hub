@@ -1,4 +1,4 @@
-
+// cultural_hub\frontend\src\features\experiences\experience-card.tsx
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";

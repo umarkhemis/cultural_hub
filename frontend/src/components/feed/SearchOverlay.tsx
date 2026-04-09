@@ -1,3 +1,5 @@
+// cultural_hub\frontend\src\components\feed\SearchOverlay.tsx
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";

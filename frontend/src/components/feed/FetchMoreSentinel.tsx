@@ -1,3 +1,5 @@
+// cultural_hub\frontend\src\components\feed\FetchMoreSentinel.tsx
+
 "use client";
 
 import { useEffect, useRef } from "react";
