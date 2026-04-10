@@ -13,13 +13,14 @@ import { BookingStatusBadge, PaymentStatusBadge } from "./booking-badges";
 
 
 
+
 type BookingCardProps = {
   booking: Booking;
   onCancel?: (bookingId: string) => void;
   isCancelling?: boolean;
   showProviderPayout?: boolean;
 };
-
+import { useMemo } from "react";
 
 
 export function BookingCard({
@@ -38,9 +39,15 @@ export function BookingCard({
     booking.booking_status === "awaiting_payment" &&
     (booking.payment_status === "unpaid" || booking.payment_status === "failed");
 
+
+  const now = useMemo(() => new Date(), []);
   const reservationExpired =
-    booking.reserved_until &&
-    new Date(booking.reserved_until).getTime() < Date.now();
+    !!booking.reserved_until &&
+    new Date(booking.reserved_until).getTime() < now.getTime();
+
+  // const reservationExpired =
+  //   booking.reserved_until &&
+  //   new Date(booking.reserved_until).getTime() < Date.now();
 
   const retryHref = `${ROUTES.bookingCheckout}?bookingId=${booking.id}`;
 

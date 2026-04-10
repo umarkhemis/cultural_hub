@@ -65,10 +65,18 @@ export default function CheckoutPage() {
     activeBooking?.total_price ||
     ((packagePrice || 0) * (participants.length || 1));
 
+
+  const now = useMemo(() => new Date(), []);
   const reservationExpired = useMemo(() => {
     if (!effectiveReservedUntil) return false;
-    return new Date(effectiveReservedUntil).getTime() < Date.now();
-  }, [effectiveReservedUntil]);
+    return new Date(effectiveReservedUntil).getTime() < now.getTime();
+  }, [effectiveReservedUntil, now]);
+
+
+  // const reservationExpired = useMemo(() => {
+  //   if (!effectiveReservedUntil) return false;
+  //   return new Date(effectiveReservedUntil).getTime() < Date.now();
+  // }, [effectiveReservedUntil]);
 
   if (!effectiveBookingId || !effectivePackageName || !effectiveAmount) {
     return (
