@@ -1,0 +1,79 @@
+
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: culturalhub-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cultural_hub_db
+      POSTGRES_USER: cultural_hub
+      POSTGRES_PASSWORD: StrongPassword123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cultural_hub -d cultural_hub_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: culturalhub-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: culturalhub-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      
+    env_file:
+      - .env.docker
+      
+    environment:
+      DATABASE_URL: postgresql+psycopg2://cultural_hub:StrongPassword123@db:5432/cultural_hub_db
+      JWT_SECRET_KEY: dev-secret-key-change-in-production
+      REDIS_URL: redis://redis:6379
+      APP_ENV: development
+      DEBUG: "True"
+      BACKEND_CORS_ORIGINS: http://localhost:3000
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      CLOUDINARY_UPLOAD_FOLDER: cultural_hub
+    ports:
+      - "8000:8000"
+
+    
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: culturalhub-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
