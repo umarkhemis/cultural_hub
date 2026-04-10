@@ -1,3 +1,5 @@
+// cultural_hub\frontend\src\components\feed\ExpandableCaption.tsx
+
 "use client";
 
 import { useState } from "react";

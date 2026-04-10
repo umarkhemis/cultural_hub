@@ -1,3 +1,5 @@
+// cultural_hub\frontend\src\components\feed\ExperienceFeedItem.tsx
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -228,7 +230,7 @@ export function ExperienceFeedItem({
   const isFollowProcessing = followMutation.isPending || unfollowMutation.isPending;
 
   return (
-    <div className="relative h-screen w-full snap-start snap-always overflow-hidden bg-black">
+    <div className="relative h-[92vh] w-full max-w-[520px] mx-auto snap-start snap-always overflow-hidden rounded-2xl bg-black">
 
       {/* Media */}
       {isVideo && mediaSrc ? (
@@ -385,8 +387,9 @@ export function ExperienceFeedItem({
           </div>
           <span className="text-xs font-bold text-white drop-shadow-md">Share</span>
         </button>
-
-        <Link
+            
+            {/* view icon */}
+        {/* <Link
           href={`/experiences/${experience.id}`}
           onClick={(e) => e.stopPropagation()}
           className="flex flex-col items-center gap-1.5"
@@ -395,7 +398,7 @@ export function ExperienceFeedItem({
             <span className="text-base text-white">→</span>
           </div>
           <span className="text-xs font-bold text-white drop-shadow-md">View</span>
-        </Link>
+        </Link> */}
       </div>
 
       {/* Up/Down arrows — left side */}
@@ -423,7 +426,7 @@ export function ExperienceFeedItem({
       {/* ── Bottom info: date + caption, aligned with "View" button ── */}
       {/* bottom-32 matches the top of the right sidebar so they sit on the same line */}
       {/* text issues */}
-      <div className="absolute bottom-28 left-4 right-4 z-20 pr-16">
+      <div className="absolute bottom-24 left-4 right-4 z-20">
         <p className="mb-1.5 text-xs text-white/40">{formatDate(experience.created_at)}</p>
         <ExpandableCaption text={experience.caption} />
         {experience.media_items?.length > 1 && (
@@ -433,6 +436,17 @@ export function ExperienceFeedItem({
             ))}
           </div>
         )}
+      </div>
+
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20">
+        <Link
+          href={`/experiences/${experience.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-amber-400/30 hover:bg-amber-300 transition-all"
+        >
+          <MapPin className="h-4 w-4" />
+          Visit this place
+        </Link>
       </div>
 
       {/* Comments drawer */}
