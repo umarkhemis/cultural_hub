@@ -61,7 +61,9 @@ jobs:
         run: alembic upgrade head
 
       - name: Run tests
-        run: pytest
+        working-directory: backend
+        run: PYTHONPATH=. pytest 
+        # run: pytest
 
   frontend:
     name: Frontend Checks
