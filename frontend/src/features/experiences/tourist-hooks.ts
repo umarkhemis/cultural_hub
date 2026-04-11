@@ -1,4 +1,4 @@
-
+// frontend\src\features\experiences\tourist-hooks.ts
 "use client";
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

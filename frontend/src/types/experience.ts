@@ -1,4 +1,4 @@
-
+// frontend\src\types\experience.ts
 export type ExperienceMedia = {
   id: string;
   media_url: string;

@@ -1,4 +1,4 @@
-
+// frontend\src\features\packages\package-detail-actions.tsx
 "use client";
 
 import { Button } from "@/src/components/ui/button";

@@ -1,4 +1,4 @@
-
+// frontend\src\features\packages\package-card.tsx
 import Link from "next/link";
 import { Calendar, MapPin, ArrowRight, Tag } from "lucide-react";
 import type { TourismPackage } from "@/src/types/package";
