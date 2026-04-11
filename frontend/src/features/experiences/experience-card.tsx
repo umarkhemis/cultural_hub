@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Volume2, VolumeX } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { ExperienceActions } from "./experience-actions";
@@ -36,11 +36,13 @@ export function ExperienceCard({
 
   const isMobile = mode === "mobile";
 
+  const hasVideo =
+    experience.media_items?.some((m) => m.media_type === "video") ?? false;
+
   return (
     <article
       className={cn(
         "overflow-hidden border shadow-sm",
-        // Softer cultural palette and rounded cards.
         "bg-[#f5f0f8] border-[#d9d0df]",
         isMobile ? "rounded-3xl" : "rounded-[28px]"
       )}
@@ -78,41 +80,59 @@ export function ExperienceCard({
           <ExpandableCaption text={experience.caption} />
         </div>
 
-        {/* Media */}
-        <Link href={`/experiences/${experience.id}`} className="block">
+        {/* Media (NOT wrapped in a Link; keeps controls + image buttons behaving correctly) */}
+        <div
+          className="block"
+          onClick={(e) => {
+            // Desktop: clicking media opens the detail page.
+            // Avoid hijacking clicks meant for buttons (carousel tiles / modal buttons / video controls).
+            if (mode !== "desktop") return;
+
+            const target = e.target as HTMLElement;
+            if (target.closest("button")) return;
+
+            router.push(`/experiences/${experience.id}`);
+          }}
+          onDoubleClick={(e) => {
+            // Optional: keep double click as well
+            e.preventDefault();
+            if (mode !== "desktop") return;
+            router.push(`/experiences/${experience.id}`);
+          }}
+        >
           <ExperienceMediaGallery
             media={experience.media_items}
             isActive={isActive}
             globalMuted={globalMuted}
+            // Only pass mute handler if there's a video (prevents image-only cards showing audio UI elsewhere)
+            onToggleMute={hasVideo ? onToggleMute : undefined}
           />
-        </Link>
+        </div>
 
-        {/* Controls */}
+        {/* Actions */}
         <div className="mt-3 flex items-center justify-between">
           <ExperienceActions
             experienceId={experience.id}
             likesCount={experience.likes_count}
             commentsCount={experience.comments_count}
             likedByCurrentUser={experience.liked_by_current_user}
-            onCommentClick={() => router.push(`/experiences/${experience.id}#comments`)}
+            onCommentClick={() =>
+              router.push(`/experiences/${experience.id}#comments`)
+            }
           />
 
-          {/* Mute toggle mainly useful on mobile autoplay feed */}
-          {onToggleMute ? (
+          {/* Desktop-only "View" button */}
+          {mode === "desktop" ? (
             <button
               type="button"
-              onClick={onToggleMute}
-              className="inline-flex items-center gap-1 rounded-xl px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
-              aria-label={globalMuted ? "Unmute videos" : "Mute videos"}
-              title={globalMuted ? "Unmute videos" : "Mute videos"}
+              onClick={() => router.push(`/experiences/${experience.id}`)}
+              className="rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100"
             >
-              {globalMuted ? (
-                <VolumeX className="h-4 w-4" />
-              ) : (
-                <Volume2 className="h-4 w-4" />
-              )}
+              View
             </button>
-          ) : null}
+          ) : (
+            <span />
+          )}
         </div>
       </div>
     </article>

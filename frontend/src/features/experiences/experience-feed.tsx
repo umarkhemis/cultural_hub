@@ -14,18 +14,28 @@ import { RightPanel } from "@/src/components/layout/RightPanel";
 import { ExperienceCard } from "./experience-card";
 
 export function ExperienceFeed() {
-  // Active index controls which card is "in focus" (important for mobile autoplay).
+  // Active index controls which card is "in focus" (mobile autoplay).
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Desktop: we want ONE active card to autoplay.
+  const [activeIdDesktop, setActiveIdDesktop] = useState<string | null>(null);
 
   // UI states.
   const [showSplash, setShowSplash] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
 
   // One shared mute state so the whole feed behaves consistently.
+  // Autoplay should be muted by default (browser policy + avoids collisions).
   const [globalMuted, setGlobalMuted] = useState(true);
 
   // Mobile feed scroll container.
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Desktop scroll container (IMPORTANT: enables scrolling in wide layout).
+  const desktopScrollRef = useRef<HTMLDivElement>(null);
+
+  // Desktop list ref (scope querySelector and observation).
+  const desktopListRef = useRef<HTMLDivElement>(null);
 
   // Prevent observer/scroll handlers from fighting while smooth scrolling programmatically.
   const isProgrammaticScroll = useRef(false);
@@ -38,6 +48,30 @@ export function ExperienceFeed() {
     data?.pages.flatMap((page) => page.data.items ?? []).filter(Boolean) ?? [];
 
   /**
+   * Pause all videos except the one in the active card.
+   * This prevents sound collisions and guarantees only one video can play.
+   */
+  const pauseAllExcept = useCallback((activeExperienceId?: string) => {
+    const all = Array.from(document.querySelectorAll<HTMLVideoElement>("video"));
+
+    if (!activeExperienceId) {
+      all.forEach((v) => v.pause());
+      return;
+    }
+
+    const activeWrapper = document.querySelector<HTMLElement>(
+      `[data-experience-id="${activeExperienceId}"]`
+    );
+    const activeVideo =
+      activeWrapper?.querySelector<HTMLVideoElement>("video") ?? null;
+
+    all.forEach((v) => {
+      if (activeVideo && v === activeVideo) return;
+      v.pause();
+    });
+  }, []);
+
+  /**
    * Splash screen:
    * shows briefly after first load for a polished transition.
    */
@@ -46,16 +80,6 @@ export function ExperienceFeed() {
     const timer = setTimeout(() => setShowSplash(false), 900);
     return () => clearTimeout(timer);
   }, [isLoading]);
-
-  /**
-   * Optional UX:
-   * after first item interaction, unmute automatically (you can keep muted forever if preferred).
-   */
-  useEffect(() => {
-    if (activeIndex > 0 && globalMuted) {
-      setGlobalMuted(false);
-    }
-  }, [activeIndex, globalMuted]);
 
   /**
    * Pause all videos while search overlay is open.
@@ -152,7 +176,8 @@ export function ExperienceFeed() {
   }, []);
 
   /**
-   * Prefetch next page when user nears end of current loaded data.
+   * Prefetch next page when user nears end of current loaded data (mobile only).
+   * Desktop uses sentinel.
    */
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -167,6 +192,75 @@ export function ExperienceFeed() {
     fetchNextPage,
   ]);
 
+  /**
+   * Desktop: determine ONE active card by intersectionRatio.
+   * Root is the desktop scroll container (not the window).
+   */
+  useEffect(() => {
+    const rootEl = desktopListRef.current;
+    const scrollRoot = desktopScrollRef.current;
+    if (!rootEl || !scrollRoot) return;
+
+    const ratios = new Map<string, number>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset.experienceId;
+          if (!id) continue;
+
+          if (!entry.isIntersecting) ratios.delete(id);
+          else ratios.set(id, entry.intersectionRatio);
+        }
+
+        let bestId: string | null = null;
+        let bestRatio = 0;
+
+        for (const [id, ratio] of ratios.entries()) {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        }
+
+        const MIN_RATIO = 0.6;
+        setActiveIdDesktop(bestRatio >= MIN_RATIO ? bestId : null);
+      },
+      {
+        root: scrollRoot,
+        threshold: [0, 0.25, 0.5, 0.6, 0.75, 1],
+      }
+    );
+
+    const els = Array.from(
+      rootEl.querySelectorAll<HTMLDivElement>("[data-experience-id]")
+    );
+    els.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [experiences.length]);
+
+  /**
+   * Enforce: ONLY ONE video plays at a time.
+   * - Desktop: based on activeIdDesktop.
+   * - Mobile: based on activeIndex.
+   */
+  useEffect(() => {
+    // Only enforce when not searching (search overlay pauses anyway)
+    if (showSearch) return;
+
+    // Desktop
+    if (activeIdDesktop) {
+      pauseAllExcept(activeIdDesktop);
+      return;
+    }
+
+    // Mobile fallback (activeIdDesktop can be null on smaller screens or early render)
+    const active = experiences[activeIndex];
+    if (active) pauseAllExcept(active.id);
+  }, [activeIdDesktop, activeIndex, experiences, showSearch, pauseAllExcept]);
+
+  // Splash shown at first when showing the feed
   if (isLoading || showSplash) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black text-white">
@@ -178,7 +272,7 @@ export function ExperienceFeed() {
   if (!experiences.length) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F4F4F4] text-slate-600">
-        No experiences yet.
+        No experiences yet
       </div>
     );
   }
@@ -218,32 +312,50 @@ export function ExperienceFeed() {
               </section>
             ))}
 
-            {hasNextPage && <FetchMoreSentinel onVisible={fetchNextPage} />}
+            {hasNextPage ? (
+              <FetchMoreSentinel
+                onVisible={fetchNextPage}
+                enabled={hasNextPage && !isFetchingNextPage}
+              />
+            ) : null}
           </div>
         </div>
 
         {/* DESKTOP FEED (card stream with side panels) */}
-        <div className="hidden lg:block w-full max-w-3xl px-6 py-8">
-          <div className="flex flex-col gap-6">
-            {experiences.map((experience) => (
-              <ExperienceCard
-                key={experience.id}
-                experience={experience}
-                mode="desktop"
-                // Desktop can autoplay too, but keeping false is simpler/safer for performance.
-                isActive={false}
-                globalMuted={true}
-              />
-            ))}
+        <div className="hidden lg:block w-full max-w-3xl">
+          <div
+            ref={desktopScrollRef}
+            className="h-screen overflow-y-auto px-6 py-8"
+          >
+            <div ref={desktopListRef} className="flex flex-col gap-6">
+              {experiences.map((experience) => (
+                <div key={experience.id} data-experience-id={experience.id}>
+                  <ExperienceCard
+                    experience={experience}
+                    mode="desktop"
+                    isActive={experience.id === activeIdDesktop && !showSearch}
+                    globalMuted={globalMuted}
+                    onToggleMute={() => setGlobalMuted((v) => !v)}
+                  />
+                </div>
+              ))}
 
-            {hasNextPage && <FetchMoreSentinel onVisible={fetchNextPage} />}
+              {hasNextPage ? (
+                <FetchMoreSentinel
+                  onVisible={fetchNextPage}
+                  enabled={hasNextPage && !isFetchingNextPage}
+                />
+              ) : null}
+            </div>
           </div>
         </div>
       </main>
 
       {/* RIGHT SIDEBAR (desktop only) */}
-      <aside className="hidden lg:block w-80 xl:w-96 px-4 py-8">
-        <RightPanel />
+      <aside className="hidden lg:block w-80 xl:w-96 border-l border-[#e5ddd1] bg-[#f7f3ed]">
+        <div className="h-screen overflow-y-auto px-4 py-8">
+          <RightPanel />
+        </div>
       </aside>
     </div>
   );
