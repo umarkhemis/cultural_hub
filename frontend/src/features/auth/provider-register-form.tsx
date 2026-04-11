@@ -22,6 +22,32 @@ import { BrandLogo } from "@/src/components/common/brand-logo";
 
 type Props = { onBack?: () => void };
 
+
+
+// function SectionLabel({ number, label }: { number: string; label: string }) {
+//   return (
+//     <div className="col-span-2 flex items-center gap-2 sm:gap-3">
+//       <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[10px] font-bold text-amber-400 sm:h-6 sm:w-6">
+//         {number}
+//       </div>
+//       <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-200 sm:text-xs">{label}</h2>
+//       <div className="flex-1 h-px bg-white/10" />
+//     </div>
+//   );
+// }
+
+const SectionLabel = ({ number, label }: { number: string; label: string }) => (
+    <div className="col-span-2 flex items-center gap-2 sm:gap-3">
+      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[10px] font-bold text-amber-400 sm:h-6 sm:w-6">
+        {number}
+      </div>
+      <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-200 sm:text-xs">{label}</h2>
+      <div className="flex-1 h-px bg-white/10" />
+    </div>
+  );
+
+// export function ProviderRegisterForm({ onBack }: Props) {
+
 export function ProviderRegisterForm({ onBack }: Props) {
   const router = useRouter();
   const { setSession } = useAuth();
@@ -61,15 +87,15 @@ export function ProviderRegisterForm({ onBack }: Props) {
   const iconClass = "absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 pointer-events-none sm:left-3.5 sm:h-4 sm:w-4";
 
   // Always 2-col section label
-  const SectionLabel = ({ number, label }: { number: string; label: string }) => (
-    <div className="col-span-2 flex items-center gap-2 sm:gap-3">
-      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[10px] font-bold text-amber-400 sm:h-6 sm:w-6">
-        {number}
-      </div>
-      <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-200 sm:text-xs">{label}</h2>
-      <div className="flex-1 h-px bg-white/10" />
-    </div>
-  );
+  // const SectionLabel = ({ number, label }: { number: string; label: string }) => (
+  //   <div className="col-span-2 flex items-center gap-2 sm:gap-3">
+  //     <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[10px] font-bold text-amber-400 sm:h-6 sm:w-6">
+  //       {number}
+  //     </div>
+  //     <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-200 sm:text-xs">{label}</h2>
+  //     <div className="flex-1 h-px bg-white/10" />
+  //   </div>
+  // );
 
   return (
     <div className="relative min-h-screen w-full">
@@ -248,5 +274,4 @@ export function ProviderRegisterForm({ onBack }: Props) {
     </div>
   );
 }
-
 

@@ -44,8 +44,16 @@ export function ExperienceFeed() {
   }, [isLoading]);
 
   // Auto-unmute after first scroll
+  // useEffect(() => {
+  //   if (activeIndex > 0 && globalMuted) {
+  //     setGlobalMuted(false);
+  //   }
+  // }, [activeIndex]);
+
+  const hasScrolled = useRef(false);
   useEffect(() => {
-    if (activeIndex > 0 && globalMuted) {
+    if (activeIndex > 0 && !hasScrolled.current) {
+      hasScrolled.current = true;
       setGlobalMuted(false);
     }
   }, [activeIndex]);
