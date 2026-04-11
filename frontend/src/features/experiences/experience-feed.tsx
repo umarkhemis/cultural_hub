@@ -54,6 +54,7 @@ export function ExperienceFeed() {
   useEffect(() => {
     if (activeIndex > 0 && !hasScrolled.current) {
       hasScrolled.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setGlobalMuted(false);
     }
   }, [activeIndex]);

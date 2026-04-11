@@ -166,7 +166,7 @@ export default function TermsPage() {
             <a href="mailto:legal@culturalhub.com" className="underline underline-offset-2 hover:text-amber-900">
               legal@culturalhub.com
             </a>{" "}
-            and we'll be happy to clarify anything.
+            and We&apos;ll be happy to clarify anything.
           </p>
         </div>
 

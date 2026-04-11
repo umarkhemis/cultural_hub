@@ -22,7 +22,7 @@ export function useTypewriter(
   useEffect(() => {
     if (activeIndex < 0 || activeIndex >= lines.length) return;
     const full = lines[activeIndex];
-    let i = displayed[activeIndex].length;
+    const i = displayed[activeIndex].length;
 
     if (i >= full.length) {
       const t = setTimeout(() => {

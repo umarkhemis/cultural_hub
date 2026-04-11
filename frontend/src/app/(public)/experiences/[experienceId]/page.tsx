@@ -27,13 +27,25 @@ export default function ExperienceDetailPage() {
   const { data: comments = [], isLoading: commentsLoading } =
     useExperienceComments(experienceId, 20);
 
+  // useEffect(() => {
+  //   if (window.location.hash === "#comments") {
+  //     setShowComments(true);
+  //     setTimeout(() => {
+  //       commentFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  //       commentFormRef.current?.querySelector("textarea")?.focus();
+  //     }, 500);
+  //   }
+  // }, []);
+
+
   useEffect(() => {
     if (window.location.hash === "#comments") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowComments(true);
       setTimeout(() => {
         commentFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
         commentFormRef.current?.querySelector("textarea")?.focus();
-      }, 500);
+      }, 100);
     }
   }, []);
 

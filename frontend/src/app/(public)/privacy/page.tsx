@@ -178,7 +178,7 @@ export default function PrivacyPage() {
             >         
               privacy@culturalhub.com
             </a>{" "}
-            and we'll respond within 30 days.
+            and We&apos;ll respond within 30 days.
           </p>
         </div>
 

@@ -139,9 +139,10 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
             <Search className="h-10 w-10 text-white/10" />
             <p className="text-sm text-white/40">
               No results for{" "}
-              <span className="text-white/60 font-medium">
+              {/* <span className="text-white/60 font-medium">
                 "{debouncedQuery}"
-              </span>
+              </span> */}
+              <span className="text-white/60 font-medium">&ldquo;{debouncedQuery}&rdquo;</span>
             </p>
             <p className="text-xs text-white/20">
               Try different keywords

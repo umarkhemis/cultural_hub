@@ -25,16 +25,36 @@ export default function ProviderProfilePage() {
   const [contactPhone, setContactPhone] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
 
+  // useEffect(() => {
+  //   if (data) {
+  //     setSiteName(data.site_name || "");
+  //     setDescription(data.description || "");
+  //     setLocation(data.location || "");
+  //     setContactEmail(data.contact_email || "");
+  //     setContactPhone(data.contact_phone || "");
+  //     setLogoUrl(data.logo_url || "");
+  //   }
+  // }, [data]);
+
   useEffect(() => {
     if (data) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSiteName(data.site_name || "");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDescription(data.description || "");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocation(data.location || "");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setContactEmail(data.contact_email || "");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setContactPhone(data.contact_phone || "");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLogoUrl(data.logo_url || "");
     }
   }, [data]);
+
+
+
 
   const handleSave = async () => {
     try {
