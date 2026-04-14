@@ -1,4 +1,4 @@
-
+// frontend\src\constants\routes.ts
 export const ROUTES = {
   home: "/",
   welcome: "/welcome",

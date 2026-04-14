@@ -11,9 +11,21 @@ import { ImageCarouselModal } from "@/src/components/ui/ImageCarouselModal";
 type Props = {
   media: ExperienceMedia[];
   isActive?: boolean;
+
+  // global sound preference (persists across cards)
   globalMuted?: boolean;
   onToggleMute?: () => void;
+
+  // local behavior
   allowManualPlayback?: boolean;
+
+  // feed-controlled autoplay permission:
+  // - false on first visit
+  // - true after user initiates playback once
+  shouldAutoplay?: boolean;
+
+  // called when user manually starts playback (presses play)
+  onUserPlay?: () => void;
 };
 
 export function ExperienceMediaGallery({
@@ -22,6 +34,8 @@ export function ExperienceMediaGallery({
   globalMuted = true,
   onToggleMute,
   allowManualPlayback = true,
+  shouldAutoplay = false,
+  onUserPlay,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -67,25 +81,29 @@ export function ExperienceMediaGallery({
     v.volume = globalMuted ? 0 : 1;
   }, [globalMuted]);
 
-  // Autoplay only if active, not paused by user, and no error
+  // Autoplay only if:
+  // - card is active
+  // - feed allows autoplay (shouldAutoplay)
+  // - user hasn't paused this card manually
+  // - video isn't in error state
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
 
-    if (primaryVideo && isActive && !isPausedByUser && !videoError) {
+    if (primaryVideo && isActive && shouldAutoplay && !isPausedByUser && !videoError) {
       v.play()
         .then(() => {
           // ok
         })
         .catch(() => {
           // Autoplay can fail due to browser policy.
-          // Not an "error": user can press play.
+          // Not treated as error; user can press play.
           setIsPlaying(false);
         });
     } else {
       v.pause();
     }
-  }, [primaryVideo, isActive, isPausedByUser, videoError]);
+  }, [primaryVideo, isActive, shouldAutoplay, isPausedByUser, videoError]);
 
   // If card becomes inactive, clear user pause so it can autoplay again when active later
   useEffect(() => {
@@ -162,6 +180,10 @@ export function ExperienceMediaGallery({
 
                 if (v.paused) {
                   setIsPausedByUser(false);
+
+                  // user initiated playback -> allow feed autoplay & auto-unmute (handled in feed)
+                  onUserPlay?.();
+
                   v.play().catch(() => {});
                 } else {
                   setIsPausedByUser(true);

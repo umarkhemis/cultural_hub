@@ -16,8 +16,17 @@ type ExperienceCardProps = {
   experience: Experience;
   mode?: "mobile" | "desktop";
   isActive?: boolean;
+
   globalMuted?: boolean;
   onToggleMute?: () => void;
+
+  // Feed-controlled:
+  // - false on first visit
+  // - true after user presses play once
+  shouldAutoplay?: boolean;
+
+  // Called when user presses play on any video in this card
+  onUserPlay?: () => void;
 };
 
 export function ExperienceCard({
@@ -26,6 +35,8 @@ export function ExperienceCard({
   isActive = false,
   globalMuted = true,
   onToggleMute,
+  shouldAutoplay = false,
+  onUserPlay,
 }: ExperienceCardProps) {
   const router = useRouter();
   if (!experience) return null;
@@ -104,8 +115,9 @@ export function ExperienceCard({
             media={experience.media_items}
             isActive={isActive}
             globalMuted={globalMuted}
-            // Only pass mute handler if there's a video (prevents image-only cards showing audio UI elsewhere)
             onToggleMute={hasVideo ? onToggleMute : undefined}
+            shouldAutoplay={shouldAutoplay}
+            onUserPlay={hasVideo ? onUserPlay : undefined}
           />
         </div>
 

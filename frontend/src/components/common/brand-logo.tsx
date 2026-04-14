@@ -2,15 +2,24 @@
 
 import Link from "next/link";
 import { ROUTES } from "@/src/constants/routes";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   size?: "sm" | "md" | "lg";
   showTagline?: boolean;
+
+  // NEW:
+  href?: string;
+  logoShape?: "square" | "rounded" | "circle";
+  className?: string;
 };
 
 export function BrandLogo({
   size = "md",
   showTagline = true,
+  href = ROUTES.welcome,
+  logoShape = "square",
+  className,
 }: Props) {
   const sizes = {
     sm: {
@@ -32,18 +41,29 @@ export function BrandLogo({
 
   const s = sizes[size];
 
+  const shapeClass =
+    logoShape === "circle"
+      ? "rounded-full"
+      : logoShape === "rounded"
+        ? "rounded-2xl"
+        : "";
+
   return (
-    <Link href={ROUTES.welcome} className="flex items-center gap-2">
+    <Link href={href} className={cn("flex items-center gap-2", className)}>
       <img
         src="/mock/logo_cultural_hub-bg.png"
         alt="CulturalHub"
-        className={`${s.logo} object-contain shrink-0`}
+        className={cn(
+          s.logo,
+          "object-contain shrink-0",
+          shapeClass
+        )}
         style={{ imageRendering: "crisp-edges" }}
       />
 
       <div className="flex flex-col leading-none gap-0.5">
         <span
-          className={`${s.title} font-bold tracking-wide`}
+          className={cn(s.title, "font-bold tracking-wide")}
           style={{ color: "#f97316" }} // orange
         >
           CulturalHub
@@ -51,8 +71,11 @@ export function BrandLogo({
 
         {showTagline && (
           <span
-            className={`${s.tagline} font-semibold tracking-widest uppercase`}
-            style={{ color: "#22c55e" }} // FIXED light green
+            className={cn(
+              s.tagline,
+              "font-semibold tracking-widest uppercase"
+            )}
+            style={{ color: "#22c55e" }} // light green
           >
             Explore Culture
           </span>
@@ -61,3 +84,4 @@ export function BrandLogo({
     </Link>
   );
 }
+

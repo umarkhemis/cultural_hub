@@ -14,27 +14,29 @@ import { RightPanel } from "@/src/components/layout/RightPanel";
 import { ExperienceCard } from "./experience-card";
 
 export function ExperienceFeed() {
-  // Active index controls which card is "in focus" (mobile autoplay).
+  // Used mainly for mobile navigation helpers (snap scrolling / keyboard testing).
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Desktop: we want ONE active card to autoplay.
-  const [activeIdDesktop, setActiveIdDesktop] = useState<string | null>(null);
+  // Unified: the ONE experience considered active for playback purposes.
+  const [activeExperienceId, setActiveExperienceId] = useState<string | null>(null);
 
   // UI states.
   const [showSplash, setShowSplash] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
 
-  // One shared mute state so the whole feed behaves consistently.
-  // Autoplay should be muted by default (browser policy + avoids collisions).
+  // Global audio preference. Default muted until user initiates playback.
   const [globalMuted, setGlobalMuted] = useState(true);
+
+  // Autoplay permission: false on first load, becomes true once user presses play once.
+  const [hasUserStartedPlayback, setHasUserStartedPlayback] = useState(false);
 
   // Mobile feed scroll container.
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Desktop scroll container (IMPORTANT: enables scrolling in wide layout).
+  // Desktop scroll container.
   const desktopScrollRef = useRef<HTMLDivElement>(null);
 
-  // Desktop list ref (scope querySelector and observation).
+  // Desktop list ref.
   const desktopListRef = useRef<HTMLDivElement>(null);
 
   // Prevent observer/scroll handlers from fighting while smooth scrolling programmatically.
@@ -43,24 +45,23 @@ export function ExperienceFeed() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfinitePublicFeed();
 
-  // Flatten paginated backend response into one list.
   const experiences: Experience[] =
     data?.pages.flatMap((page) => page.data.items ?? []).filter(Boolean) ?? [];
 
   /**
    * Pause all videos except the one in the active card.
-   * This prevents sound collisions and guarantees only one video can play.
+   * Guarantees no sound collisions.
    */
-  const pauseAllExcept = useCallback((activeExperienceId?: string) => {
+  const pauseAllExcept = useCallback((id?: string | null) => {
     const all = Array.from(document.querySelectorAll<HTMLVideoElement>("video"));
 
-    if (!activeExperienceId) {
+    if (!id) {
       all.forEach((v) => v.pause());
       return;
     }
 
     const activeWrapper = document.querySelector<HTMLElement>(
-      `[data-experience-id="${activeExperienceId}"]`
+      `[data-experience-id="${id}"]`
     );
     const activeVideo =
       activeWrapper?.querySelector<HTMLVideoElement>("video") ?? null;
@@ -72,8 +73,7 @@ export function ExperienceFeed() {
   }, []);
 
   /**
-   * Splash screen:
-   * shows briefly after first load for a polished transition.
+   * Splash screen.
    */
   useEffect(() => {
     if (isLoading) return;
@@ -83,7 +83,6 @@ export function ExperienceFeed() {
 
   /**
    * Pause all videos while search overlay is open.
-   * This avoids hidden playback + audio confusion.
    */
   useEffect(() => {
     if (!showSearch) return;
@@ -91,7 +90,44 @@ export function ExperienceFeed() {
   }, [showSearch]);
 
   /**
-   * Mobile helper: scroll to a specific feed item.
+   * When activeExperienceId changes, enforce only-one-playing.
+   */
+  useEffect(() => {
+    if (showSearch) return;
+    pauseAllExcept(activeExperienceId);
+  }, [activeExperienceId, pauseAllExcept, showSearch]);
+
+  /**
+   * CRITICAL: Enforce pausing during scroll too.
+   * IntersectionObserver can lag, so without this a manually played video can keep playing off-screen.
+   */
+  useEffect(() => {
+    if (showSearch) return;
+
+    const mobileRoot = containerRef.current;
+    const desktopRoot = desktopScrollRef.current;
+
+    const handler = () => pauseAllExcept(activeExperienceId);
+
+    mobileRoot?.addEventListener("scroll", handler, { passive: true });
+    desktopRoot?.addEventListener("scroll", handler, { passive: true });
+
+    return () => {
+      mobileRoot?.removeEventListener("scroll", handler);
+      desktopRoot?.removeEventListener("scroll", handler);
+    };
+  }, [activeExperienceId, pauseAllExcept, showSearch]);
+
+  /**
+   * Optional: set an initial active id once data arrives (helps consistent enforcement).
+   */
+  useEffect(() => {
+    if (!experiences.length) return;
+    setActiveExperienceId((prev) => prev ?? experiences[0].id);
+  }, [experiences]);
+
+  /**
+   * Mobile helper: scroll to index (keyboard support/testing).
    */
   const scrollToIndex = useCallback((index: number) => {
     const container = containerRef.current;
@@ -110,7 +146,6 @@ export function ExperienceFeed() {
     }, 450);
   }, []);
 
-  // Keyboard support (works nicely on desktop + testing environments).
   const goNext = useCallback(() => {
     scrollToIndex(Math.min(activeIndex + 1, experiences.length - 1));
   }, [activeIndex, experiences.length, scrollToIndex]);
@@ -129,55 +164,7 @@ export function ExperienceFeed() {
   }, [goNext, goPrev]);
 
   /**
-   * Active card detection for mobile:
-   * whichever snap item is >= 60% visible becomes active.
-   */
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (isProgrammaticScroll.current) return;
-
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const index = Number((entry.target as HTMLElement).dataset.index);
-          if (!Number.isNaN(index)) {
-            setActiveIndex((prev) => (prev !== index ? index : prev));
-          }
-        });
-      },
-      { root: container, threshold: 0.6 }
-    );
-
-    const children = Array.from(container.children);
-    children.forEach((child) => observer.observe(child));
-
-    return () => observer.disconnect();
-  }, [experiences.length]);
-
-  /**
-   * Scroll fallback:
-   * keeps active index accurate in browsers/devices where observer behavior is imperfect.
-   */
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      if (isProgrammaticScroll.current) return;
-      const index = Math.round(container.scrollTop / container.clientHeight);
-      setActiveIndex((prev) => (prev !== index ? index : prev));
-    };
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  /**
-   * Prefetch next page when user nears end of current loaded data (mobile only).
-   * Desktop uses sentinel.
+   * Prefetch next page when user nears end (mobile).
    */
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -192,9 +179,62 @@ export function ExperienceFeed() {
     fetchNextPage,
   ]);
 
+  const THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.35, 0.5, 0.75, 1];
+  const MIN_RATIO = 0.35;
+
   /**
-   * Desktop: determine ONE active card by intersectionRatio.
-   * Root is the desktop scroll container (not the window).
+   * Most-visible-wins observer (Mobile).
+   * Root = mobile scroll container.
+   */
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+
+    const ratios = new Map<string, number>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isProgrammaticScroll.current) return;
+
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).dataset.experienceId;
+          if (!id) continue;
+
+          if (!entry.isIntersecting) ratios.delete(id);
+          else ratios.set(id, entry.intersectionRatio);
+        }
+
+        let bestId: string | null = null;
+        let bestRatio = 0;
+
+        for (const [id, ratio] of ratios.entries()) {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        }
+
+        // Keep previous unless nothing is intersecting (prevents flicker to null)
+        setActiveExperienceId((prev) => {
+          if (bestRatio >= MIN_RATIO) return bestId;
+          if (ratios.size === 0) return null;
+          return prev;
+        });
+      },
+      { root, threshold: THRESHOLDS }
+    );
+
+    const els = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-experience-id]")
+    );
+    els.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [experiences.length]);
+
+  /**
+   * Most-visible-wins observer (Desktop).
+   * Root = desktop scroll container.
    */
   useEffect(() => {
     const rootEl = desktopListRef.current;
@@ -223,17 +263,20 @@ export function ExperienceFeed() {
           }
         }
 
-        const MIN_RATIO = 0.6;
-        setActiveIdDesktop(bestRatio >= MIN_RATIO ? bestId : null);
+        setActiveExperienceId((prev) => {
+          if (bestRatio >= MIN_RATIO) return bestId;
+          if (ratios.size === 0) return null; // truly nothing visible
+          return prev; // keep current to avoid flicker
+        });
       },
       {
         root: scrollRoot,
-        threshold: [0, 0.25, 0.5, 0.6, 0.75, 1],
+        threshold: THRESHOLDS,
       }
     );
 
     const els = Array.from(
-      rootEl.querySelectorAll<HTMLDivElement>("[data-experience-id]")
+      rootEl.querySelectorAll<HTMLElement>("[data-experience-id]")
     );
     els.forEach((el) => observer.observe(el));
 
@@ -241,26 +284,15 @@ export function ExperienceFeed() {
   }, [experiences.length]);
 
   /**
-   * Enforce: ONLY ONE video plays at a time.
-   * - Desktop: based on activeIdDesktop.
-   * - Mobile: based on activeIndex.
+   * Handler called when user presses Play on any video.
+   * - enables autoplay for subsequent active videos
+   * - turns sound on
    */
-  useEffect(() => {
-    // Only enforce when not searching (search overlay pauses anyway)
-    if (showSearch) return;
+  const handleUserPlay = useCallback(() => {
+    setHasUserStartedPlayback(true);
+    setGlobalMuted(false);
+  }, []);
 
-    // Desktop
-    if (activeIdDesktop) {
-      pauseAllExcept(activeIdDesktop);
-      return;
-    }
-
-    // Mobile fallback (activeIdDesktop can be null on smaller screens or early render)
-    const active = experiences[activeIndex];
-    if (active) pauseAllExcept(active.id);
-  }, [activeIdDesktop, activeIndex, experiences, showSearch, pauseAllExcept]);
-
-  // Splash shown at first when showing the feed
   if (isLoading || showSplash) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black text-white">
@@ -286,31 +318,38 @@ export function ExperienceFeed() {
 
       {/* CENTER COLUMN */}
       <main className="flex-1 flex justify-center">
-        {/* MOBILE FEED (full-screen snapping experience) */}
+        {/* MOBILE FEED */}
         <div className="w-full max-w-[460px] lg:hidden bg-[#f6f0e8] relative">
           <FeedNavbar onSearchOpen={() => setShowSearch(true)} />
-
           {showSearch && <SearchOverlay onClose={() => setShowSearch(false)} />}
 
           <div
             ref={containerRef}
             className="h-screen overflow-y-auto snap-y snap-mandatory no-scrollbar"
           >
-            {experiences.map((experience, index) => (
-              <section
-                key={experience.id}
-                data-index={index}
-                className="snap-start min-h-screen px-3 py-3"
-              >
-                <ExperienceCard
-                  experience={experience}
-                  mode="mobile"
-                  isActive={index === activeIndex && !showSearch}
-                  globalMuted={globalMuted}
-                  onToggleMute={() => setGlobalMuted((v) => !v)}
-                />
-              </section>
-            ))}
+            {experiences.map((experience, index) => {
+              const isActive = experience.id === activeExperienceId && !showSearch;
+              const shouldAutoplay = hasUserStartedPlayback && isActive;
+
+              return (
+                <section
+                  key={experience.id}
+                  data-index={index}
+                  data-experience-id={experience.id}
+                  className="snap-start min-h-screen px-3 py-3"
+                >
+                  <ExperienceCard
+                    experience={experience}
+                    mode="mobile"
+                    isActive={isActive}
+                    globalMuted={globalMuted}
+                    onToggleMute={() => setGlobalMuted((v) => !v)}
+                    shouldAutoplay={shouldAutoplay}
+                    onUserPlay={handleUserPlay}
+                  />
+                </section>
+              );
+            })}
 
             {hasNextPage ? (
               <FetchMoreSentinel
@@ -321,24 +360,28 @@ export function ExperienceFeed() {
           </div>
         </div>
 
-        {/* DESKTOP FEED (card stream with side panels) */}
+        {/* DESKTOP FEED */}
         <div className="hidden lg:block w-full max-w-3xl">
-          <div
-            ref={desktopScrollRef}
-            className="h-screen overflow-y-auto px-6 py-8"
-          >
+          <div ref={desktopScrollRef} className="h-screen overflow-y-auto px-6 py-8">
             <div ref={desktopListRef} className="flex flex-col gap-6">
-              {experiences.map((experience) => (
-                <div key={experience.id} data-experience-id={experience.id}>
-                  <ExperienceCard
-                    experience={experience}
-                    mode="desktop"
-                    isActive={experience.id === activeIdDesktop && !showSearch}
-                    globalMuted={globalMuted}
-                    onToggleMute={() => setGlobalMuted((v) => !v)}
-                  />
-                </div>
-              ))}
+              {experiences.map((experience) => {
+                const isActive = experience.id === activeExperienceId && !showSearch;
+                const shouldAutoplay = hasUserStartedPlayback && isActive;
+
+                return (
+                  <div key={experience.id} data-experience-id={experience.id}>
+                    <ExperienceCard
+                      experience={experience}
+                      mode="desktop"
+                      isActive={isActive}
+                      globalMuted={globalMuted}
+                      onToggleMute={() => setGlobalMuted((v) => !v)}
+                      shouldAutoplay={shouldAutoplay}
+                      onUserPlay={handleUserPlay}
+                    />
+                  </div>
+                );
+              })}
 
               {hasNextPage ? (
                 <FetchMoreSentinel

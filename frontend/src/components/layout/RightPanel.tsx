@@ -1,3 +1,4 @@
+// frontend\src\features\sites
 "use client";
 
 import Link from "next/link";
@@ -29,7 +30,7 @@ export function RightPanel() {
     isError: packagesError,
   } = usePackages();
 
-  // ✅ Normalize shape locally so RightPanel never breaks.
+  // Normalize shape locally so RightPanel never breaks.
   const packages: TourismPackage[] = useMemo(() => {
     if (Array.isArray(packagesRaw)) return packagesRaw;
     if (packagesRaw && Array.isArray((packagesRaw as { items?: TourismPackage[] }).items)) {
