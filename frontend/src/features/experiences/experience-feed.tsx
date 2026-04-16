@@ -12,34 +12,25 @@ import { LeftSidebar } from "@/src/components/layout/LeftSidebar";
 import { RightPanel } from "@/src/components/layout/RightPanel";
 
 import { ExperienceCard } from "./experience-card";
+import { useMediaQuery } from "@/src/hooks/useMediaQuery";
 
 export function ExperienceFeed() {
-  // Used mainly for mobile navigation helpers (snap scrolling / keyboard testing).
-  const [activeIndex, setActiveIndex] = useState(0);
+  // Tailwind lg breakpoint is 1024px
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  // Unified: the ONE experience considered active for playback purposes.
+  const [activeIndex, setActiveIndex] = useState(0);
   const [activeExperienceId, setActiveExperienceId] = useState<string | null>(null);
 
-  // UI states.
   const [showSplash, setShowSplash] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
 
-  // Global audio preference. Default muted until user initiates playback.
   const [globalMuted, setGlobalMuted] = useState(true);
-
-  // Autoplay permission: false on first load, becomes true once user presses play once.
   const [hasUserStartedPlayback, setHasUserStartedPlayback] = useState(false);
 
-  // Mobile feed scroll container.
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Desktop scroll container.
   const desktopScrollRef = useRef<HTMLDivElement>(null);
-
-  // Desktop list ref.
   const desktopListRef = useRef<HTMLDivElement>(null);
 
-  // Prevent observer/scroll handlers from fighting while smooth scrolling programmatically.
   const isProgrammaticScroll = useRef(false);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -49,26 +40,24 @@ export function ExperienceFeed() {
     data?.pages.flatMap((page) => page.data.items ?? []).filter(Boolean) ?? [];
 
   /**
-   * Pause all videos except the one in the active card.
-   * Guarantees no sound collisions.
+   * Pause all videos NOT inside the active wrapper.
+   * More robust than comparing to a single "activeVideo" node.
    */
   const pauseAllExcept = useCallback((id?: string | null) => {
-    const all = Array.from(document.querySelectorAll<HTMLVideoElement>("video"));
+    const videos = Array.from(document.querySelectorAll<HTMLVideoElement>("video"));
 
     if (!id) {
-      all.forEach((v) => v.pause());
+      videos.forEach((v) => v.pause());
       return;
     }
 
     const activeWrapper = document.querySelector<HTMLElement>(
       `[data-experience-id="${id}"]`
     );
-    const activeVideo =
-      activeWrapper?.querySelector<HTMLVideoElement>("video") ?? null;
 
-    all.forEach((v) => {
-      if (activeVideo && v === activeVideo) return;
-      v.pause();
+    videos.forEach((v) => {
+      const insideActive = activeWrapper ? activeWrapper.contains(v) : false;
+      if (!insideActive) v.pause();
     });
   }, []);
 
@@ -98,8 +87,7 @@ export function ExperienceFeed() {
   }, [activeExperienceId, pauseAllExcept, showSearch]);
 
   /**
-   * CRITICAL: Enforce pausing during scroll too.
-   * IntersectionObserver can lag, so without this a manually played video can keep playing off-screen.
+   * Enforce during scroll too (observer can lag).
    */
   useEffect(() => {
     if (showSearch) return;
@@ -119,7 +107,7 @@ export function ExperienceFeed() {
   }, [activeExperienceId, pauseAllExcept, showSearch]);
 
   /**
-   * Optional: set an initial active id once data arrives (helps consistent enforcement).
+   * Set initial active id once experiences load.
    */
   useEffect(() => {
     if (!experiences.length) return;
@@ -164,14 +152,14 @@ export function ExperienceFeed() {
   }, [goNext, goPrev]);
 
   /**
-   * Prefetch next page when user nears end (mobile).
+   * Prefetch next page when user nears end (mobile only).
    */
   useEffect(() => {
+    if (isDesktop) return;
     if (!hasNextPage || isFetchingNextPage) return;
-    if (activeIndex >= experiences.length - 3) {
-      fetchNextPage();
-    }
+    if (activeIndex >= experiences.length - 3) fetchNextPage();
   }, [
+    isDesktop,
     activeIndex,
     experiences.length,
     hasNextPage,
@@ -183,10 +171,11 @@ export function ExperienceFeed() {
   const MIN_RATIO = 0.35;
 
   /**
-   * Most-visible-wins observer (Mobile).
-   * Root = mobile scroll container.
+   * Most-visible-wins observer (Mobile only).
    */
   useEffect(() => {
+    if (isDesktop) return;
+
     const root = containerRef.current;
     if (!root) return;
 
@@ -214,7 +203,6 @@ export function ExperienceFeed() {
           }
         }
 
-        // Keep previous unless nothing is intersecting (prevents flicker to null)
         setActiveExperienceId((prev) => {
           if (bestRatio >= MIN_RATIO) return bestId;
           if (ratios.size === 0) return null;
@@ -224,19 +212,18 @@ export function ExperienceFeed() {
       { root, threshold: THRESHOLDS }
     );
 
-    const els = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-experience-id]")
-    );
+    const els = Array.from(root.querySelectorAll<HTMLElement>("[data-experience-id]"));
     els.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [experiences.length]);
+  }, [experiences.length, isDesktop]);
 
   /**
-   * Most-visible-wins observer (Desktop).
-   * Root = desktop scroll container.
+   * Most-visible-wins observer (Desktop only).
    */
   useEffect(() => {
+    if (!isDesktop) return;
+
     const rootEl = desktopListRef.current;
     const scrollRoot = desktopScrollRef.current;
     if (!rootEl || !scrollRoot) return;
@@ -265,14 +252,11 @@ export function ExperienceFeed() {
 
         setActiveExperienceId((prev) => {
           if (bestRatio >= MIN_RATIO) return bestId;
-          if (ratios.size === 0) return null; // truly nothing visible
-          return prev; // keep current to avoid flicker
+          if (ratios.size === 0) return null;
+          return prev;
         });
       },
-      {
-        root: scrollRoot,
-        threshold: THRESHOLDS,
-      }
+      { root: scrollRoot, threshold: THRESHOLDS }
     );
 
     const els = Array.from(
@@ -281,13 +265,8 @@ export function ExperienceFeed() {
     els.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [experiences.length]);
+  }, [experiences.length, isDesktop]);
 
-  /**
-   * Handler called when user presses Play on any video.
-   * - enables autoplay for subsequent active videos
-   * - turns sound on
-   */
   const handleUserPlay = useCallback(() => {
     setHasUserStartedPlayback(true);
     setGlobalMuted(false);
@@ -318,68 +297,37 @@ export function ExperienceFeed() {
 
       {/* CENTER COLUMN */}
       <main className="flex-1 flex justify-center">
-        {/* MOBILE FEED */}
-        <div className="w-full max-w-[460px] lg:hidden bg-[#f6f0e8] relative">
-          <FeedNavbar onSearchOpen={() => setShowSearch(true)} />
-          {showSearch && <SearchOverlay onClose={() => setShowSearch(false)} />}
+        {/* Render ONLY ONE feed layout */}
+        {!isDesktop ? (
+          <div className="w-full max-w-[460px] bg-[#f6f0e8] relative">
+            <FeedNavbar onSearchOpen={() => setShowSearch(true)} />
+            {showSearch && <SearchOverlay onClose={() => setShowSearch(false)} />}
 
-          <div
-            ref={containerRef}
-            className="h-screen overflow-y-auto snap-y snap-mandatory no-scrollbar"
-          >
-            {experiences.map((experience, index) => {
-              const isActive = experience.id === activeExperienceId && !showSearch;
-              const shouldAutoplay = hasUserStartedPlayback && isActive;
-
-              return (
-                <section
-                  key={experience.id}
-                  data-index={index}
-                  data-experience-id={experience.id}
-                  className="snap-start min-h-screen px-3 py-3"
-                >
-                  <ExperienceCard
-                    experience={experience}
-                    mode="mobile"
-                    isActive={isActive}
-                    globalMuted={globalMuted}
-                    onToggleMute={() => setGlobalMuted((v) => !v)}
-                    shouldAutoplay={shouldAutoplay}
-                    onUserPlay={handleUserPlay}
-                  />
-                </section>
-              );
-            })}
-
-            {hasNextPage ? (
-              <FetchMoreSentinel
-                onVisible={fetchNextPage}
-                enabled={hasNextPage && !isFetchingNextPage}
-              />
-            ) : null}
-          </div>
-        </div>
-
-        {/* DESKTOP FEED */}
-        <div className="hidden lg:block w-full max-w-3xl">
-          <div ref={desktopScrollRef} className="h-screen overflow-y-auto px-6 py-8">
-            <div ref={desktopListRef} className="flex flex-col gap-6">
-              {experiences.map((experience) => {
+            <div
+              ref={containerRef}
+              className="h-screen overflow-y-auto snap-y snap-mandatory no-scrollbar"
+            >
+              {experiences.map((experience, index) => {
                 const isActive = experience.id === activeExperienceId && !showSearch;
                 const shouldAutoplay = hasUserStartedPlayback && isActive;
 
                 return (
-                  <div key={experience.id} data-experience-id={experience.id}>
+                  <section
+                    key={experience.id}
+                    data-index={index}
+                    data-experience-id={experience.id}
+                    className="snap-start min-h-screen px-3 py-3"
+                  >
                     <ExperienceCard
                       experience={experience}
-                      mode="desktop"
+                      mode="mobile"
                       isActive={isActive}
                       globalMuted={globalMuted}
                       onToggleMute={() => setGlobalMuted((v) => !v)}
                       shouldAutoplay={shouldAutoplay}
                       onUserPlay={handleUserPlay}
                     />
-                  </div>
+                  </section>
                 );
               })}
 
@@ -391,7 +339,39 @@ export function ExperienceFeed() {
               ) : null}
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="w-full max-w-3xl">
+            <div ref={desktopScrollRef} className="h-screen overflow-y-auto px-6 py-8">
+              <div ref={desktopListRef} className="flex flex-col gap-6">
+                {experiences.map((experience) => {
+                  const isActive = experience.id === activeExperienceId && !showSearch;
+                  const shouldAutoplay = hasUserStartedPlayback && isActive;
+
+                  return (
+                    <div key={experience.id} data-experience-id={experience.id}>
+                      <ExperienceCard
+                        experience={experience}
+                        mode="desktop"
+                        isActive={isActive}
+                        globalMuted={globalMuted}
+                        onToggleMute={() => setGlobalMuted((v) => !v)}
+                        shouldAutoplay={shouldAutoplay}
+                        onUserPlay={handleUserPlay}
+                      />
+                    </div>
+                  );
+                })}
+
+                {hasNextPage ? (
+                  <FetchMoreSentinel
+                    onVisible={fetchNextPage}
+                    enabled={hasNextPage && !isFetchingNextPage}
+                  />
+                ) : null}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* RIGHT SIDEBAR (desktop only) */}

@@ -1,4 +1,4 @@
-// frontend\src\features\sites
+
 "use client";
 
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { useSites } from "@/src/features/sites/hooks";
 import { usePackages } from "@/src/features/packages/hooks";
 
 import type { TourismPackage } from "@/src/types/package";
-import type { Site } from "@/src/types/sites";
+import type { Site } from "@/src/types/site";
 import { cn } from "@/src/utils/cn";
 
 export function RightPanel() {
