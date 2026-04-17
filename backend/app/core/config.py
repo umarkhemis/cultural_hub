@@ -38,8 +38,8 @@ class Settings(BaseSettings):
     # GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=https://cultural-hub.onrender.com/api/v1/auth/google/callback"
     GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=http://localhost:8000/api/v1/auth/google/callback"
 
-    # FRONTEND_URL: str = "https://cultural-hub-psi.vercel.app"
-    FRONTEND_URL: str = "http://localhost:3000"
+    FRONTEND_URL: str = "https://cultural-hub-psi.vercel.app"
+    
 
     GOOGLE_OAUTH_STATE_TTL_SECONDS: int =600
     GOOGLE_OAUTH_EXCHANGE_CODE_TTL_SECONDS: int =120
