@@ -146,7 +146,7 @@ export function WhatYouCanDoScroll() {
         "Create experiences, manage bookings, and share updates—all from one place built for cultural providers.",
       cta: "Become a Provider",
       href: ROUTES.register,
-      imageSrc: "/home/story_3.png",
+      imageSrc: "/home/provider.png",
       imageAlt: "Provider tools preview",
     },
   ];
