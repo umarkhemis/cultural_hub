@@ -18,4 +18,4 @@ jobs:
 
     steps:
       - name: Trigger Render Deploy
-        run: curl -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+        run: curl --fail --silent --show-error -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
