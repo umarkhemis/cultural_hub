@@ -35,7 +35,14 @@ class Settings(BaseSettings):
 
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
-    GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=https://cultural-hub.onrender.com/api/v1/auth/google/callback, http://localhost:8000/api/v1/auth/google/callback"
+    # GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=https://cultural-hub.onrender.com/api/v1/auth/google/callback"
+    GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=http://localhost:8000/api/v1/auth/google/callback"
+
+    # FRONTEND_URL: str = "https://cultural-hub-psi.vercel.app"
+    FRONTEND_URL: str = "http://localhost:3000"
+
+    GOOGLE_OAUTH_STATE_TTL_SECONDS: int =600
+    GOOGLE_OAUTH_EXCHANGE_CODE_TTL_SECONDS: int =120
 
     RATE_LIMIT_LOGIN_PER_MINUTE: int = 5
     RATE_LIMIT_REGISTER_PER_HOUR: int = 10

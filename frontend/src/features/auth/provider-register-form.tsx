@@ -24,7 +24,7 @@ import { GoogleAuthButton } from "@/src/store/Google_auth_button";
 
 // ⬇ Provider Google register — backend creates a provider stub, then redirects to callback
 // The callback will detect `needs_site_details: true` and redirect to /register/provider-complete
-const GOOGLE_PROVIDER_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=register&role=provider`;
+const GOOGLE_PROVIDER_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=provider`;
 
 type Props = { onBack?: () => void };
 

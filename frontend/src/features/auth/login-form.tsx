@@ -22,7 +22,7 @@ import { setAuthTokens } from "@/src/lib/api/client";
 import { GoogleAuthButton } from "@/src/store/Google_auth_button";
 
 // ⬇ Point this at your backend's Google OAuth initiation endpoint
-const GOOGLE_LOGIN_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=login`;
+const GOOGLE_LOGIN_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=tourist`;
 
 export function LoginForm() {
   const router = useRouter();

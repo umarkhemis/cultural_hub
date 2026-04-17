@@ -84,84 +84,23 @@ def delete_cache_by_pattern(pattern: str) -> None:
 
 
 
+def set_cache_raw(key: str, value: str, ttl_seconds: int = 60) -> None:
+    if redis_client is None:
+        return
+
+    try:
+        redis_client.setex(key, ttl_seconds, value)
+    except RedisError as exc:
+        logger.warning("Redis raw set failed for key=%s: %s", key, exc)
 
 
+def get_cache_raw(key: str) -> str | None:
+    if redis_client is None:
+        return None
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# import json
-# import logging
-
-# import redis
-# from redis.exceptions import RedisError
-
-# from app.core.config import settings
-
-# logger = logging.getLogger(__name__)
-
-# redis_client = redis.Redis.from_url(
-#     settings.REDIS_URL,
-#     decode_responses=True,
-# )
-
-
-# def get_cache(key: str):
-#     try:
-#         value = redis_client.get(key)
-#         if value is None:
-#             return None
-#         return json.loads(value)
-#     except RedisError as exc:
-#         logger.warning("Redis get failed for key=%s: %s", key, exc)
-#         return None
-
-
-# def set_cache(key: str, value, ttl_seconds: int = 60):
-#     try:
-#         redis_client.setex(key, ttl_seconds, json.dumps(value, default=str))
-#     except RedisError as exc:
-#         logger.warning("Redis set failed for key=%s: %s", key, exc)
-
-
-# def delete_cache(key: str):
-#     try:
-#         redis_client.delete(key)
-#     except RedisError as exc:
-#         logger.warning("Redis delete failed for key=%s: %s", key, exc)
-
-
-# def delete_cache_by_pattern(pattern: str):
-#     try:
-#         keys = redis_client.keys(pattern)
-#         if keys:
-#             redis_client.delete(*keys)
-#     except RedisError as exc:
-#         logger.warning("Redis pattern delete failed for pattern=%s: %s", pattern, exc)
+    try:
+        value = redis_client.get(key)
+        return value
+    except RedisError as exc:
+        logger.warning("Redis raw get failed for key=%s: %s", key, exc)
+        return None

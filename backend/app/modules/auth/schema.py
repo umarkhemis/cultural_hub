@@ -3,6 +3,9 @@ from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, model_validator, field_validator
+from pydantic import BaseModel, Field
+
+
 
 
 class RegisterRequest(BaseModel):
@@ -101,3 +104,6 @@ class UserResponse(BaseModel):
 class AuthResponse(BaseModel):
     user: UserResponse
     tokens: TokenResponse
+
+class OAuthExchangeRequest(BaseModel):
+    code: str = Field(min_length=10, max_length=255)

@@ -22,7 +22,8 @@ import { BrandLogo } from "@/src/components/common/brand-logo";
 import { GoogleAuthButton } from "@/src/store/Google_auth_button";
 
 // ⬇ Tourist Google register — backend should create a tourist account and redirect to callback
-const GOOGLE_TOURIST_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=register&role=tourist`;
+// const GOOGLE_TOURIST_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=tourist`;
+const GOOGLE_TOURIST_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=tourist`;
 
 type Props = { onBack?: () => void };
 
