@@ -14,8 +14,8 @@ export type CurrentUser = {
 
 export type AuthTokens = {
   access_token: string;
-  refresh_token: string;
-  token_type: string;
+  refresh_token?: string;  // not present in Google OAuth redirect flow
+  token_type?: string;
 };
 
 export type AuthPayload = {

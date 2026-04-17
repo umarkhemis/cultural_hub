@@ -1,4 +1,5 @@
 
+// frontend/src/features/auth/provider-register-form.tsx
 "use client";
 
 import Link from "next/link";
@@ -18,35 +19,24 @@ import { getApiErrorMessage } from "./get-error-message";
 import { useProviderRegisterMutation } from "./hooks";
 import { providerRegisterSchema, type ProviderRegisterFormValues } from "./schema";
 import { BrandLogo } from "@/src/components/common/brand-logo";
+import { GoogleAuthButton } from "@/src/store/Google_auth_button";
 
+
+// ⬇ Provider Google register — backend creates a provider stub, then redirects to callback
+// The callback will detect `needs_site_details: true` and redirect to /register/provider-complete
+const GOOGLE_PROVIDER_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=register&role=provider`;
 
 type Props = { onBack?: () => void };
 
-
-
-// function SectionLabel({ number, label }: { number: string; label: string }) {
-//   return (
-//     <div className="col-span-2 flex items-center gap-2 sm:gap-3">
-//       <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[10px] font-bold text-amber-400 sm:h-6 sm:w-6">
-//         {number}
-//       </div>
-//       <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-200 sm:text-xs">{label}</h2>
-//       <div className="flex-1 h-px bg-white/10" />
-//     </div>
-//   );
-// }
-
 const SectionLabel = ({ number, label }: { number: string; label: string }) => (
-    <div className="col-span-2 flex items-center gap-2 sm:gap-3">
-      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[10px] font-bold text-amber-400 sm:h-6 sm:w-6">
-        {number}
-      </div>
-      <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-200 sm:text-xs">{label}</h2>
-      <div className="flex-1 h-px bg-white/10" />
+  <div className="col-span-2 flex items-center gap-2 sm:gap-3">
+    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[10px] font-bold text-amber-400 sm:h-6 sm:w-6">
+      {number}
     </div>
-  );
-
-// export function ProviderRegisterForm({ onBack }: Props) {
+    <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-200 sm:text-xs">{label}</h2>
+    <div className="flex-1 h-px bg-white/10" />
+  </div>
+);
 
 export function ProviderRegisterForm({ onBack }: Props) {
   const router = useRouter();
@@ -85,17 +75,6 @@ export function ProviderRegisterForm({ onBack }: Props) {
     "w-full rounded-xl border border-white/25 bg-white/15 py-2.5 pl-9 pr-3 text-xs text-white placeholder-slate-400 outline-none transition-all focus:border-amber-400/60 focus:bg-white/20 focus:ring-2 focus:ring-amber-400/20 sm:rounded-2xl sm:py-3 sm:pl-10 sm:pr-4 sm:text-sm";
 
   const iconClass = "absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 pointer-events-none sm:left-3.5 sm:h-4 sm:w-4";
-
-  // Always 2-col section label
-  // const SectionLabel = ({ number, label }: { number: string; label: string }) => (
-  //   <div className="col-span-2 flex items-center gap-2 sm:gap-3">
-  //     <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[10px] font-bold text-amber-400 sm:h-6 sm:w-6">
-  //       {number}
-  //     </div>
-  //     <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-200 sm:text-xs">{label}</h2>
-  //     <div className="flex-1 h-px bg-white/10" />
-  //   </div>
-  // );
 
   return (
     <div className="relative min-h-screen w-full">
@@ -151,6 +130,21 @@ export function ProviderRegisterForm({ onBack }: Props) {
 
         {/* Form — always 2 columns */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-3xl space-y-4 pb-8 sm:space-y-6">
+
+          {/* Google quick start — note explains the extra step */}
+          <div className="space-y-2">
+            <GoogleAuthButton href={GOOGLE_PROVIDER_URL} label="Sign up with Google" />
+            <p className="text-center text-[10px] text-slate-400 sm:text-xs">
+              You&apos;ll add your cultural site details on the next step
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-white/15" />
+            <span className="text-[10px] text-slate-400 sm:text-xs">or fill in everything below</span>
+            <div className="flex-1 h-px bg-white/15" />
+          </div>
 
           {/* Section 1 — Account */}
           <div className="grid grid-cols-2 gap-2 sm:gap-4">

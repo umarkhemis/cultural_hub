@@ -1,4 +1,5 @@
-// frontend\src\features\auth\tourist-register-form.tsx
+
+// frontend/src/features/auth/tourist-register-form.tsx
 "use client";
 
 import Link from "next/link";
@@ -18,7 +19,10 @@ import { getApiErrorMessage } from "./get-error-message";
 import { touristRegisterSchema, type TouristRegisterFormValues } from "./schema";
 import { ROUTES } from "@/src/constants/routes";
 import { BrandLogo } from "@/src/components/common/brand-logo";
+import { GoogleAuthButton } from "@/src/store/Google_auth_button";
 
+// ⬇ Tourist Google register — backend should create a tourist account and redirect to callback
+const GOOGLE_TOURIST_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=register&role=tourist`;
 
 type Props = { onBack?: () => void };
 
@@ -105,6 +109,16 @@ export function TouristRegisterForm({ onBack }: Props) {
 
         {/* Form — always 2 columns */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-2xl space-y-3 pb-8 sm:space-y-5">
+
+          {/* Google sign-up */}
+          <GoogleAuthButton href={GOOGLE_TOURIST_URL} label="Sign up with Google" />
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-white/15" />
+            <span className="text-[10px] text-slate-400 sm:text-xs">or sign up with email</span>
+            <div className="flex-1 h-px bg-white/15" />
+          </div>
 
           {/* Name + Email — always side by side */}
           <div className="grid grid-cols-2 gap-2 sm:gap-4">
@@ -199,4 +213,5 @@ export function TouristRegisterForm({ onBack }: Props) {
     </div>
   );
 }
+
 

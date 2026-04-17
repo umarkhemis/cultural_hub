@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     CLOUDINARY_API_SECRET: str | None = None
     CLOUDINARY_UPLOAD_FOLDER: str = "cultural_hub"
 
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=https://cultural-hub.onrender.com/api/v1/auth/google/callback, http://localhost:8000/api/v1/auth/google/callback"
+
     RATE_LIMIT_LOGIN_PER_MINUTE: int = 5
     RATE_LIMIT_REGISTER_PER_HOUR: int = 10
 

@@ -11,7 +11,7 @@ export function AnimatedCounter({
 }: {
   value: number;
   duration?: number;
-  decimals?: number; // ✅ NEW
+  decimals?: number; 
 }) {
   const [count, setCount] = useState(0);
 

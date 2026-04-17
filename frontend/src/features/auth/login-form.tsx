@@ -1,4 +1,6 @@
 
+
+// frontend/src/features/auth/login-form.tsx
 "use client";
 
 import Link from "next/link";
@@ -17,7 +19,10 @@ import { loginSchema, type LoginFormValues } from "./schema";
 import { useAuth } from "@/src/hooks/useAuth";
 import { BrandLogo } from "@/src/components/common/brand-logo";
 import { setAuthTokens } from "@/src/lib/api/client";
+import { GoogleAuthButton } from "@/src/store/Google_auth_button";
 
+// ⬇ Point this at your backend's Google OAuth initiation endpoint
+const GOOGLE_LOGIN_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google?intent=login`;
 
 export function LoginForm() {
   const router = useRouter();
@@ -95,6 +100,18 @@ export function LoginForm() {
               <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300">
                 Continue your cultural journey
               </p>
+            </div>
+
+            {/* Google sign-in */}
+            <div className="mb-4 sm:mb-5">
+              <GoogleAuthButton href={GOOGLE_LOGIN_URL} label="Sign in with Google" />
+            </div>
+
+            {/* Divider */}
+            <div className="mb-4 flex items-center gap-3 sm:mb-5">
+              <div className="flex-1 h-px bg-white/15" />
+              <span className="text-xs text-slate-400">or sign in with email</span>
+              <div className="flex-1 h-px bg-white/15" />
             </div>
 
             {/* Form */}
@@ -200,4 +217,3 @@ export function LoginForm() {
     </div>
   );
 }
-

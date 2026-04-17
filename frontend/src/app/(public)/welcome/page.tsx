@@ -185,7 +185,7 @@ export default function WelcomePage() {
               </h2>
 
               <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed">
-                This video represents the kind of content you&apos;ll find on the platform —
+                This video represents the kind of content you&apos;ll find on the platform -
                 cultural events, traditions, and real-life moments captured by providers.
               </p>
 
