@@ -96,9 +96,24 @@ def me(current_user: User = Depends(get_current_user)):
 
 # ─── Google OAuth ─────────────────────────────────────────────────────────────
 
+# @router.get("/google")
+# def google_login():
+#     """Redirect user to Google's OAuth consent screen."""
+#     params = {
+#         "client_id": settings.GOOGLE_CLIENT_ID,
+#         "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+#         "response_type": "code",
+#         "scope": "openid email profile",
+#         "access_type": "offline",
+#         "prompt": "select_account",
+#         "state": secrets.token_urlsafe(16),
+#     }
+#     return RedirectResponse(url=f"{GOOGLE_AUTH_URL}?{urlencode(params)}")
+
+
+
 @router.get("/google")
 def google_login():
-    """Redirect user to Google's OAuth consent screen."""
     params = {
         "client_id": settings.GOOGLE_CLIENT_ID,
         "redirect_uri": settings.GOOGLE_REDIRECT_URI,
@@ -108,6 +123,8 @@ def google_login():
         "prompt": "select_account",
         "state": secrets.token_urlsafe(16),
     }
+    print("GOOGLE_CLIENT_ID:", repr(settings.GOOGLE_CLIENT_ID))
+    print("GOOGLE_REDIRECT_URI:", repr(settings.GOOGLE_REDIRECT_URI))
     return RedirectResponse(url=f"{GOOGLE_AUTH_URL}?{urlencode(params)}")
 
 
