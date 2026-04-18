@@ -30,6 +30,9 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     last_login_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    # totp_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # totp_secret: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
     cultural_site = relationship("CulturalSite", back_populates="user", uselist=False)
     bookings = relationship(

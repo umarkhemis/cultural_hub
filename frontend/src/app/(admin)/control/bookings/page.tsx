@@ -1,45 +1,134 @@
 
 "use client";
 
-import { AdminPageHeader } from "@/src/components/admin/admin-page-header";
-import { AdminListCard } from "@/src/components/admin/admin-list-card";
-import { ErrorState } from "@/src/components/shared/error-state";
+/**
+ * Admin Bookings Page
+ * Full table: reference, package, provider, participants,
+ * total, platform fee, payout, booking & payment status.
+ */
+
 import { LoadingState } from "@/src/components/shared/loading-state";
+import { ErrorState } from "@/src/components/shared/error-state";
+import { AdminPageHeader, DataTable, AdminBadge, StatCard } from "@/src/components/admin/admin-ui";
 import { useAdminBookings } from "@/src/features/admin/hooks";
-import { formatCurrency } from "@/src/utils/formatCurrency";
 import { formatDate } from "@/src/utils/formatDate";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { BookOpen, DollarSign, Users, TrendingUp } from "lucide-react";
+import type { Booking } from "@/src/types/booking";
 
 export default function AdminBookingsPage() {
   const { data, isLoading, isError } = useAdminBookings();
 
   if (isLoading) return <LoadingState label="Loading bookings..." />;
-  if (isError) return <ErrorState description="Could not load bookings." />;
+  if (isError)   return <ErrorState description="Could not load bookings." />;
+
+  const bookings = data ?? [];
+
+  // Aggregate financials
+  const totalRevenue  = bookings.reduce((acc, b) => acc + (b.total_price ?? 0), 0);
+  const totalFees     = bookings.reduce((acc, b) => acc + (b.platform_fee ?? 0), 0);
+  const totalPayouts  = bookings.reduce((acc, b) => acc + (b.provider_payout_amount ?? 0), 0);
+  const totalParticip = bookings.reduce((acc, b) => acc + (b.participants_count ?? 0), 0);
 
   return (
-    <div>
+    <div className="space-y-6">
       <AdminPageHeader
         title="Bookings"
-        description="Review booking activity, payment state, and customer lifecycle."
+        description="Complete booking ledger with payment tracking and financial breakdown."
       />
 
-      <div className="grid gap-4">
-        {data?.map((booking) => (
-          <AdminListCard
-            key={booking.id}
-            title={`${booking.package_title_snapshot} • ${booking.booking_reference}`}
-            subtitle={`Provider: ${booking.provider_name_snapshot}`}
-            meta={booking.booking_status}
-          >
-            <div className="grid gap-2 text-sm text-slate-500 sm:grid-cols-2 lg:grid-cols-5">
-              <span>Payment: {booking.payment_status}</span>
-              <span>Participants: {booking.participants_count}</span>
-              <span>Total paid: {formatCurrency(booking.total_price)}</span>
-              <span>Platform fee: {formatCurrency(booking.platform_fee)}</span>
-              <span>Provider payout: {formatCurrency(booking.provider_payout_amount)}</span>
-            </div>
-          </AdminListCard>
-        ))}
+      {/* Financial summary */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard label="Total Revenue"     value={formatCurrency(totalRevenue)}  icon={DollarSign} iconColor="bg-emerald-500" />
+        <StatCard label="Platform Fees"     value={formatCurrency(totalFees)}     icon={TrendingUp} iconColor="bg-amber-400"   />
+        <StatCard label="Provider Payouts"  value={formatCurrency(totalPayouts)}  icon={BookOpen}   iconColor="bg-blue-500"    />
+        <StatCard label="Total Participants" value={totalParticip}                icon={Users}      iconColor="bg-violet-500"  />
       </div>
+
+      <DataTable
+        data={bookings}
+        searchKeys={[
+          "booking_reference", "package_title_snapshot", "provider_name_snapshot",
+        ] as (keyof Booking)[]}
+        searchPlaceholder="Search by reference or package..."
+        emptyMessage="No bookings found."
+        columns={[
+          {
+            key: "booking_reference",
+            label: "Reference",
+            sortable: true,
+            render: (b) => (
+              <span className="text-xs font-mono font-semibold text-amber-400 bg-amber-400/10 px-2 py-1 rounded-lg border border-amber-400/20">
+                {b.booking_reference}
+              </span>
+            ),
+          },
+          {
+            key: "package_title_snapshot",
+            label: "Package",
+            sortable: true,
+            render: (b) => (
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white truncate max-w-[160px]">{b.package_title_snapshot}</p>
+                <p className="text-xs text-slate-500 truncate">{b.provider_name_snapshot}</p>
+              </div>
+            ),
+          },
+          {
+            key: "booking_status",
+            label: "Booking",
+            sortable: true,
+            render: (b) => <AdminBadge value={b.booking_status} />,
+          },
+          {
+            key: "payment_status",
+            label: "Payment",
+            sortable: true,
+            render: (b) => <AdminBadge value={b.payment_status} />,
+          },
+          {
+            key: "participants_count",
+            label: "Pax",
+            hideOnMobile: true,
+            sortable: true,
+            render: (b) => (
+              <span className="text-sm font-medium text-slate-300">{b.participants_count}</span>
+            ),
+          },
+          {
+            key: "total_price",
+            label: "Total",
+            sortable: true,
+            hideOnMobile: true,
+            render: (b) => (
+              <span className="text-sm font-semibold text-white">{formatCurrency(b.total_price)}</span>
+            ),
+          },
+          {
+            key: "platform_fee",
+            label: "Fee",
+            hideOnMobile: true,
+            render: (b) => (
+              <span className="text-xs text-slate-500">{formatCurrency(b.platform_fee)}</span>
+            ),
+          },
+          {
+            key: "provider_payout_amount",
+            label: "Payout",
+            hideOnMobile: true,
+            render: (b) => (
+              <span className="text-xs text-emerald-400 font-medium">{formatCurrency(b.provider_payout_amount)}</span>
+            ),
+          },
+          {
+            key: "created_at",
+            label: "Date",
+            sortable: true,
+            hideOnMobile: true,
+            render: (b) => <span className="text-xs text-slate-500">{formatDate(b.created_at)}</span>,
+          },
+        ]}
+      />
     </div>
   );
 }

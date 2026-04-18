@@ -125,7 +125,7 @@ export function WhatYouCanDoScroll() {
     {
       title: "Explore the feed",
       body:
-        "Watch real cultural moments shared by communities—discover stories, events, and places worth visiting.",
+        "Watch real cultural moments shared by communities-discover stories, events, and places worth visiting.",
       cta: "Explore Feed",
       href: ROUTES.feed,
       imageSrc: "/home/feed-scroll.png",
@@ -143,7 +143,7 @@ export function WhatYouCanDoScroll() {
     {
       title: "Providers can manage events digitally",
       body:
-        "Create experiences, manage bookings, and share updates—all from one place built for cultural providers.",
+        "Create experiences, manage bookings, and share updates-all from one place built for cultural providers.",
       cta: "Become a Provider",
       href: ROUTES.register,
       imageSrc: "/home/provider.png",

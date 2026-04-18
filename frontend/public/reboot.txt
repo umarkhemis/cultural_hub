@@ -1,0 +1,32 @@
+
+# public/robots.txt
+#
+# IMPORTANT: Exclude the admin login URL from search engine indexing.
+# This prevents it from being discovered via Google/Bing.
+# Place this file at:  frontend/public/robots.txt
+
+User-agent: *
+Allow: /
+
+# Never index or crawl anything under /admin
+Disallow: /admin/
+Disallow: /admin
+
+# Never reveal the admin login URL to crawlers
+# (If a crawler finds it anyway, Disallow ensures it's not indexed)
+Disallow: /sys/
+Disallow: /sys/owner/
+Disallow: /sys/owner/access
+
+
+# ─── next-sitemap config ──────────────────────────────────────────────────────
+# If you use next-sitemap, add this to next-sitemap.config.js:
+#
+#   module.exports = {
+#     siteUrl: process.env.SITE_URL,
+#     exclude: [
+#       "/admin",
+#       "/admin/*",
+#       "/sys/owner/access",   // ← keep this out of sitemap.xml
+#     ],
+#   }
