@@ -35,8 +35,8 @@ class Settings(BaseSettings):
 
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
-    # GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=https://cultural-hub.onrender.com/api/v1/auth/google/callback"
-    GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=http://localhost:8000/api/v1/auth/google/callback"
+    GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=https://cultural-hub.onrender.com/api/v1/auth/google/callback"
+    # GOOGLE_REDIRECT_URI: str = "GOOGLE_REDIRECT_URI=http://localhost:8000/api/v1/auth/google/callback"
 
     FRONTEND_URL: str = "https://cultural-hub-psi.vercel.app"
     
