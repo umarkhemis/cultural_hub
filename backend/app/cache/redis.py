@@ -94,13 +94,29 @@ def set_cache_raw(key: str, value: str, ttl_seconds: int = 60) -> None:
         logger.warning("Redis raw set failed for key=%s: %s", key, exc)
 
 
+# def get_cache_raw(key: str) -> str | None:
+#     if redis_client is None:
+#         return None
+
+#     try:
+#         value = redis_client.get(key)
+#         return value
+#     except RedisError as exc:
+#         logger.warning("Redis raw get failed for key=%s: %s", key, exc)
+#         return None
+    
+
+
 def get_cache_raw(key: str) -> str | None:
     if redis_client is None:
+        logger.error("Redis client is None — cache unavailable")  # make this loud
         return None
 
     try:
         value = redis_client.get(key)
-        return value
+        if value is None:
+            return None
+        return value.decode("utf-8") if isinstance(value, bytes) else value
     except RedisError as exc:
         logger.warning("Redis raw get failed for key=%s: %s", key, exc)
         return None

@@ -12,6 +12,7 @@ from app.modules.sites.router import router as sites_router
 from app.modules.uploads.router import router as uploads_router
 from app.modules.search.router import router as search_router
 from app.modules.admin.router import router as admin_router
+from app.modules.providers.router import router as providers_router
 
 
 
@@ -27,3 +28,4 @@ api_router.include_router(sites_router)
 api_router.include_router(uploads_router)
 api_router.include_router(search_router)
 api_router.include_router(admin_router)
+api_router.include_router(providers_router)
