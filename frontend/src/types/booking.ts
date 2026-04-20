@@ -21,6 +21,8 @@ export type Booking = {
   provider_payout_amount: number;
   currency: string;
   booking_date: string;
+  created_at: string;        
+  updated_at?: string | null;
   reserved_until?: string | null;
   cancelled_at?: string | null;
   cancellation_reason?: string | null;
