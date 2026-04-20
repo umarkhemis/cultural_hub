@@ -1,14 +1,6 @@
 
 "use client";
 
-/**
- * AdminLayout — wraps every admin page.
- * - Role guard: redirects non-admins immediately
- * - Collapsible sidebar (desktop) + drawer (mobile)
- * - Active-tab highlighting driven by pathname
- * - Notification bell with unread count
- */
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -21,37 +13,35 @@ import { cn } from "@/src/utils/cn";
 import { useAuth } from "@/src/hooks/useAuth";
 
 const NAV = [
-  { href: "/control",              label: "Overview",     icon: LayoutDashboard },
-  { href: "/control/users",        label: "Users",        icon: Users           },
-  { href: "/control/sites",        label: "Sites",        icon: Globe           },
-  { href: "/control/experiences",  label: "Experiences",  icon: Eye             },
-  { href: "/control/packages",     label: "Packages",     icon: Package         },
-  { href: "/control/bookings",     label: "Bookings",     icon: BookOpen        },
-  { href: "/control/reports",      label: "Reports",      icon: Flag, badge: 3  },
-  { href: "/control/settings",     label: "Settings",     icon: Settings        },
+  { href: "/control",             label: "Overview",    icon: LayoutDashboard },
+  { href: "/control/users",       label: "Users",       icon: Users           },
+  { href: "/control/sites",       label: "Sites",       icon: Globe           },
+  { href: "/control/experiences", label: "Experiences", icon: Eye             },
+  { href: "/control/packages",    label: "Packages",    icon: Package         },
+  { href: "/control/bookings",    label: "Bookings",    icon: BookOpen        },
+  { href: "/control/reports",     label: "Reports",     icon: Flag, badge: 3  },
+  { href: "/control/settings",    label: "Settings",    icon: Settings        },
 ];
 
+// ── Moved OUTSIDE AdminLayout to fix react-hooks/static-components error ──
+interface SidebarContentProps {
+  mobile?: boolean;
+  collapsed: boolean;
+  pathname: string;
+  user: { full_name?: string; email?: string };
+  onNavClick: () => void;
+  onSignOut: () => void;
+}
 
-export function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, clearSession } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-
-  // ── Role guard ──────────────────────────────────────────
-  useEffect(() => {
-    if (user && user.role !== "admin") {
-      router.replace("/feed");
-    }
-    if (!user) {
-      router.replace("/login?redirect=/control");
-    }
-  }, [user, router]);
-
-  if (!user || user.role !== "admin") return null;
-
-  const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
+function SidebarContent({
+  mobile = false,
+  collapsed,
+  pathname,
+  user,
+  onNavClick,
+  onSignOut,
+}: SidebarContentProps) {
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={cn(
@@ -72,12 +62,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
         {NAV.map(({ href, label, icon: Icon, badge }) => {
-          const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
+          const active = pathname === href || (href !== "/control" && pathname.startsWith(href));
           return (
             <Link
               key={href}
               href={href}
-              onClick={() => setDrawerOpen(false)}
+              onClick={onNavClick}
               className={cn(
                 "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all relative",
                 active
@@ -121,7 +111,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <button
-          onClick={() => { clearSession(); router.replace("/login"); }}
+          onClick={onSignOut}
           className={cn(
             "flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-red-400 transition-all",
             collapsed && !mobile && "justify-center"
@@ -133,17 +123,45 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </div>
     </div>
   );
+}
+
+// ── Main Layout ──────────────────────────────────────────────────
+export function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { user, clearSession } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (user && user.role !== "admin") router.replace("/feed");
+    if (!user) router.replace("/login?redirect=/control");
+  }, [user, router]);
+
+  if (!user || user.role !== "admin") return null;
+
+  const handleSignOut = () => {
+    clearSession();
+    router.replace("/login");
+  };
+
+  const sidebarProps = {
+    collapsed,
+    pathname,
+    user,
+    onNavClick: () => setDrawerOpen(false),
+    onSignOut: handleSignOut,
+  };
 
   return (
     <div className="flex h-screen bg-slate-950 overflow-hidden font-sans">
 
-      {/* ── Desktop sidebar ── */}
+      {/* Desktop sidebar */}
       <aside className={cn(
         "hidden lg:flex flex-col border-r border-white/10 bg-slate-900 shrink-0 transition-all duration-300",
         collapsed ? "w-16" : "w-60"
       )}>
-        <SidebarContent />
-        {/* Collapse toggle */}
+        <SidebarContent {...sidebarProps} />
         <button
           onClick={() => setCollapsed(v => !v)}
           className="absolute left-0 top-1/2 -translate-y-1/2 translate-x-full flex h-6 w-6 items-center justify-center rounded-r-lg bg-slate-800 border border-white/10 text-slate-400 hover:text-white z-10 transition-all"
@@ -153,7 +171,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </button>
       </aside>
 
-      {/* ── Mobile drawer ── */}
+      {/* Mobile drawer */}
       {drawerOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
@@ -164,15 +182,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             >
               <X className="h-5 w-5" />
             </button>
-            <SidebarContent mobile />
+            <SidebarContent {...sidebarProps} mobile />
           </aside>
         </div>
       )}
 
-      {/* ── Main ── */}
+      {/* Main */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-
-        {/* Topbar */}
         <header className="flex items-center justify-between gap-4 border-b border-white/10 bg-slate-900/80 backdrop-blur-sm px-4 sm:px-6 py-3.5 shrink-0 z-20">
           <div className="flex items-center gap-3">
             <button
@@ -183,26 +199,22 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </button>
             <div>
               <h1 className="text-sm font-bold text-white leading-tight">
-                {NAV.find(n => n.href === pathname || (n.href !== "/admin" && pathname.startsWith(n.href)))?.label ?? "Admin"}
+                {NAV.find(n => n.href === pathname || (n.href !== "/control" && pathname.startsWith(n.href)))?.label ?? "Admin"}
               </h1>
               <p className="text-[10px] text-slate-500 hidden sm:block">CulturalHub Administration</p>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
-            {/* Notification bell */}
             <button className="relative flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:bg-white/5 hover:text-white transition-all">
               <Bell className="h-4 w-4" />
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
             </button>
-            {/* Avatar */}
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-xs font-bold text-slate-900 shrink-0">
               {user.full_name?.[0]?.toUpperCase() ?? "A"}
             </div>
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto bg-slate-950 p-4 sm:p-6">
           {children}
         </main>
@@ -210,3 +222,4 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
