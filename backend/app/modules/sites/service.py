@@ -249,6 +249,29 @@ def get_public_site_detail(db: Session, site_id: uuid.UUID, current_user: User |
 
 
 
+def get_provider_site(db: Session, current_user: User) -> dict:
+    if current_user.role != UserRole.provider:
+        raise ForbiddenException("Only providers can access their cultural site.")
+
+    site = db.scalar(
+        select(CulturalSite).where(CulturalSite.user_id == current_user.id)
+    )
+    if not site:
+        raise NotFoundException("Provider site not found.")
+
+    return {
+        "id": str(site.id),
+        "site_name": site.site_name,
+        "description": site.description,
+        "location": site.location,
+        "logo_url": site.logo_url,
+        "contact_email": site.contact_email,
+        "contact_phone": site.contact_phone,
+        "verification_status": site.verification_status.value,
+        "created_at": site.created_at,
+    }
+
+
 def update_provider_site(db: Session, current_user: User, payload: SiteUpdateRequest) -> dict:
     if current_user.role != UserRole.provider:
         raise ForbiddenException("Only providers can update their cultural site.")

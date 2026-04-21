@@ -28,7 +28,7 @@ def get_admin_overview(db: Session) -> dict:
         "total_packages": int(total_packages),
         "total_experiences": int(total_experiences),
         "total_bookings": int(total_bookings),
-        # "total_reports": int(total_reports),
+        "total_reports": 0,
     }
 
 

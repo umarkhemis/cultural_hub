@@ -6,9 +6,36 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.booking import Booking, BookingStatus, PaymentStatus
+from app.models.notification import NotificationType
 from app.models.payment import Payment, PaymentGateway
 from app.models.user import User, UserRole
+from app.modules.notifications.service import create_notification
 from app.utils.exceptions import ForbiddenException, NotFoundException, ValidationException
+
+
+def get_payment_by_id(db: Session, payment_id: uuid.UUID, current_user: User) -> Payment:
+    from sqlalchemy.orm import joinedload as jl
+    from app.models.package import Package
+
+    payment = db.scalar(
+        select(Payment)
+        .options(joinedload(Payment.booking))
+        .where(Payment.id == payment_id)
+    )
+    if not payment:
+        raise NotFoundException("Payment not found.")
+
+    booking = payment.booking
+    if current_user.role == UserRole.tourist and booking.tourist_id != current_user.id:
+        raise ForbiddenException("You do not have permission to view this payment.")
+
+    if current_user.role == UserRole.provider:
+        provider_site = getattr(current_user, "cultural_site", None)
+        pkg = db.scalar(select(Package).where(Package.id == booking.package_id))
+        if provider_site is None or pkg is None or pkg.provider_id != provider_site.id:
+            raise ForbiddenException("You do not have permission to view this payment.")
+
+    return payment
 
 
 def _now() -> datetime:
@@ -152,6 +179,15 @@ def mark_payment_success(
     booking.payment_status = PaymentStatus.paid
     booking.booking_status = BookingStatus.confirmed
 
+    create_notification(
+        db=db,
+        user_id=booking.tourist_id,
+        notification_type=NotificationType.payment_completed,
+        title="Payment Successful",
+        message=f"Your payment has been confirmed and your booking is now confirmed.",
+        related_entity_id=str(booking.id),
+    )
+
     db.add(payment)
     db.add(booking)
     db.commit()
@@ -180,6 +216,15 @@ def mark_payment_failed(
 
     if booking.booking_status == BookingStatus.awaiting_payment:
         booking.payment_status = PaymentStatus.failed
+
+    create_notification(
+        db=db,
+        user_id=booking.tourist_id,
+        notification_type=NotificationType.payment_failed,
+        title="Payment Failed",
+        message="Your payment could not be processed. Please try again.",
+        related_entity_id=str(booking.id),
+    )
 
     db.add(payment)
     db.add(booking)

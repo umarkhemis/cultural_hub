@@ -5,15 +5,13 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.dependencies import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.modules.sites.follow_service import follow_site, unfollow_site
-from app.modules.sites.service import get_public_site_detail, list_public_sites
+from app.modules.sites.service import get_provider_site, get_public_site_detail, list_public_sites, update_provider_site
 from app.modules.users.service import get_current_user_optional, get_current_user
 from app.utils.responses import success_response
 from app.core.permissions import require_roles
-from app.models.user import User, UserRole
 from app.modules.sites.schema import SiteUpdateRequest
-from app.modules.sites.service import update_provider_site
 
 router = APIRouter(prefix="/sites", tags=["Sites"])
 
@@ -30,13 +28,12 @@ def list_sites(
     )
 
 
-
 @router.get("/me")
 def my_site(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.provider)),
 ):
-    item = update_provider_site(db=db, current_user=current_user, payload=SiteUpdateRequest())
+    item = get_provider_site(db=db, current_user=current_user)
     return success_response(
         message="Provider site retrieved successfully.",
         data=item,
@@ -54,7 +51,6 @@ def update_my_site(
         message="Provider site updated successfully.",
         data=item,
     )
-
 
 
 @router.get("/{site_id}")
@@ -94,33 +90,4 @@ def unfollow_site_endpoint(
         message="Cultural site unfollowed successfully.",
         data=result,
     )
-
-
-@router.get("/me")
-def my_site(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.provider)),
-):
-    item = update_provider_site(db=db, current_user=current_user, payload=SiteUpdateRequest())
-    return success_response(
-        message="Provider site retrieved successfully.",
-        data=item,
-    )
-
-
-@router.patch("/me")
-def update_my_site(
-    payload: SiteUpdateRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(UserRole.provider)),
-):
-    item = update_provider_site(db=db, current_user=current_user, payload=payload)
-    return success_response(
-        message="Provider site updated successfully.",
-        data=item,
-    )
-
-
-
-
 

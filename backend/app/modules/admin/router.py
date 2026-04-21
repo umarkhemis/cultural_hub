@@ -10,8 +10,8 @@ from app.core.permissions import require_roles
 from app.database.dependencies import get_db
 from app.models.user import User, UserRole
 from app.models.cultural_site import CulturalSite, VerificationStatus
-from app.models.experience import Experience
-from app.models.package import Package
+from app.models.experience import Experience, ExperienceStatus
+from app.models.package import Package, PackageStatus
 from app.modules.admin.service import (
     get_admin_overview,
     list_admin_bookings,
@@ -280,7 +280,13 @@ def admin_patch_experience(
 
     changes = []
     if body.status is not None:
-        exp.status = body.status
+        try:
+            exp.status = ExperienceStatus(body.status)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Invalid status. Allowed: {[e.value for e in ExperienceStatus]}",
+            )
         changes.append(f"status={body.status}")
 
     db.commit()
@@ -308,7 +314,13 @@ def admin_patch_package(
 
     changes = []
     if body.status is not None:
-        pkg.status = body.status
+        try:
+            pkg.status = PackageStatus(body.status)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Invalid status. Allowed: {[e.value for e in PackageStatus]}",
+            )
         changes.append(f"status={body.status}")
 
     db.commit()

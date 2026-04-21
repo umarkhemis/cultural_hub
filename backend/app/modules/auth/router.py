@@ -1,62 +1,37 @@
 
-from fastapi import APIRouter, Depends, Request, Response, status, HTTPException
-from sqlalchemy.orm import Session
-from fastapi.responses import RedirectResponse
-import httpx
-import secrets
-import json
-import base64
-from urllib.parse import urlencode
-from app.database.dependencies import get_db
-from app.modules.auth.schema import LoginRequest, RefreshRequest, RegisterRequest
-from app.modules.auth.service import login_user, logout_user, refresh_user_token, register_user, hash_token, create_refresh_token
-from app.modules.users.service import get_current_user
-from .jwt import create_access_token
-from passlib.context import CryptContext
-
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from app.core.config import settings
-
 from datetime import datetime, timedelta, timezone
 
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from urllib.parse import urlencode
+import httpx
+import json
+import secrets
+
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.cache.redis import delete_cache, get_cache_raw, set_cache_raw
 from app.core.config import settings
+from app.core.security import hash_password, hash_token, create_refresh_token
 from app.database.dependencies import get_db
 from app.models.cultural_site import CulturalSite, VerificationStatus
 from app.models.refresh_token import RefreshToken
 from app.models.user import User, UserRole
-from app.modules.auth.schema import OAuthExchangeRequest
-from app.modules.auth.service import _build_auth_payload
+from app.modules.auth.schema import LoginRequest, OAuthExchangeRequest, RefreshRequest, RegisterRequest
+from app.modules.auth.service import _build_auth_payload, login_user, logout_user, refresh_user_token, register_user
+from app.modules.users.service import get_current_user
 from app.utils.responses import success_response
-from app.core.security import hash_password
-
-
-
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 limiter = Limiter(key_func=get_remote_address)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
-
-
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password[:72])
-
-
-def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
-
-
-# ─── Standard Auth ────────────────────────────────────────────────────────────
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 @limiter.limit(f"{settings.RATE_LIMIT_REGISTER_PER_HOUR}/hour")
