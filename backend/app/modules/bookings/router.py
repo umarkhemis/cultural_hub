@@ -11,9 +11,12 @@ from app.modules.bookings.schema import BookingCancelRequest, BookingCreateReque
 from app.modules.bookings.service import (
     cancel_booking,
     create_booking,
+    get_booking_by_id,
     list_provider_bookings,
     list_tourist_bookings,
 )
+from app.modules.users.service import get_current_user
+from app.utils.exceptions import ForbiddenException
 from app.utils.responses import success_response
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
@@ -53,6 +56,21 @@ def provider_bookings(
     return success_response(
         message="Provider bookings retrieved successfully.",
         data={"items": items},
+    )
+
+
+@router.get("/{booking_id}")
+def get_booking_detail(
+    booking_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = get_booking_by_id(db=db, booking_id=booking_id)
+    if current_user.role == UserRole.tourist and booking.tourist_id != current_user.id:
+        raise ForbiddenException("You cannot view this booking.")
+    return success_response(
+        message="Booking retrieved successfully.",
+        data=booking,
     )
 
 

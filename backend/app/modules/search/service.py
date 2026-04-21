@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.cultural_site import CulturalSite
 from app.models.experience import Experience, ExperienceStatus
 from app.models.experience_media import ExperienceMedia
+from app.models.package import Package, PackageStatus
 
 def search_all(db: Session, q: str) -> dict:
     term = f"%{q.lower()}%"
@@ -35,6 +36,19 @@ def search_all(db: Session, q: str) -> dict:
         .limit(8)
     ).scalars().all()
 
+    # Search packages
+    packages = db.execute(
+        select(Package)
+        .where(
+            Package.status == PackageStatus.published,
+            or_(
+                func.lower(Package.package_name).like(term),
+                func.lower(Package.description).like(term),
+            )
+        )
+        .limit(8)
+    ).scalars().all()
+
     return {
         "sites": [
             {
@@ -54,5 +68,15 @@ def search_all(db: Session, q: str) -> dict:
                 "provider_id": str(e.provider_id),
             }
             for e in experiences
+        ],
+        "packages": [
+            {
+                "id": str(p.id),
+                "package_name": p.package_name,
+                "description": p.description,
+                "price": float(p.price),
+                "provider_id": str(p.provider_id),
+            }
+            for p in packages
         ],
     }

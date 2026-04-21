@@ -9,8 +9,10 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.config import settings
 from app.models.booking import Booking, BookingStatus, PaymentStatus
 from app.models.booking_participant import BookingParticipant
+from app.models.notification import NotificationType
 from app.models.package import Package, PackageStatus
 from app.models.user import User, UserRole
+from app.modules.notifications.service import create_notification
 from app.utils.booking_reference import generate_booking_reference
 from app.utils.exceptions import ForbiddenException, NotFoundException, ValidationException
 
@@ -89,7 +91,7 @@ def create_booking(db: Session, current_user: User, payload) -> Booking:
 
     base_price = _quantize_money(Decimal(str(package.price)) * Decimal(participants_count))
     platform_fee = _quantize_money(base_price * Decimal(str(settings.PLATFORM_BOOKING_FEE_PERCENT)))
-    total_price = base_price
+    total_price = base_price + platform_fee
     provider_payout_amount = _quantize_money(base_price - platform_fee)
 
 
@@ -129,6 +131,23 @@ def create_booking(db: Session, current_user: User, payload) -> Booking:
                 special_requests=participant.special_requests,
             )
         )
+
+    create_notification(
+        db=db,
+        user_id=current_user.id,
+        notification_type=NotificationType.booking_created,
+        title="Booking Created",
+        message=f"Your booking for '{package.package_name}' has been created. Please complete payment to confirm.",
+        related_entity_id=str(booking.id),
+    )
+    create_notification(
+        db=db,
+        user_id=package.provider.user_id,
+        notification_type=NotificationType.new_booking_for_provider,
+        title="New Booking",
+        message=f"You have a new booking for '{package.package_name}' from {current_user.full_name}.",
+        related_entity_id=str(booking.id),
+    )
 
     db.commit()
     return get_booking_by_id(db=db, booking_id=booking.id)

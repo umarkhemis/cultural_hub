@@ -12,9 +12,11 @@ from app.modules.payments.schema import (
     PaymentInitializeRequest,
 )
 from app.modules.payments.service import (
+    get_payment_by_id,
     initialize_payment,
     process_mock_payment_webhook,
 )
+from app.modules.users.service import get_current_user
 from app.utils.responses import success_response
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
@@ -52,6 +54,19 @@ def process_mock_webhook_endpoint(
     )
     return success_response(
         message="Mock payment webhook processed successfully.",
+        data=payment,
+    )
+
+
+@router.get("/{payment_id}")
+def get_payment_detail_endpoint(
+    payment_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    payment = get_payment_by_id(db=db, payment_id=payment_id, current_user=current_user)
+    return success_response(
+        message="Payment retrieved successfully.",
         data=payment,
     )
 

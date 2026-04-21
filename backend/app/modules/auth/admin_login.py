@@ -1,7 +1,7 @@
 
 import hashlib
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr
@@ -10,8 +10,10 @@ from sqlalchemy.orm import Session
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from app.core.security import verify_password, create_access_token, create_refresh_token
+from app.core.config import settings
+from app.core.security import verify_password, create_access_token, create_refresh_token, hash_token
 from app.database.dependencies import get_db
+from app.models.refresh_token import RefreshToken
 from app.models.user import User, UserRole
 from app.utils.responses import success_response
 
@@ -80,7 +82,17 @@ def admin_login(
     #         raise HTTPException(status_code=401, detail=ACCESS_DENIED_MSG)
 
     access_token  = create_access_token(str(user.id), user.role)
-    refresh_token = create_refresh_token()
+    raw_refresh_token = create_refresh_token()
+
+    refresh_token_record = RefreshToken(
+        user_id=user.id,
+        token_hash=hash_token(raw_refresh_token),
+        user_agent=request.headers.get("user-agent"),
+        ip_address=request.client.host if request.client else None,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+    )
+    db.add(refresh_token_record)
+    db.commit()
 
     _log_attempt(request, body.email, True)
 
@@ -97,7 +109,7 @@ def admin_login(
             },
             "tokens": {
                 "access_token":  access_token,
-                "refresh_token": refresh_token,
+                "refresh_token": raw_refresh_token,
             },
             "requires_totp": False,
         },

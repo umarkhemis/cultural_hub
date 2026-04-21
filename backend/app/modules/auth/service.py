@@ -19,17 +19,6 @@ from app.modules.auth.schema import LoginRequest, RegisterRequest
 from app.utils.exceptions import ConflictException, UnauthorizedException, ValidationException
 
 
-# def _build_auth_payload(user: User, refresh_token: str) -> dict:
-#     access_token = create_access_token(str(user.id), user.role.value)
-#     return {
-#         "user": user,
-#         "tokens": {
-#             "access_token": access_token,
-#             "refresh_token": refresh_token,
-#             "token_type": "bearer",
-#         },
-#     }
-
 def serialize_auth_user(user: User) -> dict:
     return {
         "id": str(user.id),
@@ -190,21 +179,6 @@ def logout_user(db: Session, raw_refresh_token: str) -> None:
         stored.revoked_at = datetime.now(timezone.utc)
         db.commit()
 
-
-
-def serialize_auth_user(user: User) -> dict:
-    return {
-        "id": str(user.id),
-        "full_name": user.full_name,
-        "email": user.email,
-        "phone": user.phone,
-        "role": user.role.value,
-        "profile_image_url": user.profile_image_url,
-        "is_active": user.is_active,
-        "is_verified": user.is_verified,
-        "last_login_at": user.last_login_at,
-        "created_at": user.created_at,
-    }
 
 
 
