@@ -68,6 +68,10 @@ def get_booking_detail(
     booking = get_booking_by_id(db=db, booking_id=booking_id)
     if current_user.role == UserRole.tourist and booking.tourist_id != current_user.id:
         raise ForbiddenException("You cannot view this booking.")
+    if current_user.role == UserRole.provider:
+        provider_site = getattr(current_user, "cultural_site", None)
+        if provider_site is None or booking.package.provider_id != provider_site.id:
+            raise ForbiddenException("You cannot view this booking.")
     return success_response(
         message="Booking retrieved successfully.",
         data=booking,
