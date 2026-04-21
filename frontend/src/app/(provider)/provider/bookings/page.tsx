@@ -11,7 +11,7 @@ export default function ProviderBookingsPage() {
   const { data, isLoading, isError } = useProviderBookings();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-20">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           Bookings

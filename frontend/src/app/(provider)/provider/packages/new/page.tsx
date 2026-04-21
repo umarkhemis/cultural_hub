@@ -3,7 +3,7 @@ import { ProviderPackageForm } from "@/src/features/provider/package-form";
 
 export default function NewPackagePage() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-16 pt-10">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           Create Package

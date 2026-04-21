@@ -3,7 +3,7 @@ import { ProviderExperienceForm } from "@/src/features/provider/experience-form"
 
 export default function NewExperiencePage() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-16 pt-10">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           Upload Experience

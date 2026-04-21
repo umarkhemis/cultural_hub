@@ -85,7 +85,7 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <main className="bg-slate-50 py-10">
+    <main className="bg-slate-50 py-10 pb-16 pt-20">
       <PageContainer className="max-w-4xl">
 
         {/* Header */}

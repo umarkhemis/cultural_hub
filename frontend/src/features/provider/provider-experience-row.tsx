@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Heart, MessageCircle, Trash2, ImageIcon, VideoIcon } from "lucide-react";
+import { MapPin, Heart, MessageCircle, Trash2, ImageIcon, VideoIcon, Eye } from "lucide-react";
 import { Experience } from "@/src/types/experience";
 import { useDeleteExperienceMutation } from "./hooks";
 import { useToastStore } from "@/src/store/toast-store";
@@ -12,9 +12,16 @@ interface Props {
   selected: boolean;
   onToggleSelect: () => void;
   isLast: boolean;
+  onViewAnalytics?: () => void;
 }
 
-export default function ProviderExperienceRow({ item, selected, onToggleSelect, isLast }: Props) {
+export default function ProviderExperienceRow({
+  item,
+  selected,
+  onToggleSelect,
+  isLast,
+  onViewAnalytics,
+}: Props) {
   const deleteMutation = useDeleteExperienceMutation();
   const { addToast } = useToastStore();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -75,7 +82,9 @@ export default function ProviderExperienceRow({ item, selected, onToggleSelect, 
           </div>
         )}
         <p className="mt-0.5 text-[11px] text-slate-400">
-          {new Date(item.created_at).toLocaleDateString("en-UG", { day: "numeric", month: "short", year: "numeric" })}
+          {new Date(item.created_at).toLocaleDateString("en-UG", {
+            day: "numeric", month: "short", year: "numeric",
+          })}
         </p>
       </div>
 
@@ -89,6 +98,12 @@ export default function ProviderExperienceRow({ item, selected, onToggleSelect, 
           <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
           <span className="text-xs text-slate-600">{item.comments_count}</span>
         </div>
+        {item.views_count != null && (
+          <div className="flex items-center gap-1">
+            <Eye className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="text-xs text-slate-600">{item.views_count}</span>
+          </div>
+        )}
       </div>
 
       {/* Status badge */}
@@ -98,8 +113,17 @@ export default function ProviderExperienceRow({ item, selected, onToggleSelect, 
         </span>
       </div>
 
-      {/* Delete */}
-      <div className="w-20 flex justify-end">
+      {/* Actions */}
+      <div className="flex items-center gap-2 w-fit justify-end">
+        {onViewAnalytics && (
+          <button
+            onClick={onViewAnalytics}
+            className="flex items-center gap-1.5 rounded-xl bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-all"
+          >
+            <Eye className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Analytics</span>
+          </button>
+        )}
         <button
           onClick={handleDelete}
           disabled={deleteMutation.isPending}

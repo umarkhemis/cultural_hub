@@ -27,7 +27,7 @@ export default function TouristProfilePage() {
   ];
 
   return (
-    <div className="bg-slate-50 pb-16">
+    <div className="bg-slate-50 pb-16 pt-16">
 
       {/* Profile hero */}
       <div className="bg-slate-900 px-4 pb-8 pt-10 sm:px-6 lg:px-8">

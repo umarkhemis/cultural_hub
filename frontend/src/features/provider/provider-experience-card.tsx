@@ -2,12 +2,17 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Heart, MessageCircle, Trash2, ImageIcon, VideoIcon } from "lucide-react";
+import { MapPin, Heart, MessageCircle, Trash2, ImageIcon, VideoIcon, Eye } from "lucide-react";
 import { Experience } from "@/src/types/experience";
 import { useDeleteExperienceMutation } from "./hooks";
 import { useToastStore } from "@/src/store/toast-store";
 
-export function ProviderExperienceCard({ item }: { item: Experience }) {
+interface Props {
+  item: Experience;
+  onViewAnalytics?: () => void;
+}
+
+export function ProviderExperienceCard({ item, onViewAnalytics }: Props) {
   const deleteMutation = useDeleteExperienceMutation();
   const { addToast } = useToastStore();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -15,10 +20,7 @@ export function ProviderExperienceCard({ item }: { item: Experience }) {
   const firstMedia = item.media_items?.[0];
 
   const handleDelete = async () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      return;
-    }
+    if (!confirmDelete) { setConfirmDelete(true); return; }
     try {
       await deleteMutation.mutateAsync(item.id);
       addToast({ type: "success", title: "Experience deleted." });
@@ -69,6 +71,16 @@ export function ProviderExperienceCard({ item }: { item: Experience }) {
         <div className="absolute top-3 right-3 rounded-full bg-emerald-500 px-2.5 py-1">
           <span className="text-[10px] font-semibold text-white capitalize">{item.status}</span>
         </div>
+
+        {/* View count overlay */}
+        {item.views_count != null && item.views_count > 0 && (
+          <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm">
+            <Eye className="h-3 w-3 text-white" />
+            <span className="text-[10px] font-semibold text-white">
+              {item.views_count.toLocaleString()}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -85,23 +97,39 @@ export function ProviderExperienceCard({ item }: { item: Experience }) {
           </div>
         )}
 
-        {/* Stats + Delete */}
-        <div className="flex items-center justify-between border-t border-slate-100 pt-3">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5">
-              <Heart className="h-4 w-4 text-slate-400" />
-              <span className="text-xs font-medium text-slate-600">{item.likes_count}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <MessageCircle className="h-4 w-4 text-slate-400" />
-              <span className="text-xs font-medium text-slate-600">{item.comments_count}</span>
-            </div>
+        {/* Stats */}
+        <div className="flex items-center gap-4 border-t border-slate-100 pt-3">
+          <div className="flex items-center gap-1.5">
+            <Heart className="h-4 w-4 text-slate-400" />
+            <span className="text-xs font-medium text-slate-600">{item.likes_count}</span>
           </div>
+          <div className="flex items-center gap-1.5">
+            <MessageCircle className="h-4 w-4 text-slate-400" />
+            <span className="text-xs font-medium text-slate-600">{item.comments_count}</span>
+          </div>
+          {item.views_count != null && (
+            <div className="flex items-center gap-1.5">
+              <Eye className="h-4 w-4 text-emerald-400" />
+              <span className="text-xs font-medium text-slate-600">{item.views_count.toLocaleString()}</span>
+            </div>
+          )}
+        </div>
 
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {onViewAnalytics && (
+            <button
+              onClick={onViewAnalytics}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-all"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Analytics
+            </button>
+          )}
           <button
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
-            className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all disabled:opacity-50 ${
+            className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all disabled:opacity-50 ${
               confirmDelete
                 ? "bg-red-600 text-white hover:bg-red-700"
                 : "bg-red-50 text-red-600 hover:bg-red-100"
@@ -115,3 +143,5 @@ export function ProviderExperienceCard({ item }: { item: Experience }) {
     </div>
   );
 }
+
+

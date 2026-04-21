@@ -18,7 +18,7 @@ export default function ProviderPackagesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 pt-10 pb-16 pt-16 sm:px-6 lg:px-8">
 
         {/* ── Header ── */}
         <div className="mb-8">

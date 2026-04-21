@@ -14,6 +14,12 @@ from app.modules.search.router import router as search_router
 from app.modules.admin.router import router as admin_router
 from app.modules.providers.router import router as providers_router
 from app.modules.auth.admin_login import router as admin_auth_router
+from app.modules.translations.router import router as translations_router
+from app.modules.experiences.views_router import router as experience_views_router
+
+
+
+
 
 
 
@@ -31,3 +37,5 @@ api_router.include_router(search_router)
 api_router.include_router(admin_router)
 api_router.include_router(providers_router)
 api_router.include_router(admin_auth_router)
+api_router.include_router(translations_router)
+api_router.include_router(experience_views_router)

@@ -28,4 +28,5 @@ export type Experience = {
   likes_count: number;
   comments_count: number;
   liked_by_current_user: boolean;
+  views_count?: number;
 };

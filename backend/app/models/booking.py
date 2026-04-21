@@ -13,6 +13,7 @@ from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 class BookingStatus(str, enum.Enum):
     awaiting_payment = "awaiting_payment"
+    pending = "pending" 
     confirmed = "confirmed"
     cancelled = "cancelled"
     expired = "expired"

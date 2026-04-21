@@ -15,7 +15,7 @@ export default function ProviderNotificationsPage() {
   const markReadMutation = useMarkNotificationReadMutation();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-20 sm:pt-20">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           Notifications

@@ -15,7 +15,7 @@ export default function PackagesPage() {
   return (
     <main className="bg-slate-50 py-8 sm:py-10">
       <PageContainer>
-        <div className="mb-8">
+        <div className="mb-8 pb-16 pt-20">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
             Tourism Packages
           </h1>

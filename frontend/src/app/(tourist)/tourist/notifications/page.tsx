@@ -16,7 +16,7 @@ export default function TouristNotificationsPage() {
   const markReadMutation = useMarkNotificationReadMutation();
 
   return (
-    <main className="py-2">
+    <main className="py-2 pt-20 sm:pt-20">
       <PageContainer className="max-w-4xl px-0 sm:px-0">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">

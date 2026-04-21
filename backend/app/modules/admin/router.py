@@ -1,18 +1,5 @@
 
-# app/modules/admin/router.py
-#
-# Extended admin router — adds PATCH mutations for:
-#   • Suspend / activate users      PATCH /admin/users/{user_id}
-#   • Verify / unverify sites       PATCH /admin/sites/{site_id}
-#   • Resolve / dismiss reports     PATCH /admin/reports/{report_id}
-#   • Unpublish experiences         PATCH /admin/experiences/{experience_id}
-#   • Unpublish packages            PATCH /admin/packages/{package_id}
-#
-# Security:
-#   • All routes require admin role (require_roles guard)
-#   • Every mutation is logged via audit_log()
-#   • Input validated with Pydantic schemas (no raw dicts)
-#   • Returns 404 if target not found, 403 if permission mismatch
+
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -22,7 +9,7 @@ from typing import Optional
 from app.core.permissions import require_roles
 from app.database.dependencies import get_db
 from app.models.user import User, UserRole
-from app.models.cultural_site import CulturalSite
+from app.models.cultural_site import CulturalSite, VerificationStatus
 from app.models.experience import Experience
 from app.models.package import Package
 from app.modules.admin.service import (
@@ -203,7 +190,43 @@ def admin_patch_user(
 # PATCH /admin/sites/{site_id}
 # ──────────────────────────────────────────────────────────
 
-ALLOWED_VERIFICATION_STATUSES = {"verified", "unverified", "pending"}
+# ALLOWED_VERIFICATION_STATUSES = {"verified", "unverified", "pending"}
+VERIFICATION_STATUS_MAP = {
+    "verified":   VerificationStatus.approved,
+    "unverified": VerificationStatus.rejected,
+    "pending":    VerificationStatus.pending,
+}
+
+# @router.patch("/sites/{site_id}")
+# def admin_patch_site(
+#     site_id: str,
+#     body: PatchSiteBody,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(require_roles(UserRole.admin)),
+# ):
+#     site = db.get(CulturalSite, site_id)
+#     if not site:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Site not found.")
+
+#     changes = []
+#     if body.verification_status is not None:
+#         if body.verification_status not in ALLOWED_VERIFICATION_STATUSES:
+#             raise HTTPException(
+#                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+#                 detail=f"Invalid status. Allowed: {ALLOWED_VERIFICATION_STATUSES}",
+#             )
+#         site.verification_status = body.verification_status
+#         changes.append(f"verification_status={body.verification_status}")
+
+#     db.commit()
+#     db.refresh(site)
+
+#     audit_log("patch_site", "CulturalSite", site_id, current_user, ", ".join(changes))
+
+#     return success_response(message="Site updated.", data=site)
+
+
+
 
 @router.patch("/sites/{site_id}")
 def admin_patch_site(
@@ -218,20 +241,26 @@ def admin_patch_site(
 
     changes = []
     if body.verification_status is not None:
-        if body.verification_status not in ALLOWED_VERIFICATION_STATUSES:
+        mapped = VERIFICATION_STATUS_MAP.get(body.verification_status)
+        if mapped is None:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Invalid status. Allowed: {ALLOWED_VERIFICATION_STATUSES}",
+                detail=f"Invalid status. Allowed: {list(VERIFICATION_STATUS_MAP.keys())}",
             )
-        site.verification_status = body.verification_status
-        changes.append(f"verification_status={body.verification_status}")
+        site.verification_status = mapped
+        changes.append(f"verification_status={mapped.value}")
 
     db.commit()
     db.refresh(site)
 
     audit_log("patch_site", "CulturalSite", site_id, current_user, ", ".join(changes))
-
     return success_response(message="Site updated.", data=site)
+
+
+
+
+
+
 
 
 # ──────────────────────────────────────────────────────────
@@ -295,6 +324,28 @@ def admin_patch_package(
 # (Uncomment Report import when model is ready)
 # ──────────────────────────────────────────────────────────
 
+#uncomment and use this after creating the report model
+
+# @router.patch("/reports/{report_id}")
+# def admin_patch_report(
+#     report_id: str,
+#     body: PatchReportBody,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(require_roles(UserRole.admin)),
+# ):
+#     # from app.models.report import Report
+#     # report = db.get(Report, report_id)
+#     # if not report:
+#     #     raise HTTPException(status_code=404, detail="Report not found.")
+#     # if body.status:
+#     #     report.status = body.status
+#     # db.commit()
+#     # audit_log("patch_report", "Report", report_id, current_user, f"status={body.status}")
+#     # return success_response(message="Report updated.", data=report)
+
+#     audit_log("patch_report", "Report", report_id, current_user, f"status={body.status}")
+#     return success_response(message="Report updated.", data={"id": report_id, "status": body.status})
+
 @router.patch("/reports/{report_id}")
 def admin_patch_report(
     report_id: str,
@@ -302,143 +353,12 @@ def admin_patch_report(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.admin)),
 ):
-    # from app.models.report import Report
-    # report = db.get(Report, report_id)
-    # if not report:
-    #     raise HTTPException(status_code=404, detail="Report not found.")
-    # if body.status:
-    #     report.status = body.status
-    # db.commit()
-    # audit_log("patch_report", "Report", report_id, current_user, f"status={body.status}")
-    # return success_response(message="Report updated.", data=report)
+    audit_log(
+        "patch_report", "Report", report_id, current_user,
+        f"status={body.status}" if body.status else "no change",
+    )
+    return success_response(
+        message="Report updated.",
+        data={"id": report_id, "status": body.status},
+    )
 
-    audit_log("patch_report", "Report", report_id, current_user, f"status={body.status}")
-    return success_response(message="Report updated.", data={"id": report_id, "status": body.status})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# from fastapi import APIRouter, Depends
-# from sqlalchemy.orm import Session
-
-# from app.core.permissions import require_roles
-# from app.database.dependencies import get_db
-# from app.models.user import User, UserRole
-# from app.modules.admin.service import (
-#     get_admin_overview,
-#     list_admin_bookings,
-#     list_admin_experiences,
-#     list_admin_packages,
-#     # list_admin_reports,
-#     list_admin_sites,
-#     list_admin_users,
-# )
-# from app.utils.responses import success_response
-
-# router = APIRouter(prefix="/admin", tags=["Admin"])
-
-
-# @router.get("/overview")
-# def admin_overview(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(require_roles(UserRole.admin)),
-# ):
-#     return success_response(
-#         message="Admin overview retrieved successfully.",
-#         data=get_admin_overview(db=db),
-#     )
-
-
-# @router.get("/users")
-# def admin_users(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(require_roles(UserRole.admin)),
-# ):
-#     return success_response(
-#         message="Users retrieved successfully.",
-#         data={"items": list_admin_users(db=db)},
-#     )
-
-
-# @router.get("/sites")
-# def admin_sites(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(require_roles(UserRole.admin)),
-# ):
-#     return success_response(
-#         message="Sites retrieved successfully.",
-#         data={"items": list_admin_sites(db=db)},
-#     )
-
-
-# @router.get("/bookings")
-# def admin_bookings(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(require_roles(UserRole.admin)),
-# ):
-#     return success_response(
-#         message="Bookings retrieved successfully.",
-#         data={"items": list_admin_bookings(db=db)},
-#     )
-
-
-# @router.get("/experiences")
-# def admin_experiences(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(require_roles(UserRole.admin)),
-# ):
-#     return success_response(
-#         message="Experiences retrieved successfully.",
-#         data={"items": list_admin_experiences(db=db)},
-#     )
-
-
-# @router.get("/packages")
-# def admin_packages(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(require_roles(UserRole.admin)),
-# ):
-#     return success_response(
-#         message="Packages retrieved successfully.",
-#         data={"items": list_admin_packages(db=db)},
-#     )
-
-
-# # @router.get("/reports")
-# # def admin_reports(
-# #     db: Session = Depends(get_db),
-# #     current_user: User = Depends(require_roles(UserRole.admin)),
-# # ):
-# #     return success_response(
-# #         message="Reports retrieved successfully.",
-# #         data={"items": list_admin_reports(db=db)},
-# #     )

@@ -1,34 +1,35 @@
 
+// src/components/feed/ExperienceFeedItem.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Share2, MapPin, Users, Bell, BellOff, BadgeCheck } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, Users, Bell, BellOff, Eye } from "lucide-react";
 
 import { cn } from "@/src/utils/cn";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useToastStore } from "@/src/store/toast-store";
 import { useProtectedAction } from "@/src/features/auth/useProtectedAction";
-
 import {
   useLikeExperienceMutation,
   useUnlikeExperienceMutation,
   useExperienceComments,
 } from "@/src/features/experiences/tourist-hooks";
 import { useFollowSiteMutation, useUnfollowSiteMutation } from "@/src/features/sites/hooks";
-
+import { useTrackExperienceView } from "@/src/features/experiences/use-track-view";
 import { formatDate } from "@/src/utils/formatDate";
 import { shareUrl } from "@/src/utils/share";
 import { ExpandableCaption } from "./ExpandableCaption";
 import { CommentForm } from "@/src/features/experiences/comment-form";
 import { CommentList } from "@/src/features/experiences/comment-list";
 import { AutoPlayVideo } from "./AutoPlayVideo";
-
 import type { Experience } from "@/src/types/experience";
 
 export function ExperienceFeedItem({ experience }: { experience: Experience }) {
   const [showComments, setShowComments] = useState(false);
   const [isFollowing, setIsFollowing] = useState(experience.provider.following ?? false);
+  const [isVisible, setIsVisible] = useState(false);
+  const articleRef = useRef<HTMLElement>(null);
 
   const { user } = useAuth();
   const { addToast } = useToastStore();
@@ -39,15 +40,26 @@ export function ExperienceFeedItem({ experience }: { experience: Experience }) {
   const unlikeMutation = useUnlikeExperienceMutation(experience.id);
   const followMutation = useFollowSiteMutation(experience.provider.id);
   const unfollowMutation = useUnfollowSiteMutation(experience.provider.id);
-
   const { data: comments = [] } = useExperienceComments(experience.id, 20);
+
+  // ── TikTok-style view tracking via IntersectionObserver ──
+  useEffect(() => {
+    const el = articleRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.5 } // 50% of card must be visible
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useTrackExperienceView(experience.id, isVisible);
 
   const firstMedia = experience.media_items?.[0];
   const mediaSrc = firstMedia?.media_url;
   const isVideo = firstMedia?.media_type === "video";
-
-  // Whether this provider/site is verified
-  // const isVerified = experience.provider.is_verified ?? false;
 
   const handleLike = () => {
     runProtectedAction(async () => {
@@ -103,8 +115,10 @@ export function ExperienceFeedItem({ experience }: { experience: Experience }) {
   const isFollowProcessing = followMutation.isPending || unfollowMutation.isPending;
 
   return (
-    <article className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-
+    <article
+      ref={articleRef}
+      className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+    >
       {/* ── Card header: provider info ── */}
       <div className="flex items-center justify-between px-3 sm:px-4 py-3 sm:py-3.5">
         <Link
@@ -123,17 +137,10 @@ export function ExperienceFeedItem({ experience }: { experience: Experience }) {
             </div>
           )}
           <div className="min-w-0">
-            {/* Site name + verification badge */}
             <div className="flex items-center gap-1">
               <p className="text-sm font-semibold text-stone-900 leading-tight truncate">
                 {experience.provider.site_name}
               </p>
-              {/* {isVerified && (
-                <BadgeCheck
-                  className="h-4 w-4 shrink-0 text-amber-500"
-                  aria-label="Verified cultural site"
-                />
-              )} */}
             </div>
             <div className="flex items-center gap-2 mt-0.5">
               {experience.provider.location && (
@@ -191,7 +198,6 @@ export function ExperienceFeedItem({ experience }: { experience: Experience }) {
               className="w-full h-full object-cover"
             />
           )}
-
           {experience.media_items?.length > 1 && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
               {experience.media_items.map((_, i) => (
@@ -246,6 +252,14 @@ export function ExperienceFeedItem({ experience }: { experience: Experience }) {
           <span className="hidden sm:inline">Share</span>
         </button>
 
+        {/* ── View count — visible to everyone ── */}
+        {experience.views_count != null && experience.views_count > 0 && (
+          <div className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs text-stone-400">
+            <Eye className="h-3.5 w-3.5 shrink-0" />
+            <span>{experience.views_count.toLocaleString()}</span>
+          </div>
+        )}
+
         <Link
           href={`/experiences/${experience.id}`}
           className="ml-auto flex items-center gap-1 sm:gap-1.5 rounded-xl px-2 sm:px-3 py-2 text-xs font-semibold text-amber-600 hover:bg-amber-50 transition-all"
@@ -269,5 +283,4 @@ export function ExperienceFeedItem({ experience }: { experience: Experience }) {
     </article>
   );
 }
-
 

@@ -17,6 +17,7 @@ import { ROUTES } from "@/src/constants/routes";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useToastStore } from "@/src/store/toast-store";
 import { BrandLogo } from "@/src/components/common/brand-logo";
+import { LanguageSwitcher } from "@/src/components/common/language-switcher";
 
 type NavItem = {
   label: string;
@@ -165,6 +166,8 @@ export function TopNavbar({ onSearchOpen }: TopNavbarProps) {
                 </Link>
               </>
             )}
+
+            <LanguageSwitcher />
 
             {/* Mobile toggle */}
             <button

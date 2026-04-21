@@ -89,7 +89,7 @@ export function ProviderPackageForm() {
     <div className="mt-8 overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
 
       {/* ── Header ── */}
-      <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
+      <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-60">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900">
             <Package className="h-4 w-4 text-white" />
@@ -160,7 +160,7 @@ export function ProviderPackageForm() {
           </div>
 
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            A 15% platform commission will be deducted from your listed package price
+            A 10% platform commission will be deducted from your listed package price
             after each successful booking.
           </div>
         </div>

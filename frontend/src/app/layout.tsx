@@ -1,9 +1,11 @@
 
+// src/app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
 import { AppQueryProvider } from "@/src/lib/query/provider";
 import { AuthRequiredModal } from "@/src/components/shared/auth-required-modal";
 import { ToastContainer } from "@/src/components/shared/toast-container";
+import { LanguageProvider } from "@/src/components/providers/language-provider";
 
 export const metadata: Metadata = {
   title: "CulturalHub",
@@ -19,13 +21,16 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppQueryProvider>
-          {children}
-          <AuthRequiredModal />
-          <ToastContainer />
+          <LanguageProvider>
+            {children}
+            <AuthRequiredModal />
+            <ToastContainer />
+          </LanguageProvider>
         </AppQueryProvider>
       </body>
     </html>
   );
 }
+
 
 

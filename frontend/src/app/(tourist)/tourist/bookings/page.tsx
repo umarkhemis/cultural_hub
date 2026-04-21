@@ -33,10 +33,11 @@ export default function TouristBookingsPage() {
   };
 
   return (
-    <main className="bg-slate-50 pb-16">
+    <main className="bg-slate-50 pb-16 pt-16">
 
       {/* Header */}
-      <div className="bg-slate-900 px-4 py-10 sm:px-6 lg:px-8">
+      {/* <div className="bg-slate-900 px-4 py-10 sm:px-6 lg:px-8"> */}
+      <div className="bg-slate-900 px-4 pt-10 pb-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400">

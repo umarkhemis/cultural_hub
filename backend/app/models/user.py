@@ -29,6 +29,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     last_login_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    preferred_language: Mapped[str | None] = mapped_column(String(10), nullable=True)
 
     # totp_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     # totp_secret: Mapped[str | None] = mapped_column(String(64), nullable=True)

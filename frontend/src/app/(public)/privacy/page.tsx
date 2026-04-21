@@ -18,7 +18,7 @@ const sections = [
     content: [
       "When you create an account, we collect personal information such as your full name, email address, phone number, and profile photo. For providers, we additionally collect business details including your organisation name, location, service descriptions, and banking information required for payouts.",
       "As you use the platform, we automatically collect usage data such as pages visited, experiences viewed, bookings made, search queries, device type, browser, IP address, and approximate geographic location. This helps us understand how our platform is used and where improvements can be made.",
-      "When you complete a booking or transaction, we collect payment-related data through our third-party payment processor. We do not store full card numbers or sensitive payment credentials on our servers — these are handled securely by our payment partners.",
+      "When you complete a booking or transaction, we collect payment-related data through our third-party payment processor. We do not store full card numbers or sensitive payment credentials on our servers - these are handled securely by our payment partners.",
       "We may also collect content you voluntarily submit, including reviews, photos, messages to providers, and support communications. This content may be visible to other platform users depending on the context in which it is submitted.",
     ],
   },
@@ -26,7 +26,7 @@ const sections = [
     icon: Lock,
     title: "2. How We Use Your Information",
     content: [
-      "We use your personal information primarily to operate and deliver the platform's services — including account management, booking processing, provider dashboard functionality, and communication between tourists and providers.",
+      "We use your personal information primarily to operate and deliver the platform's services - including account management, booking processing, provider dashboard functionality, and communication between tourists and providers.",
       "Your data helps us personalise your experience on the platform, such as recommending relevant cultural sites and experiences based on your browsing history and saved preferences.",
       "We use aggregated and anonymised usage data to analyse platform performance, identify technical issues, improve search and discovery features, and inform decisions about new functionality.",
       "We may use your email address to send transactional communications such as booking confirmations, payment receipts, cancellation notices, and important service updates. With your consent, we may also send promotional content about new features or curated experiences.",
@@ -37,7 +37,7 @@ const sections = [
     title: "3. Sharing Your Information",
     content: [
       "We do not sell your personal information to third parties. We share data only where necessary to operate the platform or comply with legal obligations.",
-      "When you book an experience or package, relevant booking details — such as your name, contact information, and booking specifics — are shared with the relevant provider to facilitate your visit. Providers are required to handle this data in accordance with applicable privacy laws.",
+      "When you book an experience or package, relevant booking details - such as your name, contact information, and booking specifics - are shared with the relevant provider to facilitate your visit. Providers are required to handle this data in accordance with applicable privacy laws.",
       "We work with trusted third-party service providers including cloud hosting platforms, payment processors, media storage services, and analytics tools. These partners access only the data necessary to perform their specific function and are contractually bound to protect it.",
       "We may disclose personal information if required by law, court order, or government authority, or where we believe in good faith that disclosure is necessary to protect the rights, safety, or property of CulturalHub, its users, or the public.",
     ],
@@ -48,7 +48,7 @@ const sections = [
     content: [
       "We use cookies and similar tracking technologies to maintain your session, remember your preferences, and ensure the platform functions correctly. Essential cookies are required for the platform to operate and cannot be disabled.",
       "We may use analytics cookies to understand how visitors interact with the platform. These cookies collect anonymised data such as page views, session duration, and navigation patterns. You can opt out of analytics tracking through your browser settings or our cookie preferences panel.",
-      "Third-party services embedded in the platform — such as payment widgets or map integrations — may set their own cookies. We recommend reviewing the privacy policies of those third parties for full details on their tracking practices.",
+      "Third-party services embedded in the platform - such as payment widgets or map integrations - may set their own cookies. We recommend reviewing the privacy policies of those third parties for full details on their tracking practices.",
     ],
   },
   {
@@ -92,7 +92,7 @@ const sections = [
 
 export default function PrivacyPage() {
   return (
-    <main className="bg-slate-50 py-10">
+    <main className="bg-slate-50 py-10 pb-16 pt-20">
       <PageContainer className="max-w-4xl">
 
         {/* Header */}
