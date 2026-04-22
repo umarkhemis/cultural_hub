@@ -5,11 +5,15 @@ import { fr } from "./fr";
 import { zhCN } from "./zh-CN";
 import { de } from "./de";
 import { ar } from "./ar";
-import { es } from "./es";   // ← was la
+import { es } from "./es";
 import { pt } from "./pt";
 import type { LanguageCode } from "@/src/i18n/config";
 
-type Messages = typeof en;
+type DeepStringRecord<T> = {
+  [K in keyof T]: T[K] extends string ? string : DeepStringRecord<T[K]>;
+};
+
+type Messages = DeepStringRecord<typeof en>;
 
 export const messagesByLanguage: Record<LanguageCode, Messages> = {
   en,
@@ -18,9 +22,30 @@ export const messagesByLanguage: Record<LanguageCode, Messages> = {
   "zh-CN": zhCN,
   de,
   ar,
-  es,   // ← was la
+  es,
   pt,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30,7 +55,7 @@ export const messagesByLanguage: Record<LanguageCode, Messages> = {
 // import { zhCN } from "./zh-CN";
 // import { de } from "./de";
 // import { ar } from "./ar";
-// import { es } from "./es";
+// import { es } from "./es";   // ← was la
 // import { pt } from "./pt";
 // import type { LanguageCode } from "@/src/i18n/config";
 
@@ -43,6 +68,7 @@ export const messagesByLanguage: Record<LanguageCode, Messages> = {
 //   "zh-CN": zhCN,
 //   de,
 //   ar,
-//   es,
+//   es,   // ← was la
 //   pt,
 // };
+
