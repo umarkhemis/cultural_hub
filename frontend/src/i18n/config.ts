@@ -6,7 +6,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: "zh-CN", label: "中文" },
   { code: "de", label: "Deutsch" },
   { code: "ar", label: "العربية" },
-  { code: "es", label: "Español" },   // ← was "la"
+  { code: "es", label: "Español" },   
   { code: "pt", label: "Português" },
 ] as const;
 

@@ -96,3 +96,12 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@keyframes ping-once {
+  0%   { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+@utility animate-ping-once {
+  animation: ping-once 0.4s ease-out forwards;
+}

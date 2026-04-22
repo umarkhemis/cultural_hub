@@ -182,9 +182,10 @@ export function ExperienceFeedItem({ experience }: { experience: Experience }) {
         <p className="mt-1.5 text-xs text-stone-400">{formatDate(experience.created_at)}</p>
       </div>
 
+      
       {/* ── Media ── */}
       {mediaSrc && (
-        <div className="relative bg-stone-100 aspect-[4/3] overflow-hidden">
+        <div className="relative bg-stone-100 aspect-[4/3] overflow-hidden group"> {/* ← add group */}
           {isVideo ? (
             <AutoPlayVideo
               src={mediaSrc}
