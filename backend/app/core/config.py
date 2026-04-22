@@ -59,6 +59,21 @@ class Settings(BaseSettings):
     FIRST_ADMIN_PASSWORD: str | None = None
     FIRST_ADMIN_NAME: str = "Platform Admin"
 
+    MTN_MOMO_BASE_URL: str = "https://sandbox.momodeveloper.mtn.com"
+    MTN_MOMO_SUBSCRIPTION_KEY: str = ""
+    MTN_MOMO_API_USER: str = ""
+    MTN_MOMO_API_KEY: str = ""
+    MTN_MOMO_ENVIRONMENT: str = "sandbox"
+
+    # Flutterwave
+    FLUTTERWAVE_SECRET_KEY: str = ""
+    FLUTTERWAVE_PUBLIC_KEY: str = ""
+    FLUTTERWAVE_WEBHOOK_SECRET: str = ""
+
+    PAYMENT_CALLBACK_URL: str = ""
+
+
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property

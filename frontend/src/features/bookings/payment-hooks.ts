@@ -4,32 +4,112 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   initializePayment,
+  checkMoMoStatus,
   processMockPaymentWebhook,
 } from "@/src/lib/api/payments";
 
 export function useInitializePaymentMutation() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: initializePayment,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["tourist-bookings"] });
       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      await queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+    },
+  });
+}
+
+export function useCheckMoMoStatusMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: checkMoMoStatus,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["tourist-bookings"] });
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 }
 
 export function useMockPaymentWebhookMutation() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: processMockPaymentWebhook,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["tourist-bookings"] });
       await queryClient.invalidateQueries({ queryKey: ["provider-bookings"] });
-      await queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client";
+
+// import { useMutation, useQueryClient } from "@tanstack/react-query";
+// import {
+//   initializePayment,
+//   processMockPaymentWebhook,
+// } from "@/src/lib/api/payments";
+
+// export function useInitializePaymentMutation() {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: initializePayment,
+//     onSuccess: async () => {
+//       await queryClient.invalidateQueries({ queryKey: ["tourist-bookings"] });
+//       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+//       await queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+//     },
+//   });
+// }
+
+// export function useMockPaymentWebhookMutation() {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: processMockPaymentWebhook,
+//     onSuccess: async () => {
+//       await queryClient.invalidateQueries({ queryKey: ["tourist-bookings"] });
+//       await queryClient.invalidateQueries({ queryKey: ["provider-bookings"] });
+//       await queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
+//       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+//     },
+//   });
+// }

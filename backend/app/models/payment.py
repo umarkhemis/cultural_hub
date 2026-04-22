@@ -50,6 +50,10 @@ class Payment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     gateway_response: Mapped[str | None] = mapped_column(Text, nullable=True)
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    gateway_transaction_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    phone_number: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    payment_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
     booking = relationship("Booking", back_populates="payments")
 
     __table_args__ = (
