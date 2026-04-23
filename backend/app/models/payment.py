@@ -14,8 +14,8 @@ from app.models.booking import PaymentStatus
 
 class PaymentGateway(str, enum.Enum):
     mock = "mock"
+    mtn_momo = "mtn_momo"
     flutterwave = "flutterwave"
-    paystack = "paystack"
     mobile_money = "mobile_money"
 
 
