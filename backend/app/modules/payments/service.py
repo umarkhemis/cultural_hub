@@ -148,7 +148,6 @@ def initialize_payment(
 
 
 def check_momo_payment_status(db: Session, transaction_reference: str) -> Payment:
-    """Poll MTN MoMo for payment status and update accordingly."""
     payment = db.scalar(
         select(Payment)
         .options(joinedload(Payment.booking))
@@ -160,7 +159,11 @@ def check_momo_payment_status(db: Session, transaction_reference: str) -> Paymen
     if not payment.gateway_transaction_id:
         raise ValidationException("No MoMo reference found for this payment.")
 
-    result = mtn_momo.check_payment_status(payment.gateway_transaction_id)
+    try:
+        result = mtn_momo.check_payment_status(payment.gateway_transaction_id)
+    except ValueError as e:
+        raise ValidationException(str(e))
+
     status = result.get("status", "PENDING").upper()
 
     if status == "SUCCESSFUL":
@@ -176,7 +179,7 @@ def check_momo_payment_status(db: Session, transaction_reference: str) -> Paymen
             gateway_response=str(result),
         )
 
-    # Still pending
+    # Still pending - just return current payment as-is
     return payment
 
 

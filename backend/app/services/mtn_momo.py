@@ -89,6 +89,12 @@ def check_payment_status(reference_id: str) -> dict:
             "Ocp-Apim-Subscription-Key": settings.MTN_MOMO_SUBSCRIPTION_KEY,
         },
     )
-    response.raise_for_status()
+
+    if response.status_code == 404:
+        # Reference not found — treat as still pending
+        return {"status": "PENDING", "reason": "not_found"}
+
+    if response.status_code >= 400:
+        raise ValueError(f"MTN MoMo status check error {response.status_code}: {response.text}")
+
     return response.json()
-    # Returns: {"status": "SUCCESSFUL" | "FAILED" | "PENDING", ...}
