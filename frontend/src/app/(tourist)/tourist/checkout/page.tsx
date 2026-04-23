@@ -118,12 +118,22 @@ export default function CheckoutPage() {
           setError("Please enter your MTN MoMo phone number.");
           return;
         }
+        // const result = await initializePaymentMutation.mutateAsync({
+        //   booking_id: effectiveBookingId!,
+        //   payment_gateway: "mtn_momo",
+        //   currency: "UGX",
+        //   phone_number: phoneNumber.trim(),
+        // });
+        
         const result = await initializePaymentMutation.mutateAsync({
           booking_id: effectiveBookingId!,
           payment_gateway: "mtn_momo",
-          currency: "UGX",
+          currency: "EUR",  // MTN sandbox only accepts EUR
           phone_number: phoneNumber.trim(),
         });
+
+
+
         setCurrentTxRef(result.data.transaction_reference);
         setMomoPolling(true);
         addToast({

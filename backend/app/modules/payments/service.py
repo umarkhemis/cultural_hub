@@ -94,16 +94,18 @@ def initialize_payment(
     if payment_gateway == PaymentGateway.mtn_momo:
         if not phone_number:
             raise ValidationException("Phone number is required for MTN MoMo payment.")
-
-        result = mtn_momo.request_payment(
-            amount=str(int(booking.total_price)),
-            currency=currency,
-            phone_number=phone_number,
-            external_id=tx_ref,
-            payer_message=f"Payment for booking {booking.booking_reference}",
-            payee_note=f"CulturalHub - {booking.package_title_snapshot}",
-        )
-        gateway_transaction_id = result["reference_id"]
+        try:
+            result = mtn_momo.request_payment(
+                amount=str(int(booking.total_price)),
+                currency=currency,
+                phone_number=phone_number,
+                external_id=tx_ref,
+                payer_message=f"Payment for booking {booking.booking_reference}",
+                payee_note=f"CulturalHub - {booking.package_title_snapshot}",
+            )
+            gateway_transaction_id = result["reference_id"]
+        except ValueError as e:
+            raise ValidationException(str(e))
 
     elif payment_gateway == PaymentGateway.flutterwave:
         tourist = booking.tourist

@@ -33,19 +33,27 @@ def request_payment(
     payer_message: str = "Payment for booking",
     payee_note: str = "CulturalHub booking payment",
 ) -> dict:
-    """
-    Initiate a MoMo collection request.
-    Returns the reference_id (use this to check status).
-    """
     token = _get_auth_token()
     reference_id = str(uuid_lib.uuid4())
 
-    # Normalize phone: strip leading 0 or +256, ensure 256XXXXXXXXX
+    # Normalize phone number
     normalized = phone_number.strip()
     if normalized.startswith("+"):
         normalized = normalized[1:]
     elif normalized.startswith("0"):
         normalized = "256" + normalized[1:]
+
+    payload = {
+        "amount": amount,
+        "currency": currency,
+        "externalId": external_id,
+        "payer": {
+            "partyIdType": "MSISDN",
+            "partyId": normalized,
+        },
+        "payerMessage": payer_message,
+        "payeeNote": payee_note,
+    }
 
     response = httpx.post(
         f"{settings.MTN_MOMO_BASE_URL}/collection/v1_0/requesttopay",
@@ -56,20 +64,16 @@ def request_payment(
             "Ocp-Apim-Subscription-Key": settings.MTN_MOMO_SUBSCRIPTION_KEY,
             "Content-Type": "application/json",
         },
-        json={
-            "amount": amount,
-            "currency": currency,
-            "externalId": external_id,
-            "payer": {
-                "partyIdType": "MSISDN",
-                "partyId": normalized,
-            },
-            "payerMessage": payer_message,
-            "payeeNote": payee_note,
-        },
+        json=payload,
     )
-    response.raise_for_status()
 
+    # Log full error details from MTN
+    if response.status_code >= 400:
+        raise ValueError(
+            f"MTN MoMo error {response.status_code}: {response.text} | Payload sent: {payload}"
+        )
+
+    response.raise_for_status()
     return {"reference_id": reference_id, "status": "pending"}
 
 
