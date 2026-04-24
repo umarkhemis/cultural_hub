@@ -74,6 +74,7 @@ class Settings(BaseSettings):
     PESAPAL_CONSUMER_SECRET: str = ""
     PESAPAL_BASE_URL: str = "https://cybqa.pesapal.com/pesapalv3"
     PESAPAL_IPN_URL: str = ""
+    PESAPAL_IPN_ID: str
 
     PAYMENT_CALLBACK_URL: str = ""
 
