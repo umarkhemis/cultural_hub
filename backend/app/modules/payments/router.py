@@ -7,21 +7,20 @@ from app.core.permissions import require_roles
 from app.database.dependencies import get_db
 from app.models.user import User, UserRole
 from app.modules.payments.schema import (
-    FlutterwaveCallbackRequest,
     MockPaymentWebhookRequest,
     MoMoStatusCheckRequest,
     PaymentInitializeRequest,
+    PesapalCallbackRequest,
+    PesapalWebhookRequest,
 )
 from app.modules.payments.service import (
     check_momo_payment_status,
     get_payment_by_id,
     initialize_payment,
     process_mock_payment_webhook,
-    verify_flutterwave_callback,
+    verify_pesapal_payment,
 )
 from app.modules.users.service import get_current_user
-from app.services.flutterwave import verify_webhook_signature
-from app.utils.exceptions import ValidationException
 from app.utils.responses import success_response
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
@@ -51,7 +50,6 @@ def check_momo_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.tourist)),
 ):
-    """Poll MoMo payment status — frontend calls this after initiating."""
     payment = check_momo_payment_status(
         db=db,
         transaction_reference=payload.transaction_reference,
@@ -59,44 +57,35 @@ def check_momo_status(
     return success_response(message="Payment status retrieved.", data=payment)
 
 
-@router.get("/callback/flutterwave")
-def flutterwave_callback(
-    transaction_id: str,
-    tx_ref: str,
-    status: str,
+@router.get("/callback/pesapal")
+def pesapal_callback(
+    orderTrackingId: str,
+    orderMerchantReference: str,
     db: Session = Depends(get_db),
 ):
-    """Flutterwave redirects user here after payment."""
-    payment = verify_flutterwave_callback(
+    """Pesapal redirects user here after payment attempt."""
+    payment = verify_pesapal_payment(
         db=db,
-        transaction_id=transaction_id,
-        tx_ref=tx_ref,
-        status=status,
+        order_tracking_id=orderTrackingId,
+        order_merchant_reference=orderMerchantReference,
     )
-    return success_response(message="Payment callback processed.", data=payment)
+    return success_response(message="Payment verified.", data=payment)
 
 
-@router.post("/webhook/flutterwave")
-async def flutterwave_webhook(
-    request: Request,
+@router.post("/webhook/pesapal")
+async def pesapal_webhook(
+    payload: PesapalWebhookRequest,
     db: Session = Depends(get_db),
 ):
-    """Flutterwave server-to-server webhook."""
-    body = await request.body()
-    signature = request.headers.get("verif-hash", "")
-
-    if not verify_webhook_signature(body, signature):
-        raise ValidationException("Invalid webhook signature.")
-
-    data = await request.json()
-    if data.get("event") == "charge.completed":
-        tx_ref = data["data"]["tx_ref"]
-        transaction_id = str(data["data"]["id"])
-        flw_status = data["data"]["status"]
-        verify_flutterwave_callback(
-            db=db, transaction_id=transaction_id, tx_ref=tx_ref, status=flw_status
+    """Pesapal server-to-server IPN notification."""
+    try:
+        verify_pesapal_payment(
+            db=db,
+            order_tracking_id=payload.orderTrackingId,
+            order_merchant_reference=payload.orderMerchantReference,
         )
-
+    except Exception:
+        pass  # Always return 200 to Pesapal
     return {"status": "ok"}
 
 
@@ -120,7 +109,9 @@ def get_payment_detail_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    payment = get_payment_by_id(db=db, payment_id=payment_id, current_user=current_user)
+    payment = get_payment_by_id(
+        db=db, payment_id=payment_id, current_user=current_user
+    )
     return success_response(message="Payment retrieved.", data=payment)
 
 
@@ -152,24 +143,38 @@ def get_payment_detail_endpoint(
 
 
 
-# import uuid
 
-# from fastapi import APIRouter, Depends, status
+
+
+
+
+
+
+
+
+# import uuid
+# from fastapi import APIRouter, Depends, Request, status
 # from sqlalchemy.orm import Session
 
 # from app.core.permissions import require_roles
 # from app.database.dependencies import get_db
 # from app.models.user import User, UserRole
 # from app.modules.payments.schema import (
+#     FlutterwaveCallbackRequest,
 #     MockPaymentWebhookRequest,
+#     MoMoStatusCheckRequest,
 #     PaymentInitializeRequest,
 # )
 # from app.modules.payments.service import (
+#     check_momo_payment_status,
 #     get_payment_by_id,
 #     initialize_payment,
 #     process_mock_payment_webhook,
+#     verify_flutterwave_callback,
 # )
 # from app.modules.users.service import get_current_user
+# from app.services.flutterwave import verify_webhook_signature
+# from app.utils.exceptions import ValidationException
 # from app.utils.responses import success_response
 
 # router = APIRouter(prefix="/payments", tags=["Payments"])
@@ -187,11 +192,65 @@ def get_payment_detail_endpoint(
 #         booking_id=payload.booking_id,
 #         payment_gateway=payload.payment_gateway,
 #         currency=payload.currency,
+#         phone_number=payload.phone_number,
+#         redirect_url=payload.redirect_url,
 #     )
-#     return success_response(
-#         message="Payment initialized successfully.",
-#         data=payment,
+#     return success_response(message="Payment initialized.", data=payment)
+
+
+# @router.post("/momo/status")
+# def check_momo_status(
+#     payload: MoMoStatusCheckRequest,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(require_roles(UserRole.tourist)),
+# ):
+#     """Poll MoMo payment status — frontend calls this after initiating."""
+#     payment = check_momo_payment_status(
+#         db=db,
+#         transaction_reference=payload.transaction_reference,
 #     )
+#     return success_response(message="Payment status retrieved.", data=payment)
+
+
+# @router.get("/callback/flutterwave")
+# def flutterwave_callback(
+#     transaction_id: str,
+#     tx_ref: str,
+#     status: str,
+#     db: Session = Depends(get_db),
+# ):
+#     """Flutterwave redirects user here after payment."""
+#     payment = verify_flutterwave_callback(
+#         db=db,
+#         transaction_id=transaction_id,
+#         tx_ref=tx_ref,
+#         status=status,
+#     )
+#     return success_response(message="Payment callback processed.", data=payment)
+
+
+# @router.post("/webhook/flutterwave")
+# async def flutterwave_webhook(
+#     request: Request,
+#     db: Session = Depends(get_db),
+# ):
+#     """Flutterwave server-to-server webhook."""
+#     body = await request.body()
+#     signature = request.headers.get("verif-hash", "")
+
+#     if not verify_webhook_signature(body, signature):
+#         raise ValidationException("Invalid webhook signature.")
+
+#     data = await request.json()
+#     if data.get("event") == "charge.completed":
+#         tx_ref = data["data"]["tx_ref"]
+#         transaction_id = str(data["data"]["id"])
+#         flw_status = data["data"]["status"]
+#         verify_flutterwave_callback(
+#             db=db, transaction_id=transaction_id, tx_ref=tx_ref, status=flw_status
+#         )
+
+#     return {"status": "ok"}
 
 
 # @router.post("/webhook/mock")
@@ -205,10 +264,7 @@ def get_payment_detail_endpoint(
 #         payment_status=payload.payment_status,
 #         gateway_response=payload.gateway_response,
 #     )
-#     return success_response(
-#         message="Mock payment webhook processed successfully.",
-#         data=payment,
-#     )
+#     return success_response(message="Mock webhook processed.", data=payment)
 
 
 # @router.get("/{payment_id}")
@@ -218,8 +274,7 @@ def get_payment_detail_endpoint(
 #     current_user: User = Depends(get_current_user),
 # ):
 #     payment = get_payment_by_id(db=db, payment_id=payment_id, current_user=current_user)
-#     return success_response(
-#         message="Payment retrieved successfully.",
-#         data=payment,
-#     )
+#     return success_response(message="Payment retrieved.", data=payment)
+
+
 

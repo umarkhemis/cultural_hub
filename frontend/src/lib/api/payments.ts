@@ -21,7 +21,7 @@ export type Payment = {
 
 type InitializePaymentPayload = {
   booking_id: string;
-  payment_gateway: "mock" | "mtn_momo" | "flutterwave";
+  payment_gateway: "mock" | "mtn_momo" | "flutterwave" | "pesapal";
   currency?: string;
   phone_number?: string;      // required for MoMo
   redirect_url?: string;      // optional for Flutterwave

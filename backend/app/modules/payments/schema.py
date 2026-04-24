@@ -2,7 +2,6 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
-
 from pydantic import BaseModel, Field
 from app.models.payment import PaymentGateway
 
@@ -11,9 +10,7 @@ class PaymentInitializeRequest(BaseModel):
     booking_id: uuid.UUID
     payment_gateway: PaymentGateway = PaymentGateway.mock
     currency: str = Field(default="UGX", max_length=10)
-    # For MoMo
     phone_number: str | None = Field(default=None, max_length=20)
-    # For Flutterwave redirect
     redirect_url: str | None = Field(default=None, max_length=500)
 
 
@@ -27,10 +24,15 @@ class MoMoStatusCheckRequest(BaseModel):
     transaction_reference: str
 
 
-class FlutterwaveCallbackRequest(BaseModel):
-    transaction_id: str
-    tx_ref: str
-    status: str
+class PesapalWebhookRequest(BaseModel):
+    orderTrackingId: str
+    orderMerchantReference: str
+    orderNotificationType: str
+
+
+class PesapalCallbackRequest(BaseModel):
+    orderTrackingId: str
+    orderMerchantReference: str
 
 
 class PaymentResponse(BaseModel):
@@ -43,6 +45,7 @@ class PaymentResponse(BaseModel):
     transaction_reference: str
     gateway_response: str | None
     gateway_transaction_id: str | None = None
+    pesapal_order_tracking_id: str | None = None
     phone_number: str | None = None
     payment_url: str | None = None
     paid_at: datetime | None
@@ -80,23 +83,11 @@ class PaymentResponse(BaseModel):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 # import uuid
 # from datetime import datetime
 # from decimal import Decimal
 
 # from pydantic import BaseModel, Field
-
 # from app.models.payment import PaymentGateway
 
 
@@ -104,12 +95,26 @@ class PaymentResponse(BaseModel):
 #     booking_id: uuid.UUID
 #     payment_gateway: PaymentGateway = PaymentGateway.mock
 #     currency: str = Field(default="UGX", max_length=10)
+#     # For MoMo
+#     phone_number: str | None = Field(default=None, max_length=20)
+#     # For Flutterwave redirect
+#     redirect_url: str | None = Field(default=None, max_length=500)
 
 
 # class MockPaymentWebhookRequest(BaseModel):
 #     transaction_reference: str = Field(min_length=5, max_length=100)
 #     payment_status: str = Field(min_length=3, max_length=30)
 #     gateway_response: str | None = Field(default=None, max_length=1000)
+
+
+# class MoMoStatusCheckRequest(BaseModel):
+#     transaction_reference: str
+
+
+# class FlutterwaveCallbackRequest(BaseModel):
+#     transaction_id: str
+#     tx_ref: str
+#     status: str
 
 
 # class PaymentResponse(BaseModel):
@@ -121,11 +126,15 @@ class PaymentResponse(BaseModel):
 #     payment_status: str
 #     transaction_reference: str
 #     gateway_response: str | None
+#     gateway_transaction_id: str | None = None
+#     phone_number: str | None = None
+#     payment_url: str | None = None
 #     paid_at: datetime | None
 #     created_at: datetime
 #     updated_at: datetime
 
 #     class Config:
 #         from_attributes = True
+
 
 

@@ -70,6 +70,11 @@ class Settings(BaseSettings):
     FLUTTERWAVE_PUBLIC_KEY: str = ""
     FLUTTERWAVE_WEBHOOK_SECRET: str = ""
 
+    PESAPAL_CONSUMER_KEY: str = ""
+    PESAPAL_CONSUMER_SECRET: str = ""
+    PESAPAL_BASE_URL: str = "https://cybqa.pesapal.com/pesapalv3"
+    PESAPAL_IPN_URL: str = ""
+
     PAYMENT_CALLBACK_URL: str = ""
 
 

@@ -17,6 +17,7 @@ class PaymentGateway(str, enum.Enum):
     mtn_momo = "mtn_momo"
     flutterwave = "flutterwave"
     mobile_money = "mobile_money"
+    pesapal = "pesapal"
 
 
 class Payment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -53,6 +54,7 @@ class Payment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     gateway_transaction_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
     phone_number: Mapped[str | None] = mapped_column(String(30), nullable=True)
     payment_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    pesapal_order_tracking_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
     booking = relationship("Booking", back_populates="payments")
 
