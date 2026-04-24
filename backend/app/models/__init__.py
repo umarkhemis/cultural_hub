@@ -14,6 +14,7 @@ from app.models.booking_participant import BookingParticipant
 from app.models.payment import Payment, PaymentGateway 
 from app.models.notification import Notification, NotificationType
 from app.models.site_follow import SiteFollow
+from app.models.experience_view import ExperienceView
 
 
 __all__ = [
@@ -41,7 +42,8 @@ __all__ = [
     "PaymentRecordStatus",
     "Notification",
     "NotificationType",
-    "SiteFollow"
+    "SiteFollow",
+    "ExperienceView"
 ]
 
 
